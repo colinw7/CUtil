@@ -2,6 +2,8 @@
 #define COPT_VAL_H
 
 #include <cassert>
+#include <iostream>
+#include <sys/types.h>
 
 template<typename T>
 class COptValT {
