@@ -2,6 +2,7 @@
 #define CRGB_H
 
 #include <cstdio>
+#include <iostream>
 
 #define CRGB_LIGHT_FACTOR 1.25
 #define CRGB_DARK_FACTOR  0.50

@@ -36,13 +36,13 @@ class CAutoPtrVector {
   }
 
   void addValue(T *value) {
-    assert(value != NULL);
+    assert(value != 0);
 
     vector_.push_back(value);
   }
 
   void setValue(uint i, T *value) {
-    assert(value != NULL);
+    assert(value != 0);
 
     uint size = vector_.size();
 
@@ -68,7 +68,7 @@ class CAutoPtrVector {
     vector_.resize(n);
 
     for (uint i = size; i < n; ++i)
-      vector_[i] = NULL;
+      vector_[i] = 0;
   }
 
   void clear() {

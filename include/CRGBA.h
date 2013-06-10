@@ -4,9 +4,11 @@
 #include <iostream>
 #include <cstring>
 #include <cstdio>
+#include <cassert>
 #include <sys/types.h>
 
 #include <CRGB.h>
+#include <CColorComponent.h>
 
 #define CRGBA_LIGHT_FACTOR 1.25
 #define CRGBA_DARK_FACTOR  0.50
@@ -455,6 +457,26 @@ class CRGBAT {
   uint getGreenI() const { return clampI(g_*CRGBA_IFACTOR); }
   uint getBlueI () const { return clampI(b_*CRGBA_IFACTOR); }
   uint getAlphaI() const { return clampI(a_*CRGBA_IFACTOR); }
+
+  T getComponent(CColorComponent component) const {
+    switch (component) {
+      case CCOLOR_COMPONENT_RED  : return r_;
+      case CCOLOR_COMPONENT_GREEN: return g_;
+      case CCOLOR_COMPONENT_BLUE : return b_;
+      case CCOLOR_COMPONENT_ALPHA: return a_;
+      default: assert(false);      return 0.0;
+    }
+  }
+
+  void setComponent(CColorComponent component, double value) {
+    switch (component) {
+      case CCOLOR_COMPONENT_RED  : r_ = value; break;
+      case CCOLOR_COMPONENT_GREEN: g_ = value; break;
+      case CCOLOR_COMPONENT_BLUE : b_ = value; break;
+      case CCOLOR_COMPONENT_ALPHA: a_ = value; break;
+      default: assert(false); break;
+    }
+  }
 
   uint getId() const {
     if (! id_set_) {
