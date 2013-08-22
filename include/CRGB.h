@@ -3,6 +3,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <sys/types.h>
 
 #define CRGB_LIGHT_FACTOR 1.25
 #define CRGB_DARK_FACTOR  0.50
