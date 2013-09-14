@@ -1,6 +1,8 @@
 #ifndef CGENERIC_H
 #define CGENERIC_H
 
+#include <vector>
+
 //----------
 
 // If then else for to select one of type types using compiler evaluable expression
