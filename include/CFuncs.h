@@ -1,6 +1,8 @@
 #ifndef CFuncs_H
 #define CFuncs_H
 
+#include <vector>
+
 struct CDeletePointer {
   template<class T>
   void operator()(const T *p) const {
