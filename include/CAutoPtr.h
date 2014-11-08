@@ -119,6 +119,14 @@ class CAutoPtr {
 
     return p;
   }
+
+  // util
+
+  template<typename S>
+  S *
+  cast() const {
+    return dynamic_cast<S *>(p_);
+  }
 };
 
 template<class T>
