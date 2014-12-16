@@ -1,36 +1,26 @@
 #ifndef COPT_VAL_H
 #define COPT_VAL_H
 
-#include <cassert>
-#include <iostream>
-#include <sys/types.h>
+#include <CThrow.h>
 
 template<typename T>
 class COptValT {
- private:
-  T    value_;
-  bool valid_;
-  T    def_value_;
-  bool def_valid_;
-
  public:
   COptValT() :
-   value_(), valid_(false), def_value_(), def_valid_(false) {
+   value_(), valid_(false) {
   }
 
   explicit COptValT(const T &value) :
-   value_(value), valid_(true), def_value_(), def_valid_(false) {
+   value_(value), valid_(true) {
   }
 
   COptValT(const COptValT &rhs) :
-    value_(rhs.value_), valid_(rhs.valid_), def_value_(rhs.value_), def_valid_(rhs.valid_) {
+    value_(rhs.value_), valid_(rhs.valid_) {
   }
 
   const COptValT &operator=(const COptValT &rhs) {
-    value_     = rhs.value_;
-    valid_     = rhs.valid_;
-    def_value_ = rhs.def_value_;
-    def_valid_ = rhs.def_valid_;
+    value_ = rhs.value_;
+    valid_ = rhs.valid_;
 
     return *this;
   }
@@ -41,37 +31,27 @@ class COptValT {
     return *this;
   }
 
-  bool isValid() const { return getValid(); }
-
-  bool getValid() const { return valid_; }
+  bool isValid() const { return valid_; }
 
   const T &getValue() const {
-    if      (valid_)
-      return value_;
-    else if (def_valid_)
-      return def_value_;
-    else {
-      assert(false);
-      return value_;
-    }
+    if (! valid_)
+      CTHROW("Undefined Value");
+
+    return value_;
   }
 
   T &getValue() {
-    if      (valid_)
-      return value_;
-    else if (def_valid_)
-      return def_value_;
-    else {
-      assert(false);
-      return value_;
-    }
+    if (! valid_)
+      CTHROW("Undefined Value");
+
+    return value_;
   }
 
-  T getValue(const T &def_value) const {
-    if (valid_)
-      return value_;
-    else
-      return def_value;
+  T getValue(const T &defValue) const {
+    if (! valid_)
+      return defValue;
+
+    return value_;
   }
 
   void setValue(const T &value) {
@@ -83,35 +63,22 @@ class COptValT {
     valid_ = false;
   }
 
-  bool isDefValid() const { return getDefValid(); }
+  COptValT &updateMin(const COptValT &value) {
+    if (valid_)
+      value_ = std::min(value_, value.value_);
+    else if (value.valid_)
+      setValue(value.value_);
 
-  bool getDefValid() const { return def_valid_; }
-
-  const T &getDefValue() const {
-    if (def_valid_)
-      return def_value_;
-    else {
-      assert(false);
-      return def_value_;
-    }
+    return *this;
   }
 
-  T &getDefValue() {
-    if (def_valid_)
-      return def_value_;
-    else {
-      assert(false);
-      return def_value_;
-    }
-  }
+  COptValT &updateMax(const COptValT &value) {
+    if (valid_ && value.valid_)
+      value_ = std::max(value_, value.value_);
+    else if (value.valid_)
+      setValue(value.value_);
 
-  void setDefValue(const T &value) {
-    def_value_ = value;
-    def_valid_ = true;
-  }
-
-  void setDefInvalid() {
-    def_valid_ = false;
+    return *this;
   }
 
   const T &updateMin(const T &value) {
@@ -120,7 +87,7 @@ class COptValT {
     else
       setValue(value);
 
-    return value;
+    return value_;
   }
 
   const T &updateMax(const T &value) {
@@ -129,7 +96,7 @@ class COptValT {
     else
       setValue(value);
 
-    return value;
+    return value_;
   }
 
   //------
@@ -225,8 +192,17 @@ class COptValT {
   //------
 
   friend std::ostream &operator<<(std::ostream &os, const COptValT &val) {
-    return os << val.getValue();
+    if (val.isValid())
+      os << val.getValue();
+    else
+      os << "<unset>";
+
+    return os;
   }
+
+ private:
+  T    value_;
+  bool valid_;
 };
 
 typedef COptValT<bool>        COptBool;
