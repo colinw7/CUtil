@@ -192,15 +192,27 @@ class CRGBT {
   }
 
   std::string toString() const {
-    char buffer[16];
-
     uint r, g, b;
 
     getRGBI(&r, &g, &b);
 
-    sprintf(buffer, "#%02X%02X%02X", r, g, b);
+    char str[256];
 
-    return buffer;
+    ::sprintf(str, "(%u,%u,%u)", r, g, b);
+
+    return str;
+  }
+
+  std::string stringEncode() const {
+    uint r, g, b;
+
+    getRGBI(&r, &g, &b);
+
+    char str[256];
+
+    ::sprintf(str, "#%02X%02X%02X", r, g, b);
+
+    return str;
   }
 
   void zero() { r_ = g_ = b_ = 0.0; }
