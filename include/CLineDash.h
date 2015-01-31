@@ -11,30 +11,34 @@
 class CLineDash {
  public:
   class Lengths {
-    private:
-     std::vector<double> lengths_;
+   public:
+    Lengths(double len, ...) :
+     lengths_() {
+      va_list vargs;
 
-    public:
-     Lengths(double len, ...) :
-      lengths_() {
-       va_list vargs;
+      va_start(vargs, len);
 
-       va_start(vargs, len);
+      while (len > 1E-3) {
+        lengths_.push_back(len);
 
-       while (len > 1E-3) {
-         lengths_.push_back(len);
+        len = va_arg(vargs, double);
+      }
+    }
 
-         len = va_arg(vargs, double);
-       }
-     }
+    Lengths(const std::vector<double> &lengths) :
+     lengths_(lengths) {
+    }
 
-     uint size() const {
-       return lengths_.size();
-     }
+    uint size() const {
+      return lengths_.size();
+    }
 
-     double value(uint i) const {
-       return lengths_[i];
-     }
+    double value(uint i) const {
+      return lengths_[i];
+    }
+
+   private:
+    std::vector<double> lengths_;
   };
 
  public:
