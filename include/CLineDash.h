@@ -102,6 +102,14 @@ class CLineDash {
     setDashes(pattern);
   }
 
+  CLineDash(const std::string &str) :
+   lengths_ (),
+   offset_  (0.0),
+   ind_     (0),
+   position_(0.0) {
+    fromString(str);
+  }
+
  ~CLineDash() { }
 
   CLineDash &operator=(const CLineDash &dash) {
@@ -341,7 +349,7 @@ class CLineDash {
           f /= 10.0;
         }
 
-        num += pos;
+        num += f;
       }
 
       while (pos < len && isspace(str[pos])) ++pos;
@@ -358,6 +366,12 @@ class CLineDash {
     setDashes(lengths);
 
     return true;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, const CLineDash &dash) {
+    os << dash.toString();
+
+    return os;
   }
 
  private:
