@@ -157,6 +157,8 @@ class CRefPtr {
   }
 #endif
 
+  T *get() const { return getPtr(); }
+
   T *getPtr() const {
     assert(p_ != 0 && getRef() > 0);
 
@@ -349,6 +351,8 @@ class CRefPtr {
   }
 
   void removeRef() {
+    if (! count_) return;
+
     assert(*count_ > 0);
 
     --(*count_);
@@ -378,6 +382,31 @@ struct less< CRefPtr<T> > : public binary_function<CRefPtr<T>, CRefPtr<T>, bool>
     return less<T *>()(lhs.getPtr(), rhs.getPtr());
   }
 };
+
+}
+
+// make pointer
+namespace CRefPtrUtil {
+
+template<class T>
+CRefPtr<T> make_ref() {
+  return CRefPtr<T>(new T);
+}
+
+template<class T, class A1>
+CRefPtr<T> make_ref(const A1 &a1) {
+  return CRefPtr<T>(new T(a1));
+}
+
+template<class T, class A1, class A2>
+CRefPtr<T> make_ref(const A1 &a1, const A2 &a2) {
+  return CRefPtr<T>(new T(a1, a2));
+}
+
+template<class T, class A1, class A2, class A3>
+CRefPtr<T> make_ref(const A1 &a1, const A2 &a2, const A3 &a3) {
+  return CRefPtr<T>(new T(a1, a2, a3));
+}
 
 }
 

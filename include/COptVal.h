@@ -1,7 +1,8 @@
 #ifndef COPT_VAL_H
 #define COPT_VAL_H
 
-#include <CThrow.h>
+#include <algorithm>
+#include <iostream>
 
 template<typename T>
 class COptValT {
@@ -34,15 +35,13 @@ class COptValT {
   bool isValid() const { return valid_; }
 
   const T &getValue() const {
-    if (! valid_)
-      CTHROW("Undefined Value");
+    if (! valid_) throw "Undefined Value";
 
     return value_;
   }
 
   T &getValue() {
-    if (! valid_)
-      CTHROW("Undefined Value");
+    if (! valid_) throw "Undefined Value";
 
     return value_;
   }
@@ -64,19 +63,23 @@ class COptValT {
   }
 
   COptValT &updateMin(const COptValT &value) {
-    if (valid_)
-      value_ = std::min(value_, value.value_);
-    else if (value.valid_)
-      setValue(value.value_);
+    if (value.valid_) {
+      if (valid_)
+        value_ = std::min(value_, value.value_);
+      else
+        setValue(value.value_);
+    }
 
     return *this;
   }
 
   COptValT &updateMax(const COptValT &value) {
-    if (valid_ && value.valid_)
-      value_ = std::max(value_, value.value_);
-    else if (value.valid_)
-      setValue(value.value_);
+    if (value.valid_) {
+      if (valid_)
+        value_ = std::max(value_, value.value_);
+      else
+        setValue(value.value_);
+    }
 
     return *this;
   }
@@ -191,11 +194,15 @@ class COptValT {
 
   //------
 
-  friend std::ostream &operator<<(std::ostream &os, const COptValT &val) {
-    if (val.isValid())
-      os << val.getValue();
+  void print(std::ostream &os, const std::string &unsetStr="<unset>") const {
+    if (isValid())
+      os << getValue();
     else
-      os << "<unset>";
+      os << unsetStr;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, const COptValT &val) {
+    val.print(os);
 
     return os;
   }
