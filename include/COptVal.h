@@ -46,7 +46,7 @@ class COptValT {
     return value_;
   }
 
-  T getValue(const T &defValue) const {
+  const T &getValue(const T &defValue) const {
     if (! valid_)
       return defValue;
 
