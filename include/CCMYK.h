@@ -2,9 +2,13 @@
 #define CCMYK_H
 
 #include <CRGB.h>
+#include <CRGBUtil.h>
 
 template<typename T>
 class CRGBT;
+
+template<typename T>
+class CRGBUtilT;
 
 template<typename T>
 class CCMYKT {
@@ -62,47 +66,7 @@ class CCMYKT {
     yellow_  = std::min(std::max(yellow_ , 0.0), 1.0);
   }
 
-  CRGBT<T> toRGB() const {
-    T k = getBlack();
-
-    T max_color = std::max(getCyan() + k, std::max(getMagenta() + k, getYellow() + k));
-
-    if (max_color > 1.0)
-      k -= max_color - 1.0;
-
-    if (k < 0.0)
-      k = 0.0;
-
-    T r = std::max(1.0 - (getCyan()    + k), 0.0);
-    T g = std::max(1.0 - (getMagenta() + k), 0.0);
-    T b = std::max(1.0 - (getYellow()  + k), 0.0);
-
-    return CRGBT<T>(r, g, b);
-  }
-
-  static CCMYKT fromRGB(const CRGBT<T> &rgb) {
-    T cyan    = 1.0 - rgb.getRed();
-    T magenta = 1.0 - rgb.getGreen();
-    T yellow  = 1.0 - rgb.getBlue();
-
-    //------
-
-    T black = std::min(std::min(cyan, magenta), yellow);
-
-    black = std::min(std::max(black, 0.0), 1.0);
-
-    //------
-
-    cyan    -= black;
-    magenta -= black;
-    yellow  -= black;
-
-    cyan    = std::min(std::max(cyan   , 0.0), 1.0);
-    magenta = std::min(std::max(magenta, 0.0), 1.0);
-    yellow  = std::min(std::max(yellow , 0.0), 1.0);
-
-    return CCMYKT(cyan, magenta, yellow, black);
-  }
+  CRGBT<T> toRGB() const { return CRGBUtilT<T>::CMYKtoRGB(*this); }
 };
 
 typedef CCMYKT<double> CCMYK;

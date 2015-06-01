@@ -1,13 +1,14 @@
 #ifndef CRGBA_H
 #define CRGBA_H
 
-#include <iostream>
-#include <cstring>
-#include <cstdio>
 #include <cassert>
-#include <sys/types.h>
 
 #include <CRGB.h>
+
+#ifdef USE_CRGB_NAME
+#include <CRGBName.h>
+#endif
+
 #include <CColorComponent.h>
 
 #define CRGBA_LIGHT_FACTOR 1.25
@@ -65,11 +66,29 @@ enum CRGBACombineFunc {
 template<typename T>
 class CRGBAT {
  private:
-  typedef CRGBT<T> RGB;
+  typedef CRGBT<T>     RGB;
+  typedef CRGBUtilT<T> Util;
+
+  typedef uint (*IdProc)(T r, T g, T b, T a);
 
  public:
-  static uint calcId(T r, T g, T b, T a) {
+  static IdProc setIdProc(IdProc proc) {
+    static IdProc id_proc_ = defIdProc;
+
+    if (proc)
+      id_proc_ = proc;
+
+    return id_proc_;
+  }
+
+  static uint defIdProc(T r, T g, T b, T a) {
     return encodeARGB(uint(r*255), uint(g*255), uint(b*255), uint(a*255));
+  }
+
+  static uint calcId(T r, T g, T b, T a) {
+    IdProc id_proc = setIdProc(NULL);
+
+    return id_proc(r, g, b, a);
   }
 
   //-------
@@ -85,6 +104,20 @@ class CRGBAT {
   explicit CRGBAT(T gray, T a=1.0) :
    r_(gray), g_(gray), b_(gray), a_(a), id_(0), id_set_(false) {
   }
+
+#ifdef USE_CRGB_NAME
+  explicit CRGBAT(const std::string &name) :
+   r_(0), g_(0), b_(0), a_(0), id_(0), id_set_(false) {
+    CRGBName::lookup(name, &r_, &g_, &b_, &a_);
+  }
+
+  explicit CRGBAT(const std::string &name, double a) :
+   id_(0), id_set_(false) {
+    CRGBName::lookup(name, &r_, &g_, &b_, &a_);
+
+    a_ = a;
+  }
+#endif
 
   CRGBAT(const CRGBAT &rgba) :
    r_(rgba.r_), g_(rgba.g_), b_(rgba.b_), a_(rgba.a_), id_(rgba.id_), id_set_(rgba.id_set_) {
@@ -343,7 +376,7 @@ class CRGBAT {
 
     getRGBAI(&r, &g, &b, &a);
 
-    static char str[256];
+    char str[256];
 
     ::sprintf(str, "#%02x%02x%02x%02x", r, g, b, a);
 
@@ -370,6 +403,21 @@ class CRGBAT {
 
     return *this;
   }
+
+#ifdef USE_CRGB_NAME
+  bool setName(const std::string &name) {
+    double r, g, b, a;
+
+    if (! CRGBName::lookup(name, &r, &g, &b, &a))
+      return false;
+
+    r_ = r; g_ = g; b_ = b; a_ = a;
+
+    id_set_ = false;
+
+    return true;
+  }
+#endif
 
   CRGBAT &scaleRGB(T f) {
     r_ *= f;
@@ -424,7 +472,7 @@ class CRGBAT {
   }
 
   CRGBAT &setGrayI(uint ig, uint ia=255) {
-    return setGray(ig*CRGBA_IFACTORI);
+    return setGray(ig*CRGBA_IFACTORI, ia);
   }
 
   CRGBAT &setRGBAI(uint ir, uint ig, uint ib, uint ia=255) {
@@ -451,12 +499,10 @@ class CRGBAT {
   T getBlue () const { return b_; }
   T getAlpha() const { return a_; }
 
-  uint clampI(int i) const { return std::min(std::max(i, 0), 255); }
-
-  uint getRedI  () const { return clampI(r_*CRGBA_IFACTOR); }
-  uint getGreenI() const { return clampI(g_*CRGBA_IFACTOR); }
-  uint getBlueI () const { return clampI(b_*CRGBA_IFACTOR); }
-  uint getAlphaI() const { return clampI(a_*CRGBA_IFACTOR); }
+  uint getRedI  () const { return Util::clampI(r_*CRGBA_IFACTOR); }
+  uint getGreenI() const { return Util::clampI(g_*CRGBA_IFACTOR); }
+  uint getBlueI () const { return Util::clampI(b_*CRGBA_IFACTOR); }
+  uint getAlphaI() const { return Util::clampI(a_*CRGBA_IFACTOR); }
 
   T getComponent(CColorComponent component) const {
     switch (component) {
@@ -528,49 +574,55 @@ class CRGBAT {
     return std::max(r_, std::max(g_, b_));
   }
 
-  T getLightRed() const {
-    return std::min(r_*CRGBA_LIGHT_FACTOR, 1.0);
+  //---
+
+  T getLightRed(double f=CRGBA_LIGHT_FACTOR) const {
+    return std::min(r_*f, 1.0);
   }
 
-  T getLightGreen() const {
-    return std::min(g_*CRGBA_LIGHT_FACTOR, 1.0);
+  T getLightGreen(double f=CRGBA_LIGHT_FACTOR) const {
+    return std::min(g_*f, 1.0);
   }
 
-  T getLightBlue() const {
-    return std::min(b_*CRGBA_LIGHT_FACTOR, 1.0);
+  T getLightBlue(double f=CRGBA_LIGHT_FACTOR) const {
+    return std::min(b_*f, 1.0);
   }
 
-  T getLightGray() const {
+  T getLightGray(double f=CRGBA_LIGHT_FACTOR) const {
     T gray = getGray();
 
-    return std::min(gray*CRGBA_LIGHT_FACTOR, 1.0);
+    return std::min(gray*f, 1.0);
   }
 
-  CRGBAT getLightRGBA() const {
-    return CRGBAT(getLightRed(), getLightGreen(), getLightBlue(), a_);
+  CRGBAT getLightRGBA(double f=CRGBA_LIGHT_FACTOR) const {
+    return CRGBAT(getLightRed(f), getLightGreen(f), getLightBlue(f), a_);
   }
 
-  T getDarkRed() const {
-    return std::min(r_*CRGBA_DARK_FACTOR, 1.0);
+  //---
+
+  T getDarkRed(double f=CRGBA_DARK_FACTOR) const {
+    return std::min(r_*f, 1.0);
   }
 
-  T getDarkGreen() const {
-    return std::min(g_*CRGBA_DARK_FACTOR, 1.0);
+  T getDarkGreen(double f=CRGBA_DARK_FACTOR) const {
+    return std::min(g_*f, 1.0);
   }
 
-  T getDarkBlue() const {
-    return std::min(b_*CRGBA_DARK_FACTOR, 1.0);
+  T getDarkBlue(double f=CRGBA_DARK_FACTOR) const {
+    return std::min(b_*f, 1.0);
   }
 
-  T getDarkGray() const {
+  T getDarkGray(double f=CRGBA_DARK_FACTOR) const {
     T gray = getGray();
 
-    return std::min(gray*CRGBA_DARK_FACTOR, 1.0);
+    return std::min(gray*f, 1.0);
   }
 
-  CRGBAT getDarkRGBA() const {
-    return CRGBAT(getDarkRed(), getDarkGreen(), getDarkBlue(), a_);
+  CRGBAT getDarkRGBA(double f=CRGBA_DARK_FACTOR) const {
+    return CRGBAT(getDarkRed(f), getDarkGreen(f), getDarkBlue(f), a_);
   }
+
+  //---
 
   T getInverseRed() const {
     return 1.0 - r_;
@@ -692,7 +744,7 @@ class CRGBAT {
                      CRGBACombineMode dst_mode=CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA,
                      CRGBACombineFunc func=CRGBA_COMBINE_ADD,
                      const CRGBAT &factor=CRGBAT(0,0,0,1)) {
-    return modeCombine(src, *this, src_mode, dst_mode, factor);
+    return modeCombine(src, *this, src_mode, dst_mode, func, factor);
   }
 
   static CRGBAT modeCombine(const CRGBAT &src, const CRGBAT &dst,
@@ -985,6 +1037,19 @@ class CRGBAT {
     *g = (id >>  8) & 0xFF;
     *b = (id      ) & 0xFF;
   }
+
+  static void decodeARGB(uint id, CRGBAT &rgba) {
+    uint r, g, b, a;
+
+    decodeARGB(id, &r, &g, &b, &a);
+
+    rgba = CRGBAT(r/255.0, g/255.0, b/255.0, a/255.0);
+  }
+
+  CHSVT<T>  toHSV () const { return Util::RGBtoHSV (getRGB()); }
+  CHSLT<T>  toHSL () const { return Util::RGBtoHSL (getRGB()); }
+  CCMYKT<T> toCMYK() const { return Util::RGBtoCMYK(getRGB()); }
+  CHSBT<T>  toHSB () const { return Util::RGBtoHSB (getRGB()); }
 
  private:
   T    r_, g_, b_, a_;

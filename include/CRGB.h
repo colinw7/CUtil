@@ -2,8 +2,18 @@
 #define CRGB_H
 
 #include <cstdio>
-#include <iostream>
 #include <sys/types.h>
+#include <iostream>
+
+#include <CHSV.h>
+#include <CHSL.h>
+#include <CCMYK.h>
+#include <CHSB.h>
+#include <CRGBUtil.h>
+
+#ifdef USE_CRGB_NAME
+#include <CRGBName.h>
+#endif
 
 #define CRGB_LIGHT_FACTOR 1.25
 #define CRGB_DARK_FACTOR  0.50
@@ -23,6 +33,10 @@
 #define CRGB_IFACTORI (1.0/255.0)
 
 template<typename T>
+class CRGBUtilT;
+
+// red, green, blue
+template<typename T>
 class CRGBT {
  private:
   T r_, g_, b_;
@@ -37,6 +51,12 @@ class CRGBT {
   explicit CRGBT(T gray) :
    r_(gray), g_(gray), b_(gray) {
   }
+
+#ifdef USE_CRGB_NAME
+  explicit CRGBT(std::string name) {
+    CRGBName::lookup(name, &r_, &g_, &b_);
+  }
+#endif
 
   CRGBT(const CRGBT &rgb) :
    r_(rgb.r_), g_(rgb.g_), b_(rgb.b_) {
@@ -135,6 +155,14 @@ class CRGBT {
     return CRGBT(r_*irhs, g_*irhs, b_*irhs);
   }
 
+  friend CRGBT operator*(const CRGBT &lhs, T rhs) {
+    return CRGBT(lhs.r_*rhs, lhs.g_*rhs, lhs.b_*rhs);
+  }
+
+  friend CRGBT operator*(T lhs, const CRGBT &rhs) {
+    return CRGBT(lhs*rhs.r_, lhs*rhs.g_, lhs*rhs.b_);
+  }
+
   //------
 
   int cmp(const CRGBT &rhs) const {
@@ -172,14 +200,6 @@ class CRGBT {
   }
 
   //------
-
-  friend CRGBT operator*(const CRGBT &lhs, T rhs) {
-    return CRGBT(lhs.r_*rhs, lhs.g_*rhs, lhs.b_*rhs);
-  }
-
-  friend CRGBT operator*(T lhs, const CRGBT &rhs) {
-    return CRGBT(lhs*rhs.r_, lhs*rhs.g_, lhs*rhs.b_);
-  }
 
   void print(std::ostream &os) const {
     os << "CRGB(" << r_ << "," << g_ << "," << b_ << ")";
@@ -412,6 +432,11 @@ class CRGBT {
                  ((rgb & 0x00ff00) >>  8)/255.0,
                  ((rgb & 0x0000ff) >>  0)/255.0);
   }
+
+  CHSVT<T>  toHSV () const { return CRGBUtilT<T>::RGBtoHSV (*this); }
+  CHSLT<T>  toHSL () const { return CRGBUtilT<T>::RGBtoHSL (*this); }
+  CCMYKT<T> toCMYK() const { return CRGBUtilT<T>::RGBtoCMYK(*this); }
+  CHSBT<T>  toHSB () const { return CRGBUtilT<T>::RGBtoHSB (*this); }
 };
 
 typedef CRGBT<double> CRGB;
