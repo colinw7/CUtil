@@ -91,6 +91,10 @@ class CRGBAT {
     return id_proc(r, g, b, a);
   }
 
+  static CRGBAT fromRGBAI(int r, int g, int b, int a=255) {
+    return CRGBAT(r/255.0, g/255.0, b/255.0, a/255.0);
+  }
+
   //-------
 
   CRGBAT() :
@@ -427,7 +431,7 @@ class CRGBAT {
     id_set_ = false;
 
     return *this;
-   }
+  }
 
   CRGBAT &scaleAlpha(T a) {
     a_ *= a;
@@ -673,6 +677,17 @@ class CRGBAT {
     id_set_ = false;
 
     return *this;
+  }
+
+  CRGBAT bwContrast() const {
+    T gray = getGray();
+
+    if (gray > 0.5)
+      gray = 0;
+    else
+      gray = 1;
+
+    return CRGBAT(gray, gray, gray);
   }
 
   // TODO: clamp by scaling by largest color to retain color ?
