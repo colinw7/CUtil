@@ -1,5 +1,5 @@
-#ifndef CRANGE_H
-#define CRANGE_H
+#ifndef RANGE_ITR_H
+#define RANGE_ITR_H
 
 #include <cassert>
 #include <vector>
@@ -44,7 +44,7 @@
 */
 
 template<typename T, typename RES=T>
-class RangeT {
+class RangeItrT {
  public:
   typedef std::function<T (T)>    Map;
   typedef std::function<bool (T)> Filter;
@@ -450,70 +450,70 @@ class RangeT {
   typedef const Iterator const_iterator;
 
  public:
-  // RangeT<int>.of(1, 2, 3)
+  // RangeItrT<int>.of(1, 2, 3)
   // > 1, 2, 3
-  static RangeT of(std::initializer_list<T> l) {
-    return RangeT(l);
+  static RangeItrT of(std::initializer_list<T> l) {
+    return RangeItrT(l);
   }
 
-  static RangeT of(const std::vector<T> &l) {
-    return RangeT(l);
+  static RangeItrT of(const std::vector<T> &l) {
+    return RangeItrT(l);
   }
 
-  static RangeT<T,std::pair<int,T>> ofPair(const std::vector<T> &l) {
-    return RangeT<T,std::pair<int,T>>::of(l);
+  static RangeItrT<T,std::pair<int,T>> ofPair(const std::vector<T> &l) {
+    return RangeItrT<T,std::pair<int,T>>::of(l);
   }
 
-  // RangeT<int>.range(0, 21, 2)
+  // RangeItrT<int>.range(0, 21, 2)
   // > 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20
-  static RangeT range(T start, T end, T step) {
-    return RangeT(start, end, step);
+  static RangeItrT range(T start, T end, T step) {
+    return RangeItrT(start, end, step);
   }
-  // RangeT<int>.range(1, 3)
+  // RangeItrT<int>.range(1, 3)
   // > 1, 2
-  static RangeT range(T start, T end) {
-    return RangeT(start, end);
+  static RangeItrT range(T start, T end) {
+    return RangeItrT(start, end);
   }
-  static RangeT range(T start) {
-    return RangeT(start);
+  static RangeItrT range(T start) {
+    return RangeItrT(start);
   }
 
-  // RangeT<int>.rangeClosed(1, 3)
+  // RangeItrT<int>.rangeClosed(1, 3)
   // > 1, 2, 3
-  static RangeT rangeClosed(T start, T end, T step) {
-    return RangeT(start, start < end ? end + step : end - step, step);
+  static RangeItrT rangeClosed(T start, T end, T step) {
+    return RangeItrT(start, start < end ? end + step : end - step, step);
   }
-  static RangeT rangeClosed(T start, T end) {
-    return RangeT(start, start < end ? end + 1 : end - 1);
+  static RangeItrT rangeClosed(T start, T end) {
+    return RangeItrT(start, start < end ? end + 1 : end - 1);
   }
 
-  // RangeT<int>.generate(rand()).limit(3)
+  // RangeItrT<int>.generate(rand()).limit(3)
   // > 4, 1, 7
-  static RangeT generate(Generate g) {
-    return RangeT(g);
+  static RangeItrT generate(Generate g) {
+    return RangeItrT(g);
   }
 
   // IntStream.iterate(0, i -> i + 2).limit(3)
   // > 0, 2, 4
-  static RangeT iterate(T start, Map map) {
-    return RangeT(start).map(map);
+  static RangeItrT iterate(T start, Map map) {
+    return RangeItrT(start).map(map);
   }
 
   //---
 
-  RangeT(std::initializer_list<T> list) :
+  RangeItrT(std::initializer_list<T> list) :
    start_(list) {
   }
 
-  RangeT(T start, T end, T step) :
+  RangeItrT(T start, T end, T step) :
    start_(start, end, step) {
   }
 
-  RangeT(T start, T end) :
+  RangeItrT(T start, T end) :
    start_(start, end) {
   }
 
-  RangeT(T start) :
+  RangeItrT(T start) :
    start_(start) {
   }
 
@@ -527,28 +527,28 @@ class RangeT {
 
   // IntStream.range(1, 5).map(i -> i * i);
   // > 1, 4, 9, 16
-  RangeT map(Map map) const {
-    return RangeT(start_, map);
+  RangeItrT map(Map map) const {
+    return RangeItrT(start_, map);
   }
 
   //---
 
-  RangeT limit(int n) const {
-    return RangeT(start_.limit(n));
+  RangeItrT limit(int n) const {
+    return RangeItrT(start_.limit(n));
   }
 
   //---
 
-  RangeT step(T step) const {
-    return RangeT(start_.step(step));
+  RangeItrT step(T step) const {
+    return RangeItrT(start_.step(step));
   }
 
   //---
 
-  // RangeT<int>::rangeClosed(1, 12).filter([](int i) -> int { return (i % 3) == 0; }));
+  // RangeItrT<int>::rangeClosed(1, 12).filter([](int i) -> int { return (i % 3) == 0; }));
   // > 3, 6, 9, 12
-  RangeT filter(Filter f) const {
-    return RangeT(start_, f);
+  RangeItrT filter(Filter f) const {
+    return RangeItrT(start_, f);
   }
 
   //---
@@ -581,26 +581,26 @@ class RangeT {
     os << std::endl;
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const RangeT &r) {
+  friend std::ostream &operator<<(std::ostream &os, const RangeItrT &r) {
     r.print(os);
 
     return os;
   }
 
  private:
-  RangeT(const Iterator &start) :
+  RangeItrT(const Iterator &start) :
    start_(start), end_() {
   }
 
-  RangeT(const Iterator &start, Map f) :
+  RangeItrT(const Iterator &start, Map f) :
    start_(start, f), end_() {
   }
 
-  RangeT(const Iterator &start, Filter f) :
+  RangeItrT(const Iterator &start, Filter f) :
    start_(start, f), end_() {
   }
 
-  RangeT(Generate f) :
+  RangeItrT(Generate f) :
    start_(f), end_() {
   }
 
@@ -609,11 +609,11 @@ class RangeT {
   Iterator end_;
 };
 
-typedef RangeT<int>          IRange;
-typedef RangeT<unsigned int> UIRange;
-typedef RangeT<double>       RRange;
-typedef RangeT<std::string>  SRange;
+typedef RangeItrT<int>          IRangeItr;
+typedef RangeItrT<unsigned int> UIRangeItr;
+typedef RangeItrT<double>       RRangeItr;
+typedef RangeItrT<std::string>  SRangeItr;
 
-typedef RangeT<double,std::pair<int,double>> RRangePair;
+typedef RangeItrT<double,std::pair<int,double>> RRangePair;
 
 #endif
