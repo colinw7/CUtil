@@ -14,6 +14,8 @@ all: $(LIB_DIR)/libCUtil.a
 SRC = \
 CWindow.cpp \
 CEvent.cpp \
+CEnv.cpp \
+CEnvMatch.cpp \
 
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
@@ -21,6 +23,8 @@ CPPFLAGS = \
 -I. \
 -I$(INC_DIR) \
 -I../../CMath/include \
+-I../../CGlob/include \
+-I../../CStrUtil/include \
 
 clean:
 	$(RM) -f $(OBJ_DIR)/*.o
