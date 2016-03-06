@@ -52,7 +52,7 @@ class CRGBUtilT {
       T m  = hsl.getLuminance() + hsl.getLuminance() - v;
       T sv = (v - m)/v;
 
-      T h = hsl.getHue() * 6.0;
+      T h = hsl.getHue()*6.0;
 
       int sextant = int(h);
 
@@ -272,7 +272,7 @@ class CRGBUtilT {
   RGBtoHSB(const CRGBT<T> &rgb) {
     CHSVT<T> hsv = RGBtoHSV(rgb);
 
-    T hue        = hsv.getHue() / 360.0;
+    T hue        = hsv.getHue()/360.0;
     T saturation = hsv.getSaturation();
     T brightness = hsv.getValue();
 

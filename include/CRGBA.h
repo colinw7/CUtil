@@ -72,6 +72,8 @@ class CRGBAT {
   typedef uint (*IdProc)(T r, T g, T b, T a);
 
  public:
+  struct IValT { };
+
   static IdProc setIdProc(IdProc proc) {
     static IdProc id_proc_ = defIdProc;
 
@@ -86,10 +88,12 @@ class CRGBAT {
   }
 
   static uint calcId(T r, T g, T b, T a) {
-    IdProc id_proc = setIdProc(NULL);
+    IdProc id_proc = setIdProc(0);
 
     return id_proc(r, g, b, a);
   }
+
+  static const IValT &IVal() { static IValT ival; return ival; }
 
   static CRGBAT fromRGBAI(int r, int g, int b, int a=255) {
     return CRGBAT(r/255.0, g/255.0, b/255.0, a/255.0);
@@ -107,6 +111,10 @@ class CRGBAT {
 
   explicit CRGBAT(T gray, T a=1.0) :
    r_(gray), g_(gray), b_(gray), a_(a), id_(0), id_set_(false) {
+  }
+
+  CRGBAT(const IValT &, int r, int g, int b, int a=255) :
+   r_(r/255.0), g_(g/255.0), b_(b/255.0), a_(a/255.0), id_(0), id_set_(false) {
   }
 
 #ifdef USE_CRGB_NAME
