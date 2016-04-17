@@ -55,12 +55,28 @@ enum CRGBACombineFunc {
   CRGBA_COMBINE_MULTIPLY        ,
   CRGBA_COMBINE_MIN             ,
   CRGBA_COMBINE_MAX             ,
+
   CRGBA_COMBINE_OVER            ,
   CRGBA_COMBINE_IN              ,
   CRGBA_COMBINE_OUT             ,
   CRGBA_COMBINE_ATOP            ,
   CRGBA_COMBINE_XOR             ,
-  CRGBA_COMBINE_ARITHMETIC
+  CRGBA_COMBINE_ARITHMETIC      ,
+  CRGBA_COMBINE_SRC             ,
+  CRGBA_COMBINE_DEST            ,
+  CRGBA_COMBINE_DEST_ATOP       ,
+  CRGBA_COMBINE_DEST_OVER       ,
+  CRGBA_COMBINE_DEST_IN         ,
+  CRGBA_COMBINE_DEST_OUT        ,
+  CRGBA_COMBINE_CLEAR           ,
+};
+
+enum CRGBABlendMode {
+  CRGBA_BLEND_NORMAL,
+  CRGBA_BLEND_MULTIPLY,
+  CRGBA_BLEND_SCREEN,
+  CRGBA_BLEND_DARKEN,
+  CRGBA_BLEND_LIGHTEN
 };
 
 template<typename T>
@@ -740,6 +756,7 @@ class CRGBAT {
                   a_*factor + rgb.a_*factor1);
   }
 
+  // combine new color on top of old color
   const CRGBAT &combine(const CRGBAT &rgb) const {
     T a1 = 1.0 - rgb.a_;
 
@@ -906,32 +923,115 @@ class CRGBAT {
     else if (func == CRGBA_COMBINE_MULTIPLY)
       return rgba_s * rgba_d;
     else if (func == CRGBA_COMBINE_MIN)
-      return CRGBAT(std::min(rgba_s.r_, rgba_d.r_),
-                    std::min(rgba_s.g_, rgba_d.g_),
-                    std::min(rgba_s.b_, rgba_d.b_),
-                    std::min(rgba_s.a_, rgba_d.a_));
+      return minParts(rgba_s, rgba_d);
     else if (func == CRGBA_COMBINE_MAX)
-      return CRGBAT(std::max(rgba_s.r_, rgba_d.r_),
-                    std::max(rgba_s.g_, rgba_d.g_),
-                    std::max(rgba_s.b_, rgba_d.b_),
-                    std::max(rgba_s.a_, rgba_d.a_));
-    else if (func == CRGBA_COMBINE_OVER)
-      return (! rgba_s.isTransparent() ? rgba_s : rgba_d);
-    else if (func == CRGBA_COMBINE_IN)
-      return (! rgba_d.isTransparent() ? rgba_s : CRGBAT(0,0,0,0));
-    else if (func == CRGBA_COMBINE_OUT)
-      return (  rgba_d.isTransparent() ? rgba_s : CRGBAT(0,0,0,0));
-    else if (func == CRGBA_COMBINE_ATOP)
-      return (! rgba_s.isTransparent() ?
-                (! rgba_d.isTransparent() ? rgba_s : CRGBAT(0,0,0,0)) : rgba_d);
-    else if (func == CRGBA_COMBINE_XOR)
-      return (((! rgba_s.isTransparent() &&   rgba_d.isTransparent()) ||
-               (  rgba_s.isTransparent() && ! rgba_d.isTransparent())) ?
-               (! rgba_s.isTransparent() ? rgba_s : rgba_d) : CRGBAT(0,0,0,0));
-    else if (func == CRGBA_COMBINE_ARITHMETIC)
-      return CRGBAT(0,0,0,0); // TODO
+      return maxParts(rgba_s, rgba_d);
+    else if (func == CRGBA_COMBINE_SRC       || func == CRGBA_COMBINE_ATOP ||
+             func == CRGBA_COMBINE_OVER      || func == CRGBA_COMBINE_IN ||
+             func == CRGBA_COMBINE_OUT       || func == CRGBA_COMBINE_DEST ||
+             func == CRGBA_COMBINE_DEST_ATOP || func == CRGBA_COMBINE_DEST_OVER ||
+             func == CRGBA_COMBINE_DEST_IN   || func == CRGBA_COMBINE_DEST_OUT ||
+             func == CRGBA_COMBINE_CLEAR     || func == CRGBA_COMBINE_XOR)
+      return porterDuffCombine(src, dst, func);
+
+    // assert ?
+    return rgba_s;
+  }
+
+  static CRGBAT porterDuffCombine(const CRGBAT &src, const CRGBAT &dst,
+                                  CRGBACombineFunc func) {
+    // Porter Duff source, destination and both factors
+    double Asrc  = src.a_*(1 - dst.a_);
+    double Adest = dst.a_*(1 - src.a_);
+    double Aboth = src.a_*dst.a_;
+
+    // s, 0, s
+    if      (func == CRGBA_COMBINE_SRC      ) return Asrc*src +             Aboth*src;
+    // 0, d, s
+    else if (func == CRGBA_COMBINE_ATOP     ) return            Adest*dst + Aboth*src;
+    // s, d, s
+    else if (func == CRGBA_COMBINE_OVER     ) return Asrc*src + Adest*dst + Aboth*src;
+    // 0, 0, s
+    else if (func == CRGBA_COMBINE_IN       ) return                        Aboth*src;
+    // s, 0, 0
+    else if (func == CRGBA_COMBINE_OUT      ) return Asrc*src;
+    // 0, d, d
+    else if (func == CRGBA_COMBINE_DEST     ) return            Adest*dst + Aboth*dst;
+    // s, 0, d
+    else if (func == CRGBA_COMBINE_DEST_ATOP) return Asrc*src             + Aboth*dst;
+    // s, d, d
+    else if (func == CRGBA_COMBINE_DEST_OVER) return Asrc*src + Adest*dst + Aboth*dst;
+    // 0, 0, d
+    else if (func == CRGBA_COMBINE_DEST_IN  ) return                        Aboth*dst;
+    // 0, d, 0
+    else if (func == CRGBA_COMBINE_DEST_OUT ) return            Adest*dst;
+    // s, d, 0
+    else if (func == CRGBA_COMBINE_XOR      ) return Asrc*src + Adest*dst;
+    // 0, 0, 0
+    else if (func == CRGBA_COMBINE_CLEAR    ) return CRGBAT(0,0,0,0);
+
+    // assert ?
+    return src;
+  }
+
+  static CRGBAT arithmeticCombine(const CRGBAT &src, const CRGBAT &dst,
+                                  double k1, double k2, double k3, double k4) {
+    return k1*src*dst + k2*src + k3*dst + k4;
+  }
+
+#if 0
+  static RGB blendCombine(const CRGBAT &src, const CRGBAT &dst, CRGBABlendMode mode) {
+    double qa = src.getAlpha();
+    double qb = dst.getAlpha();
+
+    RGB ca = src.getRGB();
+    RGB cb = dst.getRGB();
+
+    if      (mode == CRGBA_BLEND_NORMAL)
+      return (1 - qa)*cb + ca;
+    else if (mode == CRGBA_BLEND_MULTIPLY)
+      return (1 - qa)*cb + (1 - qb)*ca + ca*cb;
+    else if (mode == CRGBA_BLEND_SCREEN)
+      return cb + ca - ca*cb;
+    else if (mode == CRGBA_BLEND_DARKEN)
+      return RGB::minParts((1 - qa)*cb + ca, (1 - qb)*ca + cb);
+    else if (mode == CRGBA_BLEND_LIGHTEN)
+      return RGB::maxParts((1 - qa)*cb + ca, (1 - qb)*ca + cb);
     else
-      return rgba_s;
+      return ca;
+  }
+#endif
+
+  static CRGBAT blendCombine(const CRGBAT &src, const CRGBAT &dst, CRGBABlendMode mode) {
+    double qa = src.getAlpha();
+    double qb = dst.getAlpha();
+
+    if      (mode == CRGBA_BLEND_NORMAL)
+      return (1 - qa)*dst + src;
+    else if (mode == CRGBA_BLEND_MULTIPLY)
+      return (1 - qa)*dst + (1 - qb)*src + src*dst;
+    else if (mode == CRGBA_BLEND_SCREEN)
+      return dst + src - src*dst;
+    else if (mode == CRGBA_BLEND_DARKEN)
+      return minParts((1 - qa)*dst + src, (1 - qb)*src + dst);
+    else if (mode == CRGBA_BLEND_LIGHTEN)
+      return maxParts((1 - qa)*dst + src, (1 - qb)*src + dst);
+    else
+      return src;
+  }
+
+  static CRGBAT minParts(const CRGBAT &rgba_s, const CRGBAT &rgba_d) {
+    return CRGBAT(std::min(rgba_s.r_, rgba_d.r_),
+                  std::min(rgba_s.g_, rgba_d.g_),
+                  std::min(rgba_s.b_, rgba_d.b_),
+                  std::min(rgba_s.a_, rgba_d.a_));
+  }
+
+  static CRGBAT maxParts(const CRGBAT &rgba_s, const CRGBAT &rgba_d) {
+    return CRGBAT(std::max(rgba_s.r_, rgba_d.r_),
+                  std::max(rgba_s.g_, rgba_d.g_),
+                  std::max(rgba_s.b_, rgba_d.b_),
+                  std::max(rgba_s.a_, rgba_d.a_));
   }
 
   const CRGBAT &invert() {
@@ -1081,19 +1181,5 @@ class CRGBAT {
 };
 
 typedef CRGBAT<double> CRGBA;
-
-struct CRGBACombineDef {
-  CRGBACombineMode src_mode;
-  CRGBACombineMode dst_mode;
-  CRGBACombineFunc func;
-  CRGBA            factor;
-
-  CRGBACombineDef() :
-   src_mode(CRGBA_COMBINE_SRC_ALPHA),
-   dst_mode(CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA),
-   func    (CRGBA_COMBINE_ADD),
-   factor  (CRGBA(0,0,0,1)) {
-  }
-};
 
 #endif

@@ -437,6 +437,18 @@ class CRGBT {
   CHSLT<T>  toHSL () const { return CRGBUtilT<T>::RGBtoHSL (*this); }
   CCMYKT<T> toCMYK() const { return CRGBUtilT<T>::RGBtoCMYK(*this); }
   CHSBT<T>  toHSB () const { return CRGBUtilT<T>::RGBtoHSB (*this); }
+
+  static CRGBT minParts(const CRGBT &rgb_s, const CRGBT &rgb_d) {
+    return CRGBT(std::min(rgb_s.r_, rgb_d.r_),
+                 std::min(rgb_s.g_, rgb_d.g_),
+                 std::min(rgb_s.b_, rgb_d.b_));
+  }
+
+  static CRGBT maxParts(const CRGBT &rgb_s, const CRGBT &rgb_d) {
+    return CRGBT(std::max(rgb_s.r_, rgb_d.r_),
+                 std::max(rgb_s.g_, rgb_d.g_),
+                 std::max(rgb_s.b_, rgb_d.b_));
+  }
 };
 
 typedef CRGBT<double> CRGB;
