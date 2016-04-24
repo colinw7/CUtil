@@ -1,14 +1,21 @@
 #ifndef CUtf8_H
 #define CUtf8_H
 
+#include <cassert>
+
 typedef unsigned char uchar;
+typedef unsigned long ulong;
 
 namespace CUtf8 {
-  bool IS_IN_RANGE(uchar c, uchar f, uchar l) { return (((c) >= (f)) && ((c) <= (l))); }
+  inline bool IS_IN_RANGE(uchar c, uchar f, uchar l) { return (((c) >= (f)) && ((c) <= (l))); }
 
-  ulong readNextChar(const std::string &str, int &pos) {
+  inline ulong readNextChar(const std::string &str, int &pos) {
     uint len = str.size();
-    assert(pos >= 0 && pos < int(len));
+
+    assert(pos >= 0 && pos <= int(len));
+
+    if (pos == int(len))
+      return 0;
 
     ulong uc = 0;
 
@@ -37,7 +44,7 @@ namespace CUtf8 {
       ++pos; return (ulong) c1;
     }
 
-    if (seqlen + pos >= int(len)) {
+    if (seqlen + pos > int(len)) {
       // malformed data, do something !!!
       ++pos; return (ulong) c1;
     }
@@ -101,6 +108,57 @@ namespace CUtf8 {
     pos += seqlen;
 
     return uc;
+  }
+
+  inline bool encode(long c, char s[4], int &len) {
+    if (c < 0x7F) {
+      len  = 1; // 7 bits
+      s[0] = c;
+    }
+    else if (c < 0x7FF) {
+      len = 2;  // 11 bits
+      s[0] = 0xC0 + ((c >> 6) & 0x1F); // top 5
+      s[1] = 0x80 + ( c       & 0x3F); // bottom 6
+    }
+    else if (c < 0xFFFF) {
+      len = 3; // 16 bits
+      s[0] = 0xE0 + ((c >> 12) & 0x0F); // top 4
+      s[1] = 0x80 + ((c >>  6) & 0x3F); // mid 6
+      s[2] = 0x80 + ( c        & 0x3F); // bottom 6
+    }
+    else if (c < 0x1FFFFF) {
+      len = 4; // 21 bits
+      s[0] = 0xF0 + ((c >> 18) & 0x07); // top 3
+      s[1] = 0x80 + ((c >> 12) & 0x3F); // top mid 6
+      s[2] = 0x80 + ((c >>  6) & 0x3F); // bottom mid 6
+      s[3] = 0x80 + ( c        & 0x3F); // bottom 6
+    }
+    else
+      return false;
+
+    return true;
+  }
+
+  inline bool append(std::string &str, long c) {
+    char s[4];
+    int  len;
+
+    if (! encode(c, s, len))
+      return false;
+
+    for (int i = 0; i < len; ++i)
+      str += s[i];
+
+    return true;
+  }
+
+  inline bool isSpace(long c) {
+    if      (c < 0x80)
+      return isspace(c);
+    else if (c == 0xb0) // degree
+      return true;
+    else
+      return false;
   }
 }
 

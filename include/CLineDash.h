@@ -29,6 +29,10 @@ class CLineDash {
      lengths_(lengths) {
     }
 
+    Lengths(const std::initializer_list<double> &lengths) :
+     lengths_(lengths) {
+    }
+
     uint size() const {
       return lengths_.size();
     }
@@ -75,7 +79,7 @@ class CLineDash {
       lengths_[i] = lengths[i];
   }
 
-  CLineDash(const Lengths &lengths, double offset=0.0) :
+  explicit CLineDash(const Lengths &lengths, double offset=0.0) :
    lengths_ (),
    offset_  (0.0),
    ind_     (0),
@@ -92,7 +96,7 @@ class CLineDash {
       lengths_[i] = lengths.value(i);
   }
 
-  CLineDash(ushort pattern) :
+  explicit CLineDash(ushort pattern) :
    lengths_ (),
    offset_  (0.0),
    ind_     (0),
@@ -102,7 +106,7 @@ class CLineDash {
     setDashes(pattern);
   }
 
-  CLineDash(const std::string &str) :
+  explicit CLineDash(const std::string &str) :
    lengths_ (),
    offset_  (0.0),
    ind_     (0),

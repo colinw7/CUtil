@@ -128,6 +128,6 @@ namespace CAux {
 
     return t;
   }
-};
+}
 
 #endif

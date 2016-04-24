@@ -77,10 +77,24 @@ class CFlags {
   void invert() { value_ = ~value_; }
 
   CFlags &add(CFlags flags) { *this |= flags; return *this; }
-  CFlags &add(T      flag ) { *this |= flag ; return *this; }
+  CFlags &add(T flag) { value_ |= flag; return *this; }
 
   CFlags &remove(CFlags flags) { *this &= ~flags; return *this; }
-  CFlags &remove(T      flag ) { *this &= ~flag ; return *this; }
+  CFlags &remove(T flag) { value_ &= ~flag; return *this; }
+
+  CFlags &addRemove(CFlags flags, bool b) {
+    if (b)
+      return add(flags);
+    else
+      return remove(flags);
+  }
+
+  CFlags &addRemove(T flag, bool b) {
+    if (b)
+      return add(flag);
+    else
+      return remove(flag);
+  }
 
   bool test(CFlags flags) const { return (value_ & flags.value_); }
   bool test(T      flag ) const { return (value_ & flag        ); }
