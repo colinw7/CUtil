@@ -3,13 +3,16 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <iostream>
 
 class CTrie {
  public:
   class Node;
 
-  typedef std::map<char,Node *> CharNode;
+  using CharNode = std::map<char,Node *>;
+  using String   = std::string;
+  using Strings  = std::vector<String>;
 
   struct Node {
     CharNode nodes;
@@ -81,30 +84,30 @@ class CTrie {
   };
 
  public:
-  void complete(const std::string &match) {
+  void complete(const std::string &match, Strings &strs) {
     MatchData matchData(match);
 
     Node *node = root();
 
     std::string str;
 
-    complete(node, str, matchData);
+    complete(node, str, strs, matchData);
   }
 
  private:
-  void complete(Node *node, const std::string &str, MatchData &matchData) {
+  void complete(Node *node, const std::string &str, Strings &strs, MatchData &matchData) {
     for (const auto &n : node->nodes) {
       if (matchData.pos == matchData.len) {
         if (! n.first)
-          std::cerr << matchData.str + str << std::endl;
+          strs.push_back(matchData.str + str);
         else
-          complete(n.second, str + n.first, matchData);
+          complete(n.second, str + n.first, strs, matchData);
       }
       else {
         if (n.first && n.first == matchData.str[matchData.pos]) {
           ++matchData.pos;
 
-          complete(n.second, str, matchData);
+          complete(n.second, str, strs, matchData);
 
           --matchData.pos;
         }

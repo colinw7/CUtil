@@ -72,8 +72,8 @@ class CAutoPtrVector {
   }
 
   void clear() {
-    for (typename Vector::iterator p = vector_.begin(); p != vector_.end(); ++p)
-      delete *p;
+    for (auto &p : vector_)
+      delete p;
 
     vector_.clear();
   }

@@ -57,8 +57,8 @@ class CAutoPtrStack {
   }
 
   void clear() {
-    for (typename Stack::iterator p = stack_.begin(); p != stack_.end(); ++p)
-      delete *p;
+    for (auto &p : stack_)
+      delete p;
 
     stack_.clear();
   }

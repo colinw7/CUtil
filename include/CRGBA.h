@@ -945,33 +945,47 @@ class CRGBAT {
     double Adest = dst.a_*(1 - src.a_);
     double Aboth = src.a_*dst.a_;
 
+    CRGBAT res;
+
     // s, 0, s
-    if      (func == CRGBA_COMBINE_SRC      ) return Asrc*src +             Aboth*src;
+    if      (func == CRGBA_COMBINE_SRC      ) { res    = Asrc*src +             Aboth*src;
+                                                res.a_ = Asrc     +             Aboth; }
     // 0, d, s
-    else if (func == CRGBA_COMBINE_ATOP     ) return            Adest*dst + Aboth*src;
+    else if (func == CRGBA_COMBINE_ATOP     ) { res =               Adest*dst + Aboth*src;
+                                                res.a_ =            Adest     + Aboth; }
     // s, d, s
-    else if (func == CRGBA_COMBINE_OVER     ) return Asrc*src + Adest*dst + Aboth*src;
+    else if (func == CRGBA_COMBINE_OVER     ) { res    = Asrc*src + Adest*dst + Aboth*src;
+                                                res.a_ = Asrc     + Adest     + Aboth; }
     // 0, 0, s
-    else if (func == CRGBA_COMBINE_IN       ) return                        Aboth*src;
+    else if (func == CRGBA_COMBINE_IN       ) { res    =                        Aboth*src;
+                                                res.a_ =                        Aboth; }
     // s, 0, 0
-    else if (func == CRGBA_COMBINE_OUT      ) return Asrc*src;
+    else if (func == CRGBA_COMBINE_OUT      ) { res    = Asrc*src;
+                                                res.a_ = Asrc;                         }
     // 0, d, d
-    else if (func == CRGBA_COMBINE_DEST     ) return            Adest*dst + Aboth*dst;
+    else if (func == CRGBA_COMBINE_DEST     ) { res    =            Adest*dst + Aboth*dst;
+                                                res.a_ =            Adest     + Aboth; }
     // s, 0, d
-    else if (func == CRGBA_COMBINE_DEST_ATOP) return Asrc*src             + Aboth*dst;
+    else if (func == CRGBA_COMBINE_DEST_ATOP) { res    = Asrc*src             + Aboth*dst;
+                                                res.a_ = Asrc                 + Aboth; }
     // s, d, d
-    else if (func == CRGBA_COMBINE_DEST_OVER) return Asrc*src + Adest*dst + Aboth*dst;
+    else if (func == CRGBA_COMBINE_DEST_OVER) { res    = Asrc*src + Adest*dst + Aboth*dst;
+                                                res.a_ = Asrc     + Adest     + Aboth; }
     // 0, 0, d
-    else if (func == CRGBA_COMBINE_DEST_IN  ) return                        Aboth*dst;
+    else if (func == CRGBA_COMBINE_DEST_IN  ) { res    =                        Aboth*dst;
+                                                res.a_ =                        Aboth; }
     // 0, d, 0
-    else if (func == CRGBA_COMBINE_DEST_OUT ) return            Adest*dst;
+    else if (func == CRGBA_COMBINE_DEST_OUT ) { res    =            Adest*dst;
+                                                res.a_ =            Adest;             }
     // s, d, 0
-    else if (func == CRGBA_COMBINE_XOR      ) return Asrc*src + Adest*dst;
+    else if (func == CRGBA_COMBINE_XOR      ) { res    = Asrc*src + Adest*dst;
+                                                res.a_ = Asrc     + Adest;             }
     // 0, 0, 0
-    else if (func == CRGBA_COMBINE_CLEAR    ) return CRGBAT(0,0,0,0);
+    else if (func == CRGBA_COMBINE_CLEAR    ) { res    = CRGBAT(0,0,0,0);
+                                                res.a_ = 0;                            }
 
     // assert ?
-    return src;
+    return res;
   }
 
   static CRGBAT arithmeticCombine(const CRGBAT &src, const CRGBAT &dst,

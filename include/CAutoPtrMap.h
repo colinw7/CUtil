@@ -62,8 +62,8 @@ class CAutoPtrMap {
   }
 
   void clear() {
-    for (typename Map::iterator p = map_.begin(); p != map_.end(); ++p)
-      delete (*p).second;
+    for (const auto &p : map_)
+      delete p.second;
 
     map_.clear();
   }

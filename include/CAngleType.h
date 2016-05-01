@@ -1,0 +1,10 @@
+#ifndef CANGLE_TYPE_H
+#define CANGLE_TYPE_H
+
+enum CAngleType {
+  CANGLE_TYPE_NONE,
+  CANGLE_TYPE_DEGREES,
+  CANGLE_TYPE_RADIANS
+};
+
+#endif
