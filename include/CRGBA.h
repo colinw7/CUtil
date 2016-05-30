@@ -552,6 +552,19 @@ class CRGBAT {
     }
   }
 
+  const CRGBAT &normalize() {
+    r_ *= a_;
+    g_ *= a_;
+    b_ *= a_;
+    a_  = 1.0;
+
+    return *this;
+  }
+
+  CRGBAT normalized() const {
+    return CRGBAT(r_*a_, g_*a_, b_*a_, 1.0);
+  }
+
   uint getId() const {
     if (! id_set_) {
       CRGBAT *th = const_cast<CRGBAT *>(this);
