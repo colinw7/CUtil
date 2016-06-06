@@ -115,6 +115,17 @@ class CRGBAT {
     return CRGBAT(r/255.0, g/255.0, b/255.0, a/255.0);
   }
 
+  static int iround(double r) {
+    if (r < 0)
+      return int(r - 0.5);
+    else
+      return int(r + 0.5);
+  }
+
+  static int ivalue(double r) {
+    return iround(r*CRGBA_IFACTOR);
+  }
+
   //-------
 
   CRGBAT() :
@@ -516,10 +527,10 @@ class CRGBAT {
   }
 
   void getRGBAI(uint *r, uint *g, uint *b, uint *a) const {
-    *r = uint(r_*CRGBA_IFACTOR);
-    *g = uint(g_*CRGBA_IFACTOR);
-    *b = uint(b_*CRGBA_IFACTOR);
-    *a = uint(a_*CRGBA_IFACTOR);
+    *r = iround(r_);
+    *g = iround(g_);
+    *b = iround(b_);
+    *a = iround(a_);
   }
 
   T getRed  () const { return r_; }
@@ -527,10 +538,10 @@ class CRGBAT {
   T getBlue () const { return b_; }
   T getAlpha() const { return a_; }
 
-  uint getRedI  () const { return Util::clampI(r_*CRGBA_IFACTOR); }
-  uint getGreenI() const { return Util::clampI(g_*CRGBA_IFACTOR); }
-  uint getBlueI () const { return Util::clampI(b_*CRGBA_IFACTOR); }
-  uint getAlphaI() const { return Util::clampI(a_*CRGBA_IFACTOR); }
+  uint getRedI  () const { return Util::clampI(iround(r_)); }
+  uint getGreenI() const { return Util::clampI(iround(g_)); }
+  uint getBlueI () const { return Util::clampI(iround(b_)); }
+  uint getAlphaI() const { return Util::clampI(iround(a_)); }
 
   T getComponent(CColorComponent component) const {
     switch (component) {
@@ -597,9 +608,7 @@ class CRGBAT {
     return (CRGBA_R_FACTOR*r_ + CRGBA_G_FACTOR*g_ + CRGBA_B_FACTOR*b_);
   }
 
-  uint getGrayI() const {
-    return uint(getGray()*CRGBA_IFACTOR);
-  }
+  uint getGrayI() const { return iround(getGray()); }
 
   T getClampGray() const {
     return clamped().getGray();
@@ -747,7 +756,7 @@ class CRGBAT {
                   std::max(cmin, std::min(cmax, a_)));
   }
 
-  const CRGBAT &blend(const CRGBAT &rgb, T factor) const {
+  const CRGBAT &blend(const CRGBAT &rgb, T factor) {
     T factor1 = 1.0 - factor;
 
     r_ = r_*factor + rgb.r_*factor1;
@@ -770,13 +779,24 @@ class CRGBAT {
   }
 
   // combine new color on top of old color
-  const CRGBAT &combine(const CRGBAT &rgb) const {
-    T a1 = 1.0 - rgb.a_;
+  const CRGBAT &combine(const CRGBAT &rgb) {
+    T a1 = 1.0 - a_;
+    T a2 = 1.0 - rgb.a_;
 
-    r_ = r_*a1 + rgb.r_*rgb.a_;
-    g_ = g_*a1 + rgb.g_*rgb.a_;
-    b_ = b_*a1 + rgb.b_*rgb.a_;
-    a_ = a_*a1 + rgb.a_;
+    T af = 1.0 - a1*a2;
+
+    if (af > 0.0) {
+      r_ = r_*a_*a2/af + rgb.r_*rgb.a_/af;
+      g_ = g_*a_*a2/af + rgb.g_*rgb.a_/af;
+      b_ = b_*a_*a2/af + rgb.b_*rgb.a_/af;
+      a_ = af;
+    }
+    else {
+      r_ = 0.0;
+      g_ = 0.0;
+      b_ = 0.0;
+      a_ = 0.0;
+    }
 
     id_set_ = false;
 
@@ -784,12 +804,11 @@ class CRGBAT {
   }
 
   CRGBAT combined(const CRGBAT &rgb) const {
-    T a1 = 1.0 - rgb.a_;
+    CRGBAT rgba1(*this);
 
-    return CRGBAT(r_*a1 + rgb.r_*rgb.a_,
-                  g_*a1 + rgb.g_*rgb.a_,
-                  b_*a1 + rgb.b_*rgb.a_,
-                  a_*a1 + rgb.a_);
+    rgba1.combine(rgb);
+
+    return rgba1;
   }
 
   CRGBAT modeCombine(const CRGBAT &src,
