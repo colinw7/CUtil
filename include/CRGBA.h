@@ -1023,6 +1023,19 @@ class CRGBAT {
   static CRGBAT arithmeticCombine(const CRGBAT &src, const CRGBAT &dst,
                                   double k1, double k2, double k3, double k4) {
     return k1*src*dst + k2*src + k3*dst + k4;
+#if 0
+    double a = k1*src.a_*dst.a_ + k2*src.a_ + k3*dst.a_ + k4;
+
+    if (a > 0.0) {
+      double r = k1*src.r_*dst.r_ + k2*src.r_ + k3*dst.r_ + k4;
+      double g = k1*src.g_*dst.g_ + k2*src.g_ + k3*dst.g_ + k4;
+      double b = k1*src.b_*dst.b_ + k2*src.b_ + k3*dst.b_ + k4;
+
+      return CRGBAT(r, g, b, a).clamped();
+    }
+    else
+      return CRGBAT(0, 0, 0, 0);
+#endif
   }
 
 #if 0
