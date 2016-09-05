@@ -214,6 +214,7 @@ class COptValT {
 
 typedef COptValT<bool>        COptBool;
 typedef COptValT<int>         COptInt;
+typedef COptValT<long>        COptLong;
 typedef COptValT<uint>        COptUInt;
 typedef COptValT<double>      COptReal;
 typedef COptValT<std::string> COptString;

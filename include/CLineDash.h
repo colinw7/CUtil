@@ -46,29 +46,17 @@ class CLineDash {
   };
 
  public:
-  CLineDash() :
-   lengths_ (),
-   offset_  (0.0),
-   ind_     (0),
-   position_(0.0) {
+  CLineDash() {
     init();
   }
 
-  CLineDash(const CLineDash &dash) :
-   lengths_ (),
-   offset_  (0.0),
-   ind_     (0),
-   position_(0.0) {
+  CLineDash(const CLineDash &dash) {
     init();
 
     copy(dash);
   }
 
-  CLineDash(double *lengths, uint num_lengths, double offset=0.0) :
-   lengths_ (),
-   offset_  (0.0),
-   ind_     (0),
-   position_(0.0) {
+  CLineDash(const double *lengths, uint num_lengths, double offset=0.0) {
     init();
 
     lengths_.resize(num_lengths);
@@ -79,11 +67,7 @@ class CLineDash {
       lengths_[i] = lengths[i];
   }
 
-  explicit CLineDash(const Lengths &lengths, double offset=0.0) :
-   lengths_ (),
-   offset_  (0.0),
-   ind_     (0),
-   position_(0.0) {
+  explicit CLineDash(const Lengths &lengths, double offset=0.0) {
     init();
 
     uint num_lengths = lengths.size();
@@ -96,21 +80,13 @@ class CLineDash {
       lengths_[i] = lengths.value(i);
   }
 
-  explicit CLineDash(ushort pattern) :
-   lengths_ (),
-   offset_  (0.0),
-   ind_     (0),
-   position_(0.0) {
+  explicit CLineDash(ushort pattern) {
     init();
 
     setDashes(pattern);
   }
 
-  explicit CLineDash(const std::string &str) :
-   lengths_ (),
-   offset_  (0.0),
-   ind_     (0),
-   position_(0.0) {
+  explicit CLineDash(const std::string &str) {
     fromString(str);
   }
 
@@ -220,7 +196,7 @@ class CLineDash {
     updateInd();
   }
 
-  void setDashes(double *lengths, uint num_lengths, double offset=0.0) {
+  void setDashes(const double *lengths, uint num_lengths, double offset=0.0) {
     lengths_.resize(num_lengths);
 
     offset_ = offset;
@@ -397,9 +373,9 @@ class CLineDash {
 
  private:
   std::vector<double> lengths_;
-  double              offset_;
-  uint                ind_;
-  double              position_;
+  double              offset_ { 0.0 };
+  uint                ind_ { 0 };
+  double              position_ { 0.0 };
 };
 
 #endif
