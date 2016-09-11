@@ -9,9 +9,7 @@ typedef unsigned long ulong;
 namespace CUtf8 {
   inline bool IS_IN_RANGE(uchar c, uchar f, uchar l) { return (((c) >= (f)) && ((c) <= (l))); }
 
-  inline ulong readNextChar(const std::string &str, int &pos) {
-    uint len = str.size();
-
+  inline ulong readNextChar(const std::string &str, int &pos, uint len) {
     assert(pos >= 0 && pos <= int(len));
 
     if (pos == int(len))
@@ -110,7 +108,13 @@ namespace CUtf8 {
     return uc;
   }
 
-  inline bool encode(long c, char s[4], int &len) {
+  inline ulong readNextChar(const std::string &str, int &pos) {
+    uint len = str.size();
+
+    return readNextChar(str, pos, len);
+  }
+
+  inline bool encode(ulong c, char s[4], int &len) {
     if (c < 0x7F) {
       len  = 1; // 7 bits
       s[0] = c;
@@ -139,7 +143,7 @@ namespace CUtf8 {
     return true;
   }
 
-  inline bool append(std::string &str, long c) {
+  inline bool append(std::string &str, ulong c) {
     char s[4];
     int  len;
 
@@ -152,7 +156,7 @@ namespace CUtf8 {
     return true;
   }
 
-  inline bool isSpace(long c) {
+  inline bool isSpace(ulong c) {
     if      (c < 0x80)
       return isspace(c);
     else if (c == 0xb0) // degree
