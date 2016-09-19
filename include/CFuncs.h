@@ -29,4 +29,35 @@ process_vector(const std::vector<T1> &v, const T2 &proc) {
   }
 }
 
+template<class T>
+class CPrintSeparated {
+ public:
+  CPrintSeparated(std::ostream &os=std::cout, const std::string &sep=" ") :
+   os_(os), sep_(sep) {
+  }
+
+  void operator()(const T &obj) {
+    if (! first_)
+      os_ << sep_;
+
+    os_ << obj;
+
+    first_ = false;
+  }
+
+  void operator()(const T *obj) {
+    if (! first_)
+      os_ << sep_;
+
+    os_ << *obj;
+
+    first_ = false;
+  }
+
+ private:
+  std::ostream &os_;
+  bool          first_ { true };
+  std::string   sep_;
+};
+
 #endif
