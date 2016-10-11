@@ -2,6 +2,7 @@
 #define CFuncs_H
 
 #include <vector>
+#include <iostream>
 
 struct CDeletePointer {
   template<class T>
