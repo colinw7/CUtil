@@ -195,6 +195,8 @@ namespace CUtf8 {
       return isspace(c);
     else if (c == 0xa0) // no-break space
       return true;
+    else if (c == 0x2028) // line separator
+      return true;
     else if (c == 0x2029) // em space
       return true;
     else
@@ -287,6 +289,22 @@ namespace CUtf8 {
     int i2 = pos;
 
     return str.substr(i1, i2 - i1);
+  }
+
+  inline bool isAscii(const std::string &str) {
+    uint i   = 0;
+    uint len = str.size();
+
+    while (i < len) {
+      uchar c = str[i];
+
+      if (c >= 0x80)
+        return false;
+
+      ++i;
+    }
+
+    return true;
   }
 }
 
