@@ -1,6 +1,8 @@
 #ifndef CTRIPLET_H
 #define CTRIPLET_H
 
+#include <iostream>
+
 template <typename T1, typename T2, typename T3>
 struct CTriplet {
   typedef T1 first_type;

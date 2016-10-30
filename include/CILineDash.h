@@ -4,6 +4,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <vector>
+#include <sys/types.h>
 
 class CILineDash {
  private:
