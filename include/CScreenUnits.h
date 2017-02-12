@@ -69,7 +69,7 @@ class CScreenUnits {
    value_(value), units_(units) {
   }
 
-  CScreenUnits(Units units, double value) :
+  explicit CScreenUnits(Units units, double value=1.0) :
    value_(value), units_(units) {
   }
 
