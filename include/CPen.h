@@ -13,7 +13,7 @@ class CPen {
     init();
   }
 
-  CPen(const CRGBA &c) :
+  explicit CPen(const CRGBA &c) :
    color_(c) {
     init();
   }

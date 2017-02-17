@@ -32,14 +32,12 @@ class CBrush {
  public:
   CBrush() { }
 
-  explicit CBrush(const CRGBA &c) {
-    style_ = CBRUSH_STYLE_SOLID;
-    color_ = c;
+  explicit CBrush(const CRGBA &c) :
+   style_(CBRUSH_STYLE_SOLID), color_(c) {
   }
 
-  explicit CBrush(const CImagePtr &image) {
-    style_   = CBRUSH_STYLE_TEXTURE;
-    texture_ = image;
+  explicit CBrush(const CImagePtr &image) :
+   style_(CBRUSH_STYLE_TEXTURE), texture_(image) {
   }
 
   CBrush &operator=(const CBrush &brush) {
@@ -60,19 +58,23 @@ class CBrush {
     return *this;
   }
 
-  CBrushStyle   getStyle   () const { return style_    ; }
-  const CRGBA&  getColor   () const { return color_    ; }
-  CFillType     getFillRule() const { return fill_rule_; }
-  CBrushPattern getPattern () const { return pattern_  ; }
-  CImagePtr     getTexture () const { return texture_  ; }
-  GradientPtr   getGradient() const { return gradient_ ; }
+  CBrushStyle getStyle() const { return style_; }
 
-  void setStyle   (CBrushStyle style    ) { style_     = style; }
-  void setColor   (const CRGBA &color   ) { color_     = color; }
+  const CRGBA& getColor() const { assert(style_ == CBRUSH_STYLE_SOLID); return color_; }
+
+  CFillType getFillRule() const { return fill_rule_; }
+
+  CBrushPattern getPattern () const { assert(style_ == CBRUSH_STYLE_PATTERN ); return pattern_ ; }
+  CImagePtr     getTexture () const { assert(style_ == CBRUSH_STYLE_TEXTURE ); return texture_ ; }
+  GradientPtr   getGradient() const { assert(style_ == CBRUSH_STYLE_GRADIENT); return gradient_; }
+
+  void setStyle   (CBrushStyle style    ) { style_ = style; }
+  void setColor   (const CRGBA &color   ) { color_ = color; }
   void setFillRule(CFillType rule       ) { fill_rule_ = rule; }
-  void setPattern (CBrushPattern pattern) { pattern_   = pattern; }
-  void setTexture (CImagePtr texture    ) { texture_   = texture; }
-  void setGradient(GradientPtr gradient ) { gradient_  = gradient; }
+
+  void setPattern (CBrushPattern pattern) { style_ = CBRUSH_STYLE_PATTERN ; pattern_  = pattern ; }
+  void setTexture (CImagePtr texture    ) { style_ = CBRUSH_STYLE_TEXTURE ; texture_  = texture ; }
+  void setGradient(GradientPtr gradient ) { style_ = CBRUSH_STYLE_GRADIENT; gradient_ = gradient; }
 
  private:
   CBrushStyle   style_ { CBRUSH_STYLE_SOLID };
