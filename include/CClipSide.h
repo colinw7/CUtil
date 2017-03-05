@@ -1,0 +1,11 @@
+#ifndef CCLIP_SIDE_H
+#define CCLIP_SIDE_H
+
+enum CClipSide {
+  CCLIP_SIDE_NONE,
+  CCLIP_SIDE_INSIDE,
+  CCLIP_SIDE_OUTSIDE,
+  CCLIP_SIDE_ON
+};
+
+#endif

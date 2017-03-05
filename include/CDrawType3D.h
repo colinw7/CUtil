@@ -1,0 +1,9 @@
+#ifndef CDRAW_TYPE_3D_H
+#define CDRAW_TYPE_3D_H
+
+enum CDrawType3D {
+  CDRAW_TYPE_3D_WIREFRAME,
+  CDRAW_TYPE_3D_SOLID
+};
+
+#endif
