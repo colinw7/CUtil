@@ -31,6 +31,8 @@ class CILineDash {
 
          len = va_arg(vargs, int);
        }
+
+       va_end(vargs);
      }
 
      uint size() const {
@@ -94,7 +96,7 @@ class CILineDash {
       lengths_[i] = lengths.value(i);
   }
 
-  CILineDash(ushort pattern) :
+  explicit CILineDash(ushort pattern) :
    lengths_    (NULL),
    num_lengths_(0),
    offset_     (0),

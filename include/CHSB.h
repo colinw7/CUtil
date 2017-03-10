@@ -2,28 +2,20 @@
 #define CHSB_H
 
 #include <CRGB.h>
-#include <CRGBUtil.h>
 
-template<typename T>
-class CRGBT;
-
-template<typename T>
-class CRGBUtilT;
-
-template<typename T>
-class CHSBT {
+class CHSB {
  public:
-  CHSBT(T h=0, T s=0, T b=0) :
+  CHSB(double h=0, double s=0, double b=0) :
    h_(h), s_(s), b_(b) {
   }
 
-  CHSBT(const CHSBT &hsb) :
+  CHSB(const CHSB &hsb) :
    h_(hsb.h_), s_(hsb.s_), b_(hsb.b_) {
   }
 
- ~CHSBT() { }
+ ~CHSB() { }
 
-  CHSBT &operator=(const CHSBT &hsb) {
+  CHSB &operator=(const CHSB &hsb) {
     if (&hsb == this)
       return *this;
 
@@ -34,20 +26,24 @@ class CHSBT {
     return *this;
   }
 
-  T getHue       () const { return h_; }
-  T getSaturation() const { return s_; }
-  T getBrightness() const { return b_; }
+  double getHue       () const { return h_; }
+  double getSaturation() const { return s_; }
+  double getBrightness() const { return b_; }
 
-  void setHue       (T h) { h_ = h; }
-  void setSaturation(T s) { s_ = s; }
-  void setBrightness(T b) { b_ = b; }
+  void setHue       (double h) { h_ = h; }
+  void setSaturation(double s) { s_ = s; }
+  void setBrightness(double b) { b_ = b; }
 
-  CRGBT<T> toRGB() const { return CRGBUtilT<T>::HSBtoRGB(*this); }
+  //CRGB toRGB() const;
 
  private:
-  T h_, s_, b_;
+  double h_, s_, b_;
 };
 
-typedef CHSBT<double> CHSB;
+//------
+
+//#include <CRGBUtil.h>
+
+//CRGB CHSB::toRGB() const { return CRGBUtil::HSBtoRGB(*this); }
 
 #endif

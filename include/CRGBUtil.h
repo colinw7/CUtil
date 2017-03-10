@@ -9,21 +9,12 @@
 #include <CHSI.h>
 #include <CMathGen.h>
 
-template<typename T> class CCMYKT;
-template<typename T> class CRGBT;
-template<typename T> class CHSLT;
-template<typename T> class CHSVT;
-template<typename T> class CHSBT;
-template<typename T> class CHSIT;
-
-template<typename T>
-class CRGBUtilT {
+class CRGBUtil {
  public:
-  static CRGBT<T>
-  CMYKtoRGB(const CCMYKT<T> &cmyk) {
-    T k = cmyk.getBlack();
+  static CRGB CMYKtoRGB(const CCMYK &cmyk) {
+    double k = cmyk.getBlack();
 
-    T max_color = std::max(cmyk.getCyan() + k,
+    double max_color = std::max(cmyk.getCyan() + k,
                     std::max(cmyk.getMagenta() + k, cmyk.getYellow() + k));
 
     if (max_color > 1.0)
@@ -32,36 +23,35 @@ class CRGBUtilT {
     if (k < 0.0)
       k = 0.0;
 
-    T r = std::max(1.0 - (cmyk.getCyan()    + k), 0.0);
-    T g = std::max(1.0 - (cmyk.getMagenta() + k), 0.0);
-    T b = std::max(1.0 - (cmyk.getYellow()  + k), 0.0);
+    double r = std::max(1.0 - (cmyk.getCyan()    + k), 0.0);
+    double g = std::max(1.0 - (cmyk.getMagenta() + k), 0.0);
+    double b = std::max(1.0 - (cmyk.getYellow()  + k), 0.0);
 
-    return CRGBT<T>(r, g, b);
+    return CRGB(r, g, b);
   }
 
-  static CRGBT<T>
-  HSLtoRGB(const CHSLT<T> &hsl) {
-    T r = 0.0, g = 0.0, b = 0.0;
+  static CRGB HSLtoRGB(const CHSL &hsl) {
+    double r = 0.0, g = 0.0, b = 0.0;
 
-    T v = (hsl.getLuminance() <= 0.5) ?
+    double v = (hsl.getLuminance() <= 0.5) ?
             (hsl.getLuminance()*(1.0 + hsl.getSaturation())) :
             (hsl.getLuminance() + hsl.getSaturation() -
              hsl.getLuminance()*hsl.getSaturation());
 
     if (v > 0.0) {
-      T m  = hsl.getLuminance() + hsl.getLuminance() - v;
-      T sv = (v - m)/v;
+      double m  = hsl.getLuminance() + hsl.getLuminance() - v;
+      double sv = (v - m)/v;
 
-      T h = hsl.getHue()*6.0;
+      double h = hsl.getHue()*6.0;
 
       int sextant = int(h);
 
-      T fract = h - sextant;
+      double fract = h - sextant;
 
-      T vsf = v * sv * fract;
+      double vsf = v * sv * fract;
 
-      T mid1 = m + vsf;
-      T mid2 = v - vsf;
+      double mid1 = m + vsf;
+      double mid2 = v - vsf;
 
       switch (sextant) {
         case 0: r = v   ; g = mid1; b = m   ; break;
@@ -73,17 +63,16 @@ class CRGBUtilT {
       }
     }
 
-    return CRGBT<T>(r, g, b);
+    return CRGB(r, g, b);
   }
 
-  static CRGBT<T>
-  HSVtoRGB(const CHSVT<T> &hsv) {
-    T r = hsv.getValue();
-    T g = hsv.getValue();
-    T b = hsv.getValue();
+  static CRGB HSVtoRGB(const CHSV &hsv) {
+    double r = hsv.getValue();
+    double g = hsv.getValue();
+    double b = hsv.getValue();
 
     if (hsv.getSaturation() > 0.0) {
-      T h = hsv.getHue();
+      double h = hsv.getHue();
 
       while (h <    0.0) h += 360.0;
       while (h >= 360.0) h -= 360.0;
@@ -92,13 +81,13 @@ class CRGBUtilT {
 
       int i = (int) h;
 
-      T f = h - i;
+      double f = h - i;
 
-      T f1 = 1.0 - f;
+      double f1 = 1.0 - f;
 
-      T p = hsv.getValue()*(1.0 - hsv.getSaturation());
-      T q = hsv.getValue()*(1.0 - hsv.getSaturation()*f);
-      T t = hsv.getValue()*(1.0 - hsv.getSaturation()*f1);
+      double p = hsv.getValue()*(1.0 - hsv.getSaturation());
+      double q = hsv.getValue()*(1.0 - hsv.getSaturation()*f);
+      double t = hsv.getValue()*(1.0 - hsv.getSaturation()*f1);
 
       switch (i) {
         case  0: r = hsv.getValue(); g = t; b = p; break;
@@ -111,27 +100,27 @@ class CRGBUtilT {
       }
     }
 
-    return CRGBT<T>(r, g, b);
+    return CRGB(r, g, b);
   }
 
-  static CRGBT<T>
-  HSBtoRGB(const CHSBT<T> &hsb) {
-    CHSVT<T> hsv(hsb.getHue()*(360 - 1E-6), hsb.getSaturation(), hsb.getBrightness());
+  static CRGB HSBtoRGB(const CHSB &hsb) {
+    CHSV hsv(hsb.getHue()*(360 - 1E-6), hsb.getSaturation(), hsb.getBrightness());
 
     return HSVtoRGB(hsv);
   }
 
-  static CRGBT<T>
-  HSItoRGB(const CHSIT<T> &hsb) {
-    T h = hsb.getHue();
-    T s = hsb.getSaturation();
-    T i = hsb.getIntensity();
+  static CRGB HSItoRGB(const CHSI &hsb) {
+    double h = hsb.getHue();
+    double s = hsb.getSaturation();
+  //double i = hsb.getIntensity();
 
-    T hp = h*M_PI*0.5;
+    double hp = h*M_PI*0.5;
 
     int h1 = CMathGen::Round(hp)/120;
 
-    T r, g, b, c1, c2;
+    double r = 0.0, g = 0.0, b = 0.0;
+
+    double c1, c2;
 
     switch (h1) {
       case 0:
@@ -169,18 +158,18 @@ class CRGBUtilT {
         break;
     }
 
-    return CRGBT<T>(0.0, 0.0, 0.0);
+    //return CRGB(0.0, 0.0, 0.0);
+    return CRGB(r, g, b);
   }
 
-  static CCMYKT<T>
-  RGBtoCMYK(const CRGBT<T> &rgb) {
-    T cyan    = 1.0 - rgb.getRed();
-    T magenta = 1.0 - rgb.getGreen();
-    T yellow  = 1.0 - rgb.getBlue();
+  static CCMYK RGBtoCMYK(const CRGB &rgb) {
+    double cyan    = 1.0 - rgb.getRed();
+    double magenta = 1.0 - rgb.getGreen();
+    double yellow  = 1.0 - rgb.getBlue();
 
     //------
 
-    T black = std::min(std::min(cyan, magenta), yellow);
+    double black = std::min(std::min(cyan, magenta), yellow);
 
     black = std::min(std::max(black, 0.0), 1.0);
 
@@ -194,28 +183,27 @@ class CRGBUtilT {
     magenta = std::min(std::max(magenta, 0.0), 1.0);
     yellow  = std::min(std::max(yellow , 0.0), 1.0);
 
-    return CCMYKT<T>(cyan, magenta, yellow, black);
+    return CCMYK(cyan, magenta, yellow, black);
   }
 
-  static CHSVT<T>
-  RGBtoHSV(const CRGBT<T> &rgb) {
-    T r = rgb.getRed();
-    T g = rgb.getGreen();
-    T b = rgb.getBlue();
+  static CHSV RGBtoHSV(const CRGB &rgb) {
+    double r = rgb.getRed();
+    double g = rgb.getGreen();
+    double b = rgb.getBlue();
 
-    T min_rgb = std::min(r, std::min(g, b));
-    T max_rgb = std::max(r, std::max(g, b));
+    double min_rgb = std::min(r, std::min(g, b));
+    double max_rgb = std::max(r, std::max(g, b));
 
-    T delta = max_rgb - min_rgb;
+    double delta = max_rgb - min_rgb;
 
-    T v = max_rgb;
+    double v = max_rgb;
 
-    T s = 0.0;
+    double s = 0.0;
 
     if (max_rgb > 0.0)
       s = delta/max_rgb;
 
-    T h = 0.0;
+    double h = 0.0;
 
     if (s > 0.0) {
       if      (r == max_rgb) h = 0.0 + (g - b)/delta;
@@ -228,18 +216,17 @@ class CRGBUtilT {
       while (h >= 360.0) h -= 360.0;
     }
 
-    return CHSVT<T>(h, s, v);
+    return CHSV(h, s, v);
   }
 
-  static CHSLT<T>
-  RGBtoHSL(const CRGBT<T> &rgb) {
-    T vm;
-    T r2, g2, b2;
+  static CHSL RGBtoHSL(const CRGB &rgb) {
+    double vm;
+    double r2, g2, b2;
 
-    T v = std::max(std::max(rgb.getRed(), rgb.getGreen()), rgb.getBlue());
-    T m = std::min(std::min(rgb.getRed(), rgb.getGreen()), rgb.getBlue());
+    double v = std::max(std::max(rgb.getRed(), rgb.getGreen()), rgb.getBlue());
+    double m = std::min(std::min(rgb.getRed(), rgb.getGreen()), rgb.getBlue());
 
-    T l = (m + v)*0.5;
+    double l = (m + v)*0.5;
 
     if (l <= 0.0)
       return CHSL(0.0, 0.0, 0.0);
@@ -249,7 +236,7 @@ class CRGBUtilT {
     if (vm <= 0.0)
       return CHSL(0.0, 0.0, 0.0);
 
-    T s = vm;
+    double s = vm;
 
     s /= (l <= 0.5) ? (v + m) : (2.0 - v - m);
 
@@ -257,7 +244,7 @@ class CRGBUtilT {
     g2 = (v - rgb.getGreen())/vm;
     b2 = (v - rgb.getBlue ())/vm;
 
-    T h;
+    double h;
 
     if      (rgb.getRed  () == v) h = (rgb.getGreen() == m ? 5.0 + b2 : 1.0 - g2);
     else if (rgb.getGreen() == v) h = (rgb.getBlue () == m ? 1.0 + r2 : 3.0 - b2);
@@ -265,57 +252,53 @@ class CRGBUtilT {
 
     h /= 6.0;
 
-    return CHSLT<T>(h, s, l);
+    return CHSL(h, s, l);
   }
 
-  static CHSBT<T>
-  RGBtoHSB(const CRGBT<T> &rgb) {
-    CHSVT<T> hsv = RGBtoHSV(rgb);
+  static CHSB RGBtoHSB(const CRGB &rgb) {
+    CHSV hsv = RGBtoHSV(rgb);
 
-    T hue        = hsv.getHue()/360.0;
-    T saturation = hsv.getSaturation();
-    T brightness = hsv.getValue();
+    double hue        = hsv.getHue()/360.0;
+    double saturation = hsv.getSaturation();
+    double brightness = hsv.getValue();
 
-    return CHSBT<T>(hue, saturation, brightness);
+    return CHSB(hue, saturation, brightness);
   }
 
-  static CHSIT<T>
-  RGBtoHSI(const CRGBT<T> &rgb) {
-    T r = rgb.getRed();
-    T g = rgb.getGreen();
-    T b = rgb.getBlue();
+  static CHSI RGBtoHSI(const CRGB &rgb) {
+    double r = rgb.getRed();
+    double g = rgb.getGreen();
+    double b = rgb.getBlue();
 
-    T rg = r - g;
-    T rb = r - b;
-    T gb = g - b;
+    double rg = r - g;
+    double rb = r - b;
+    double gb = g - b;
 
     if (fabs(rg) < 1E-6 && fabs(rb) < 1E-6 && fabs(gb) < 1E-6)
-      return CHSIT<T>(0.0, 0.0, r);
+      return CHSI(0.0, 0.0, r);
 
     // Hue
-    T t = ::acos(0.5*(rg + rb)/::sqrt(rg*rg + rb*gb));
+    double t = ::acos(0.5*(rg + rb)/::sqrt(rg*rg + rb*gb));
 
     if (b > g)
       t = 0.5*M_PI - t;
 
-    T h = 2.0*t/M_PI;
+    double h = 2.0*t/M_PI;
 
     // Saturation
-    T sum = r + g + b;
+    double sum = r + g + b;
 
     // Intensity
-    T i = sum/3.0;
+    double i = sum/3.0;
 
-    T s = 1.0 - std::min(r, std::min(g, b))/i;
+    double s = 1.0 - std::min(r, std::min(g, b))/i;
 
-    return CHSIT<T>(h, s, i);
+    return CHSI(h, s, i);
   }
 
   static uint clampI(int v) {
     return (v >= 0 ? (v <= 255 ? v : 255) : 0);
   }
 };
-
-typedef CRGBUtilT<double> CRGBUtil;
 
 #endif

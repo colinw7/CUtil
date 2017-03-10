@@ -2,33 +2,30 @@
 #define CHSVA_H
 
 #include <CRGBA.h>
-#include <CRGBUtil.h>
 
 // h (0.0 360.0)
 // s (0.0 1.0)
 // v (0.0 1.0)
 // a (0.0 1.0)
 
-template<typename T>
-class CRGBUtilT;
-
-template<typename T>
-class CHSVAT {
+class CHSVA {
  private:
-  typedef CRGBUtilT<T> Util;
+  static uint clampI(int v) {
+    return (v >= 0 ? (v <= 255 ? v : 255) : 0);
+  }
 
  public:
-  CHSVAT(T h=0, T s=0, T v=0, T a=1) :
+  CHSVA(double h=0, double s=0, double v=0, double a=1) :
    h_(h), s_(s), v_(v), a_(a) {
   }
 
-  CHSVAT(const CHSVAT &hsva) :
+  CHSVA(const CHSVA &hsva) :
    h_(hsva.h_), s_(hsva.s_), v_(hsva.v_), a_(hsva.a_) {
   }
 
- ~CHSVAT() { }
+ ~CHSVA() { }
 
-  CHSVAT &operator=(const CHSVAT &hsva) {
+  CHSVA &operator=(const CHSVA &hsva) {
     if (this == &hsva)
       return *this;
 
@@ -40,7 +37,7 @@ class CHSVAT {
     return *this;
   }
 
-  CHSVAT &operator+=(const CHSVAT &hsva) {
+  CHSVA &operator+=(const CHSVA &hsva) {
     if (this == &hsva)
       return *this;
 
@@ -52,7 +49,7 @@ class CHSVAT {
     return *this;
   }
 
-  CHSVAT &operator*=(const CHSVAT &hsva) {
+  CHSVA &operator*=(const CHSVA &hsva) {
     if (this == &hsva)
       return *this;
 
@@ -64,20 +61,20 @@ class CHSVAT {
     return *this;
   }
 
-  T getHue       () const { return h_; }
-  T getSaturation() const { return s_; }
-  T getValue     () const { return v_; }
-  T getAlpha     () const { return a_; }
+  double getHue       () const { return h_; }
+  double getSaturation() const { return s_; }
+  double getValue     () const { return v_; }
+  double getAlpha     () const { return a_; }
 
   uint getHueI       () const { double h = h_; while (h < 0) h += 360; return int(h) % 360; }
-  uint getSaturationI() const { return Util::clampI(255.0*s_); }
-  uint getValueI     () const { return Util::clampI(255.0*v_); }
-  uint getAlphaI     () const { return Util::clampI(255.0*a_); }
+  uint getSaturationI() const { return clampI(255.0*s_); }
+  uint getValueI     () const { return clampI(255.0*v_); }
+  uint getAlphaI     () const { return clampI(255.0*a_); }
 
-  CHSVT<T> getHSV() const { return CHSVT<T>(h_, s_, v_); }
+  CHSV getHSV() const { return CHSV(h_, s_, v_); }
 
-  CRGBAT<T> toRGBA() const {
-    CRGBAT<T> rgba = Util::HSVtoRGB(getHSV());
+  CRGBA toRGBA() const {
+    CRGBA rgba = CRGBUtil::HSVtoRGB(getHSV());
 
     rgba.setAlpha(a_);
 
@@ -85,9 +82,14 @@ class CHSVAT {
   }
 
  private:
-  T h_, s_, v_, a_;
+  double h_, s_, v_, a_;
 };
 
-typedef CHSVAT<double> CHSVA;
+//------
+
+//#include <CRGBUtil.h>
+// CRGBA CHSVA::toRGBA() const {
+//   CRGBA rgba = CRGBUtil::HSVtoRGB(getHSV()); rgba.setAlpha(a_); return rgba;
+// }
 
 #endif

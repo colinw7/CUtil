@@ -2,32 +2,24 @@
 #define CHSL_H
 
 #include <CRGB.h>
-#include <CRGBUtil.h>
-
-template<typename T>
-class CRGBUtilT;
 
 // hue, saturation, lightness
-template<typename T>
-class CHSLT {
- private:
-  T h_, s_, l_;
-
+class CHSL {
  public:
-  CHSLT() {
+  CHSL() {
   }
 
-  CHSLT(T h, T s, T l) :
+  CHSL(double h, double s, double l) :
    h_(h), s_(s), l_(l) {
   }
 
-  CHSLT(const CHSLT &hsl) :
+  CHSL(const CHSL &hsl) :
    h_(hsl.h_), s_(hsl.s_), l_(hsl.l_) {
   }
 
- ~CHSLT() { }
+ ~CHSL() { }
 
-  CHSLT &operator=(const CHSLT &hsl) {
+  CHSL &operator=(const CHSL &hsl) {
     if (&hsl == this)
       return *this;
 
@@ -38,17 +30,24 @@ class CHSLT {
     return *this;
   }
 
-  T getHue       () const { return h_; }
-  T getSaturation() const { return s_; }
-  T getLuminance () const { return l_; }
+  double getHue       () const { return h_; }
+  double getSaturation() const { return s_; }
+  double getLuminance () const { return l_; }
 
-  void setHue       (T h) { h_ = h; }
-  void setSaturation(T s) { s_ = s; }
-  void setLuminance (T l) { l_ = l; }
+  void setHue       (double h) { h_ = h; }
+  void setSaturation(double s) { s_ = s; }
+  void setLuminance (double l) { l_ = l; }
 
-  CRGBT<T> toRGB() const { return CRGBUtilT<T>::HSLtoRGB(*this); }
+  //CRGB toRGB() const;
+
+ private:
+  double h_, s_, l_;
 };
 
-typedef CHSLT<double> CHSL;
+//------
+
+//#include <CRGBUtil.h>
+
+//CRGB CHSL::toRGB() const { return CRGBUtil::HSLtoRGB(*this); }
 
 #endif

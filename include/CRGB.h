@@ -5,11 +5,10 @@
 #include <sys/types.h>
 #include <iostream>
 
-#include <CHSV.h>
-#include <CHSL.h>
-#include <CCMYK.h>
-#include <CHSB.h>
-#include <CRGBUtil.h>
+//#include <CHSV.h>
+//#include <CHSL.h>
+//#include <CCMYK.h>
+//#include <CHSB.h>
 
 #ifdef USE_CRGB_NAME
 #include <CRGBName.h>
@@ -32,39 +31,32 @@
 #define CRGB_IFACTOR  255.0
 #define CRGB_IFACTORI (1.0/255.0)
 
-template<typename T>
-class CRGBUtilT;
-
 // red, green, blue
-template<typename T>
-class CRGBT {
- private:
-  T r_, g_, b_;
-
+class CRGB {
  public:
-  CRGBT() { }
+  CRGB() { }
 
-  CRGBT(T r, T g, T b) :
+  CRGB(double r, double g, double b) :
    r_(r), g_(g), b_(b) {
   }
 
-  explicit CRGBT(T gray) :
+  explicit CRGB(double gray) :
    r_(gray), g_(gray), b_(gray) {
   }
 
 #ifdef USE_CRGB_NAME
-  explicit CRGBT(std::string name) {
+  explicit CRGB(std::string name) {
     CRGBName::lookup(name, &r_, &g_, &b_);
   }
 #endif
 
-  CRGBT(const CRGBT &rgb) :
+  CRGB(const CRGB &rgb) :
    r_(rgb.r_), g_(rgb.g_), b_(rgb.b_) {
   }
 
- ~CRGBT() { }
+ ~CRGB() { }
 
-  CRGBT &operator=(const CRGBT &rgb) {
+  CRGB &operator=(const CRGB &rgb) {
     if (this == &rgb)
       return *this;
 
@@ -75,15 +67,15 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT operator+() const {
-    return CRGBT(r_, g_, b_);
+  CRGB operator+() const {
+    return CRGB(r_, g_, b_);
   }
 
-  CRGBT operator-() const {
-    return CRGBT(-r_, -g_, -b_);
+  CRGB operator-() const {
+    return CRGB(-r_, -g_, -b_);
   }
 
-  CRGBT &operator+=(const CRGBT &rhs) {
+  CRGB &operator+=(const CRGB &rhs) {
     r_ += rhs.r_;
     g_ += rhs.g_;
     b_ += rhs.b_;
@@ -91,11 +83,11 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT operator+(const CRGBT &rhs) const {
-    return CRGBT(r_ + rhs.r_, g_ + rhs.g_, b_ + rhs.b_);
+  CRGB operator+(const CRGB &rhs) const {
+    return CRGB(r_ + rhs.r_, g_ + rhs.g_, b_ + rhs.b_);
   }
 
-  CRGBT &operator-=(const CRGBT &rhs) {
+  CRGB &operator-=(const CRGB &rhs) {
     r_ -= rhs.r_;
     g_ -= rhs.g_;
     b_ -= rhs.b_;
@@ -103,11 +95,11 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT operator-(const CRGBT &rhs) const {
-    return CRGBT(r_ - rhs.r_, g_ - rhs.g_, b_ - rhs.b_);
+  CRGB operator-(const CRGB &rhs) const {
+    return CRGB(r_ - rhs.r_, g_ - rhs.g_, b_ - rhs.b_);
   }
 
-  CRGBT &operator*=(const CRGBT &rhs) {
+  CRGB &operator*=(const CRGB &rhs) {
     r_ *= rhs.r_;
     g_ *= rhs.g_;
     b_ *= rhs.b_;
@@ -115,7 +107,7 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT &operator*=(T rhs) {
+  CRGB &operator*=(double rhs) {
     r_ *= rhs;
     g_ *= rhs;
     b_ *= rhs;
@@ -123,11 +115,11 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT operator*(const CRGBT &rhs) const {
-    return CRGBT(r_*rhs.r_, g_*rhs.g_, b_*rhs.b_);
+  CRGB operator*(const CRGB &rhs) const {
+    return CRGB(r_*rhs.r_, g_*rhs.g_, b_*rhs.b_);
   }
 
-  CRGBT &operator/=(const CRGBT &rhs) {
+  CRGB &operator/=(const CRGB &rhs) {
     r_ /= rhs.r_;
     g_ /= rhs.g_;
     b_ /= rhs.b_;
@@ -135,8 +127,8 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT &operator/=(T rhs) {
-    T irhs = 1.0/rhs;
+  CRGB &operator/=(double rhs) {
+    double irhs = 1.0/rhs;
 
     r_ *= irhs;
     g_ *= irhs;
@@ -145,27 +137,27 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT operator/(const CRGBT &rhs) const {
-    return CRGBT(r_/rhs.r_, g_/rhs.g_, b_/rhs.b_);
+  CRGB operator/(const CRGB &rhs) const {
+    return CRGB(r_/rhs.r_, g_/rhs.g_, b_/rhs.b_);
   }
 
-  CRGBT operator/(T rhs) const {
-    T irhs = 1.0/rhs;
+  CRGB operator/(double rhs) const {
+    double irhs = 1.0/rhs;
 
-    return CRGBT(r_*irhs, g_*irhs, b_*irhs);
+    return CRGB(r_*irhs, g_*irhs, b_*irhs);
   }
 
-  friend CRGBT operator*(const CRGBT &lhs, T rhs) {
-    return CRGBT(lhs.r_*rhs, lhs.g_*rhs, lhs.b_*rhs);
+  friend CRGB operator*(const CRGB &lhs, double rhs) {
+    return CRGB(lhs.r_*rhs, lhs.g_*rhs, lhs.b_*rhs);
   }
 
-  friend CRGBT operator*(T lhs, const CRGBT &rhs) {
-    return CRGBT(lhs*rhs.r_, lhs*rhs.g_, lhs*rhs.b_);
+  friend CRGB operator*(double lhs, const CRGB &rhs) {
+    return CRGB(lhs*rhs.r_, lhs*rhs.g_, lhs*rhs.b_);
   }
 
   //------
 
-  int cmp(const CRGBT &rhs) const {
+  int cmp(const CRGB &rhs) const {
     if      (r_ < rhs.r_) return -1;
     else if (r_ > rhs.r_) return 1;
     else if (g_ < rhs.g_) return -1;
@@ -175,27 +167,27 @@ class CRGBT {
     else                  return 0;
   }
 
-  friend bool operator==(const CRGBT &lhs, const CRGBT &rhs) {
+  friend bool operator==(const CRGB &lhs, const CRGB &rhs) {
     return lhs.cmp(rhs) == 0;
   }
 
-  friend bool operator!=(const CRGBT &lhs, const CRGBT &rhs) {
+  friend bool operator!=(const CRGB &lhs, const CRGB &rhs) {
     return lhs.cmp(rhs) != 0;
   }
 
-  friend bool operator<(const CRGBT &lhs, const CRGBT &rhs) {
+  friend bool operator<(const CRGB &lhs, const CRGB &rhs) {
     return lhs.cmp(rhs) < 0;
   }
 
-  friend bool operator<=(const CRGBT &lhs, const CRGBT &rhs) {
+  friend bool operator<=(const CRGB &lhs, const CRGB &rhs) {
     return lhs.cmp(rhs) <= 0;
   }
 
-  friend bool operator>(const CRGBT &lhs, const CRGBT &rhs) {
+  friend bool operator>(const CRGB &lhs, const CRGB &rhs) {
     return lhs.cmp(rhs) > 0;
   }
 
-  friend bool operator>=(const CRGBT &lhs, const CRGBT &rhs) {
+  friend bool operator>=(const CRGB &lhs, const CRGB &rhs) {
     return lhs.cmp(rhs) >= 0;
   }
 
@@ -205,7 +197,7 @@ class CRGBT {
     os << "CRGB(" << r_ << "," << g_ << "," << b_ << ")";
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const CRGBT &rgb) {
+  friend std::ostream &operator<<(std::ostream &os, const CRGB &rgb) {
     rgb.print(os);
 
     return os;
@@ -237,11 +229,11 @@ class CRGBT {
 
   void zero() { r_ = g_ = b_ = 0.0; }
 
-  void setRed  (T r) { r_ = r; };
-  void setGreen(T g) { g_ = g; };
-  void setBlue (T b) { b_ = b; };
+  void setRed  (double r) { r_ = r; };
+  void setGreen(double g) { g_ = g; };
+  void setBlue (double b) { b_ = b; };
 
-  void setRGB(T r, T g, T b) {
+  void setRGB(double r, double g, double b) {
     r_ = r; g_ = g; b_ = b;
   }
 
@@ -249,15 +241,15 @@ class CRGBT {
     r_ = int(r/255.0); g_ = int(g/255.0); b_ = int(b/255.0);
   }
 
-  T getRed  () const { return r_; }
-  T getGreen() const { return g_; }
-  T getBlue () const { return b_; }
+  double getRed  () const { return r_; }
+  double getGreen() const { return g_; }
+  double getBlue () const { return b_; }
 
   uint getRedI  () const { return uint(r_*CRGB_IFACTOR); }
   uint getGreenI() const { return uint(g_*CRGB_IFACTOR); }
   uint getBlueI () const { return uint(b_*CRGB_IFACTOR); }
 
-  void getRGB(T *r, T *g, T *b) const {
+  void getRGB(double *r, double *g, double *b) const {
     *r = r_; *g = g_; *b = b_;
   }
 
@@ -267,100 +259,100 @@ class CRGBT {
     *b = uint(b_*CRGB_IFACTOR);
   }
 
-  T getClampRed() const {
+  double getClampRed() const {
     return std::max(0.0, std::min(1.0, r_));
   }
 
-  T getClampGreen() const {
+  double getClampGreen() const {
     return std::max(0.0, std::min(1.0, g_));
   }
 
-  T getClampBlue() const {
+  double getClampBlue() const {
     return std::max(0.0, std::min(1.0, b_));
   }
 
-  T getGray() const {
+  double getGray() const {
     return (CRGB_R_FACTOR*r_ + CRGB_G_FACTOR*g_ + CRGB_B_FACTOR*b_);
   }
 
-  T getClampGray() const {
+  double getClampGray() const {
     return getClamp().getGray();
   }
 
-  CRGBT getGrayRGB() const {
-    T gray = getGray();
+  CRGB getGrayRGB() const {
+    double gray = getGray();
 
-    return CRGBT(gray, gray, gray);
+    return CRGB(gray, gray, gray);
   }
 
-  T getLightRed() const {
+  double getLightRed() const {
     return std::min(r_*CRGB_LIGHT_FACTOR, 1.0);
   }
 
-  T getLightGreen() const {
+  double getLightGreen() const {
     return std::min(g_*CRGB_LIGHT_FACTOR, 1.0);
   }
 
-  T getLightBlue() const {
+  double getLightBlue() const {
     return std::min(b_*CRGB_LIGHT_FACTOR, 1.0);
   }
 
-  T getLightGray() const {
-    T gray = getGray();
+  double getLightGray() const {
+    double gray = getGray();
 
     return std::min(gray*CRGB_LIGHT_FACTOR, 1.0);
   }
 
-  CRGBT getLightRGB() const {
-    return CRGBT(getLightRed(), getLightGreen(), getLightBlue());
+  CRGB getLightRGB() const {
+    return CRGB(getLightRed(), getLightGreen(), getLightBlue());
   }
 
-  T getDarkRed() const {
+  double getDarkRed() const {
     return std::min(r_*CRGB_DARK_FACTOR, 1.0);
   }
 
-  T getDarkGreen() const {
+  double getDarkGreen() const {
     return std::min(g_*CRGB_DARK_FACTOR, 1.0);
   }
 
-  T getDarkBlue() const {
+  double getDarkBlue() const {
     return std::min(b_*CRGB_DARK_FACTOR, 1.0);
   }
 
-  T getDarkGray() const {
-    T gray = getGray();
+  double getDarkGray() const {
+    double gray = getGray();
 
     return std::min(gray*CRGB_DARK_FACTOR, 1.0);
   }
 
-  CRGBT getDarkRGB() const {
-    return CRGBT(getDarkRed(), getDarkGreen(), getDarkBlue());
+  CRGB getDarkRGB() const {
+    return CRGB(getDarkRed(), getDarkGreen(), getDarkBlue());
   }
 
-  T getInverseRed() const {
+  double getInverseRed() const {
     return 1.0 - r_;
   }
 
-  T getInverseGreen() const {
+  double getInverseGreen() const {
     return 1.0 - g_;
   }
 
-  T getInverseBlue() const {
+  double getInverseBlue() const {
     return 1.0 - b_;
   }
 
-  T getInverseGray() const {
-    T gray = getGray();
+  double getInverseGray() const {
+    double gray = getGray();
 
     return 1.0 - gray;
   }
 
-  CRGBT getInverseRGB() const {
-    return CRGBT(getInverseRed(), getInverseGreen(), getInverseBlue());
+  CRGB getInverseRGB() const {
+    return CRGB(getInverseRed(), getInverseGreen(), getInverseBlue());
   }
 
-  const CRGBT &toGray() {
-    T gray = getGray();
+  const CRGB &toGray() {
+    double gray = getGray();
 
     r_ = gray;
     g_ = gray;
@@ -369,7 +361,7 @@ class CRGBT {
     return *this;
   }
 
-  const CRGBT &clamp() {
+  const CRGB &clamp() {
     r_ = std::max(0.0, std::min(1.0, r_));
     g_ = std::max(0.0, std::min(1.0, g_));
     b_ = std::max(0.0, std::min(1.0, b_));
@@ -377,21 +369,21 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT getClamp() const {
-    return CRGBT(std::max(0.0, std::min(1.0, r_)),
-                 std::max(0.0, std::min(1.0, g_)),
-                 std::max(0.0, std::min(1.0, b_)));
+  CRGB getClamp() const {
+    return CRGB(std::max(0.0, std::min(1.0, r_)),
+                std::max(0.0, std::min(1.0, g_)),
+                std::max(0.0, std::min(1.0, b_)));
   }
 
-  CRGBT blend(const CRGBT &rgb, T factor) const {
-    T factor1 = 1.0 - factor;
+  CRGB blend(const CRGB &rgb, double factor) const {
+    double factor1 = 1.0 - factor;
 
-    return CRGBT(r_*factor + rgb.r_*factor1,
-                 g_*factor + rgb.g_*factor1,
-                 b_*factor + rgb.b_*factor1);
+    return CRGB(r_*factor + rgb.r_*factor1,
+                g_*factor + rgb.g_*factor1,
+                b_*factor + rgb.b_*factor1);
   }
 
-  const CRGBT &invert() {
+  const CRGB &invert() {
     r_ = 1.0 - r_;
     g_ = 1.0 - g_;
     b_ = 1.0 - b_;
@@ -399,13 +391,13 @@ class CRGBT {
     return *this;
   }
 
-  CRGBT inverse() const {
-    CRGBT rgb(*this);
+  CRGB inverse() const {
+    CRGB rgb(*this);
 
     return rgb.invert();
   }
 
-  const CRGBT &toSepia() {
+  const CRGB &toSepia() {
     r_ = r_*CRGB_SEPIA_R1 + CRGB_SEPIA_R2;
     g_ = g_*CRGB_SEPIA_G1 + CRGB_SEPIA_G2;
     b_ = b_*CRGB_SEPIA_B1 + CRGB_SEPIA_B2;
@@ -427,30 +419,40 @@ class CRGBT {
             ((b & 0xff) <<  0));
   }
 
-  static CRGBT decodeRGB(uint rgb) {
-    return CRGBT(((rgb & 0xff0000) >> 16)/255.0,
-                 ((rgb & 0x00ff00) >>  8)/255.0,
-                 ((rgb & 0x0000ff) >>  0)/255.0);
+  static CRGB decodeRGB(uint rgb) {
+    return CRGB(((rgb & 0xff0000) >> 16)/255.0,
+                ((rgb & 0x00ff00) >>  8)/255.0,
+                ((rgb & 0x0000ff) >>  0)/255.0);
   }
 
-  CHSVT<T>  toHSV () const { return CRGBUtilT<T>::RGBtoHSV (*this); }
-  CHSLT<T>  toHSL () const { return CRGBUtilT<T>::RGBtoHSL (*this); }
-  CCMYKT<T> toCMYK() const { return CRGBUtilT<T>::RGBtoCMYK(*this); }
-  CHSBT<T>  toHSB () const { return CRGBUtilT<T>::RGBtoHSB (*this); }
+  //CHSV  toHSV () const;
+  //CHSL  toHSL () const;
+  //CCMYK toCMYK() const;
+  //CHSB  toHSB () const;
 
-  static CRGBT minParts(const CRGBT &rgb_s, const CRGBT &rgb_d) {
-    return CRGBT(std::min(rgb_s.r_, rgb_d.r_),
+  static CRGB minParts(const CRGB &rgb_s, const CRGB &rgb_d) {
+    return CRGB(std::min(rgb_s.r_, rgb_d.r_),
                  std::min(rgb_s.g_, rgb_d.g_),
                  std::min(rgb_s.b_, rgb_d.b_));
   }
 
-  static CRGBT maxParts(const CRGBT &rgb_s, const CRGBT &rgb_d) {
-    return CRGBT(std::max(rgb_s.r_, rgb_d.r_),
+  static CRGB maxParts(const CRGB &rgb_s, const CRGB &rgb_d) {
+    return CRGB(std::max(rgb_s.r_, rgb_d.r_),
                  std::max(rgb_s.g_, rgb_d.g_),
                  std::max(rgb_s.b_, rgb_d.b_));
   }
+
+ private:
+  double r_, g_, b_;
 };
 
-typedef CRGBT<double> CRGB;
+//------
+
+#include <CRGBUtil.h>
+
+//inline CHSV  CRGB::toHSV () const { return CRGBUtil::RGBtoHSV (*this); }
+//inline CHSL  CRGB::toHSL () const { return CRGBUtil::RGBtoHSL (*this); }
+//inline CCMYK CRGB::toCMYK() const { return CRGBUtil::RGBtoCMYK(*this); }
+//inline CHSB  CRGB::toHSB () const { return CRGBUtil::RGBtoHSB (*this); }
 
 #endif

@@ -43,7 +43,7 @@ class CEnv {
       pos_ = nameValues_->names.size();
     }
 
-    const_iterator(int) :
+    explicit const_iterator(int) :
      nameValues_(), pos_(0) {
       nameValues_ = CEnvInst.getSnapShot();
     }

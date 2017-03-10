@@ -2,39 +2,25 @@
 #define CCMYK_H
 
 #include <CRGB.h>
-#include <CRGBUtil.h>
 
-template<typename T>
-class CRGBT;
-
-template<typename T>
-class CRGBUtilT;
-
-template<typename T>
-class CCMYKT {
- private:
-  T cyan_;
-  T magenta_;
-  T yellow_;
-  T black_;
-
+class CCMYK {
  public:
-  CCMYKT() :
+  CCMYK() :
    cyan_(0), magenta_(0), yellow_(0), black_(0) {
   }
 
-  CCMYKT(T cyan, T magenta, T yellow, T black) :
+  CCMYK(double cyan, double magenta, double yellow, double black) :
    cyan_(cyan), magenta_(magenta), yellow_(yellow), black_(black) {
   }
 
-  CCMYKT(const CCMYKT &cmyk) :
+  CCMYK(const CCMYK &cmyk) :
     cyan_(cmyk.cyan_), magenta_(cmyk.magenta_),
     yellow_(cmyk.yellow_), black_(cmyk.black_) {
   }
 
- ~CCMYKT() { }
+ ~CCMYK() { }
 
-  CCMYKT &operator=(const CCMYKT &cmyk) {
+  CCMYK &operator=(const CCMYK &cmyk) {
     if (this == &cmyk)
       return *this;
 
@@ -46,17 +32,17 @@ class CCMYKT {
     return *this;
   }
 
-  T getCyan   () const { return cyan_   ; }
-  T getMagenta() const { return magenta_; }
-  T getYellow () const { return yellow_ ; }
-  T getBlack  () const { return black_  ; }
+  double getCyan   () const { return cyan_   ; }
+  double getMagenta() const { return magenta_; }
+  double getYellow () const { return yellow_ ; }
+  double getBlack  () const { return black_  ; }
 
-  void setCyan   (T cyan   ) { cyan_    = cyan   ; }
-  void setMagenta(T magenta) { magenta_ = magenta; }
-  void setYellow (T yellow ) { yellow_  = yellow ; }
-  void setBlack  (T black  ) { black_   = black  ; }
+  void setCyan   (double cyan   ) { cyan_    = cyan   ; }
+  void setMagenta(double magenta) { magenta_ = magenta; }
+  void setYellow (double yellow ) { yellow_  = yellow ; }
+  void setBlack  (double black  ) { black_   = black  ; }
 
-  void lighten(T delta) {
+  void lighten(double delta) {
     cyan_    -= delta;
     magenta_ -= delta;
     yellow_  -= delta;
@@ -66,9 +52,19 @@ class CCMYKT {
     yellow_  = std::min(std::max(yellow_ , 0.0), 1.0);
   }
 
-  CRGBT<T> toRGB() const { return CRGBUtilT<T>::CMYKtoRGB(*this); }
+  //CRGB toRGB() const;
+
+ private:
+  double cyan_;
+  double magenta_;
+  double yellow_;
+  double black_;
 };
 
-typedef CCMYKT<double> CCMYK;
+//------
+
+//#include <CRGBUtil.h>
+
+//CRGB CCMYK::toRGB() const { return CRGBUtil::CMYKtoRGB(*this); }
 
 #endif

@@ -20,6 +20,7 @@ CEnvMatch.cpp \
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPPFLAGS = \
+-std=c++11 \
 -I. \
 -I$(INC_DIR) \
 -I../../CMath/include \

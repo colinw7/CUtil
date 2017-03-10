@@ -26,9 +26,6 @@
 #define CRGBA_SEPIA_G2 -0.054
 #define CRGBA_SEPIA_B2 -0.221
 
-#define CRGBA_IFACTOR  255.0
-#define CRGBA_IFACTORI (1.0/255.0)
-
 enum CRGBACombineMode {
   CRGBA_COMBINE_ZERO                    ,
   CRGBA_COMBINE_ONE                     ,
@@ -79,13 +76,13 @@ enum CRGBABlendMode {
   CRGBA_BLEND_LIGHTEN
 };
 
-template<typename T>
-class CRGBAT {
+class CRGBA {
  private:
-  typedef CRGBT<T>     RGB;
-  typedef CRGBUtilT<T> Util;
+  typedef uint (*IdProc)(double r, double g, double b, double a);
 
-  typedef uint (*IdProc)(T r, T g, T b, T a);
+  static uint clampI(int v) {
+    return (v >= 0 ? (v <= 255 ? v : 255) : 0);
+  }
 
  public:
   struct IValT { };
@@ -99,11 +96,11 @@ class CRGBAT {
     return id_proc_;
   }
 
-  static uint defIdProc(T r, T g, T b, T a) {
-    return encodeARGB(uint(r*255), uint(g*255), uint(b*255), uint(a*255));
+  static uint defIdProc(double r, double g, double b, double a) {
+    return encodeARGB(ivalue(r), ivalue(g), ivalue(b), ivalue(a));
   }
 
-  static uint calcId(T r, T g, T b, T a) {
+  static uint calcId(double r, double g, double b, double a) {
     IdProc id_proc = setIdProc(0);
 
     return id_proc(r, g, b, a);
@@ -111,8 +108,8 @@ class CRGBAT {
 
   static const IValT &IVal() { static IValT ival; return ival; }
 
-  static CRGBAT fromRGBAI(int r, int g, int b, int a=255) {
-    return CRGBAT(r/255.0, g/255.0, b/255.0, a/255.0);
+  static CRGBA fromRGBAI(int r, int g, int b, int a=255) {
+    return CRGBA(rvalue(r), rvalue(g), rvalue(b), rvalue(a));
   }
 
   static int iround(double r) {
@@ -123,34 +120,38 @@ class CRGBAT {
   }
 
   static int ivalue(double r) {
-    return iround(r*CRGBA_IFACTOR);
+    return iround(r*255.0);
+  }
+
+  static double rvalue(int i) {
+    return i/255.0;
   }
 
   //-------
 
-  CRGBAT() :
+  CRGBA() :
    r_(0.0), g_(0.0), b_(0.0), a_(0.0), id_(0), id_set_(false) {
   }
 
-  CRGBAT(T r, T g, T b, T a=1.0) :
+  CRGBA(double r, double g, double b, double a=1.0) :
    r_(r), g_(g), b_(b), a_(a), id_(0), id_set_(false) {
   }
 
-  explicit CRGBAT(T gray, T a=1.0) :
+  explicit CRGBA(double gray, double a=1.0) :
    r_(gray), g_(gray), b_(gray), a_(a), id_(0), id_set_(false) {
   }
 
-  CRGBAT(const IValT &, int r, int g, int b, int a=255) :
-   r_(r/255.0), g_(g/255.0), b_(b/255.0), a_(a/255.0), id_(0), id_set_(false) {
+  CRGBA(const IValT &, int r, int g, int b, int a=255) :
+   r_(rvalue(r)), g_(rvalue(g)), b_(rvalue(b)), a_(rvalue(a)), id_(0), id_set_(false) {
   }
 
 #ifdef USE_CRGB_NAME
-  explicit CRGBAT(const std::string &name) :
+  explicit CRGBA(const std::string &name) :
    r_(0), g_(0), b_(0), a_(0), id_(0), id_set_(false) {
     CRGBName::lookup(name, &r_, &g_, &b_, &a_);
   }
 
-  explicit CRGBAT(const std::string &name, double a) :
+  explicit CRGBA(const std::string &name, double a) :
    id_(0), id_set_(false) {
     CRGBName::lookup(name, &r_, &g_, &b_, &a_);
 
@@ -158,17 +159,17 @@ class CRGBAT {
   }
 #endif
 
-  CRGBAT(const CRGBAT &rgba) :
+  CRGBA(const CRGBA &rgba) :
    r_(rgba.r_), g_(rgba.g_), b_(rgba.b_), a_(rgba.a_), id_(rgba.id_), id_set_(rgba.id_set_) {
   }
 
-  CRGBAT(const RGB &rgb, double a=1.0) :
+  CRGBA(const CRGB &rgb, double a=1.0) :
    r_(rgb.getRed()), g_(rgb.getGreen()), b_(rgb.getBlue()), a_(a), id_(0), id_set_(false) {
   }
 
- ~CRGBAT() { }
+ ~CRGBA() { }
 
-  CRGBAT &operator=(const CRGBAT &rgba) {
+  CRGBA &operator=(const CRGBA &rgba) {
     if (&rgba == this)
       return *this;
 
@@ -179,7 +180,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &operator=(const RGB &rgb) {
+  CRGBA &operator=(const CRGB &rgb) {
     r_ = rgb.getRed  ();
     g_ = rgb.getGreen();
     b_ = rgb.getBlue ();
@@ -190,15 +191,15 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT operator+() const {
+  CRGBA operator+() const {
     return *this;
   }
 
-  CRGBAT operator-() const {
-    return CRGBAT(-r_, -g_, -b_, a_);
+  CRGBA operator-() const {
+    return CRGBA(-r_, -g_, -b_, a_);
   }
 
-  CRGBAT &operator+=(T rhs) {
+  CRGBA &operator+=(double rhs) {
     r_ += rhs;
     g_ += rhs;
     b_ += rhs;
@@ -208,7 +209,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &operator+=(const CRGBAT &rhs) {
+  CRGBA &operator+=(const CRGBA &rhs) {
     r_ += rhs.r_;
     g_ += rhs.g_;
     b_ += rhs.b_;
@@ -219,23 +220,23 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT operator+(T rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator+(double rhs) const {
+    CRGBA t = *this;
 
     t += rhs;
 
     return t;
   }
 
-  CRGBAT operator+(const CRGBAT &rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator+(const CRGBA &rhs) const {
+    CRGBA t = *this;
 
     t += rhs;
 
     return t;
   }
 
-  CRGBAT &operator-=(T rhs) {
+  CRGBA &operator-=(double rhs) {
     r_ -= rhs;
     g_ -= rhs;
     b_ -= rhs;
@@ -245,7 +246,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &operator-=(const CRGBAT &rhs) {
+  CRGBA &operator-=(const CRGBA &rhs) {
     r_ -= rhs.r_;
     g_ -= rhs.g_;
     b_ -= rhs.b_;
@@ -256,23 +257,23 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT operator-(T rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator-(double rhs) const {
+    CRGBA t = *this;
 
     t -= rhs;
 
     return t;
   }
 
-  CRGBAT operator-(const CRGBAT &rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator-(const CRGBA &rhs) const {
+    CRGBA t = *this;
 
     t -= rhs;
 
     return t;
   }
 
-  CRGBAT &operator*=(T rhs) {
+  CRGBA &operator*=(double rhs) {
     r_ *= rhs;
     g_ *= rhs;
     b_ *= rhs;
@@ -283,7 +284,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &operator*=(const CRGBAT &rhs) {
+  CRGBA &operator*=(const CRGBA &rhs) {
     r_ *= rhs.r_;
     g_ *= rhs.g_;
     b_ *= rhs.b_;
@@ -294,16 +295,16 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT operator*(const CRGBAT &rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator*(const CRGBA &rhs) const {
+    CRGBA t = *this;
 
     t *= rhs;
 
     return t;
   }
 
-  CRGBAT &operator/=(T rhs) {
-    T irhs = 1.0/rhs;
+  CRGBA &operator/=(double rhs) {
+    double irhs = 1.0/rhs;
 
     r_ *= irhs;
     g_ *= irhs;
@@ -315,7 +316,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &operator/=(const CRGBAT &rhs) {
+  CRGBA &operator/=(const CRGBA &rhs) {
     r_ /= rhs.r_;
     g_ /= rhs.g_;
     b_ /= rhs.b_;
@@ -326,16 +327,16 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT operator/(T rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator/(double rhs) const {
+    CRGBA t = *this;
 
     t /= rhs;
 
     return t;
   }
 
-  CRGBAT operator/(const CRGBAT &rhs) const {
-    CRGBAT t = *this;
+  CRGBA operator/(const CRGBA &rhs) const {
+    CRGBA t = *this;
 
     t /= rhs;
 
@@ -344,55 +345,55 @@ class CRGBAT {
 
   //------
 
-  friend bool operator< (const CRGBAT &lhs, const CRGBAT &rhs) {
+  friend bool operator< (const CRGBA &lhs, const CRGBA &rhs) {
     return (lhs.getId() < rhs.getId());
   }
 
-  friend bool operator<=(const CRGBAT &lhs, const CRGBAT &rhs) {
+  friend bool operator<=(const CRGBA &lhs, const CRGBA &rhs) {
     return (lhs.getId() <= rhs.getId());
   }
 
-  friend bool operator> (const CRGBAT &lhs, const CRGBAT &rhs) {
+  friend bool operator> (const CRGBA &lhs, const CRGBA &rhs) {
     return (lhs.getId() > rhs.getId());
   }
 
-  friend bool operator>=(const CRGBAT &lhs, const CRGBAT &rhs) {
+  friend bool operator>=(const CRGBA &lhs, const CRGBA &rhs) {
     return (lhs.getId() >= rhs.getId());
   }
 
-  friend bool operator==(const CRGBAT &lhs, const CRGBAT &rhs) {
+  friend bool operator==(const CRGBA &lhs, const CRGBA &rhs) {
     return (lhs.getId() == rhs.getId());
   }
 
-  friend bool operator!=(const CRGBAT &lhs, const CRGBAT &rhs) {
+  friend bool operator!=(const CRGBA &lhs, const CRGBA &rhs) {
     return ! (lhs.getId() == rhs.getId());
   }
 
   //------
 
-  friend bool operator==(const CRGBAT &lhs, const RGB &rhs) {
-    return (lhs.getId() == calcId(rhs.r, rhs.g, rhs.b, 1.0));
+  friend bool operator==(const CRGBA &lhs, const CRGB &rhs) {
+    return (lhs.getId() == calcId(rhs.getRed(), rhs.getGreen(), rhs.getBlue(), 1.0));
   }
 
-  friend bool operator!=(const CRGBAT &lhs, const RGB &rhs) {
-    return ! (lhs.getId() == calcId(rhs.r, rhs.g, rhs.b, 1.0));
+  friend bool operator!=(const CRGBA &lhs, const CRGB &rhs) {
+    return ! (lhs.getId() == calcId(rhs.getRed(), rhs.getGreen(), rhs.getBlue(), 1.0));
   }
 
   //------
 
-  friend CRGBAT operator*(const CRGBAT &lhs, T rhs) {
-    return CRGBAT(lhs.r_*rhs, lhs.g_*rhs, lhs.b_*rhs, lhs.a_*rhs);
+  friend CRGBA operator*(const CRGBA &lhs, double rhs) {
+    return CRGBA(lhs.r_*rhs, lhs.g_*rhs, lhs.b_*rhs, lhs.a_*rhs);
   }
 
-  friend CRGBAT operator*(T lhs, const CRGBAT &rhs) {
-    return CRGBAT(lhs*rhs.r_, lhs*rhs.g_, lhs*rhs.b_, lhs*rhs.a_);
+  friend CRGBA operator*(double lhs, const CRGBA &rhs) {
+    return CRGBA(lhs*rhs.r_, lhs*rhs.g_, lhs*rhs.b_, lhs*rhs.a_);
   }
 
   void print(std::ostream &os) const {
     os << "CRGBA(" << r_ << "," << g_ << "," << b_ << "," << a_ << ")";
   }
 
-  friend std::ostream &operator<<(std::ostream &os, const CRGBAT &rgba) {
+  friend std::ostream &operator<<(std::ostream &os, const CRGBA &rgba) {
     rgba.print(os);
 
     return os;
@@ -422,7 +423,7 @@ class CRGBAT {
     return str;
   }
 
-  CRGBAT &zero() {
+  CRGBA &zero() {
     r_ = g_ = b_ = a_ = 0.0;
 
     id_set_ = false;
@@ -430,13 +431,13 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &setRed  (T r) { r_ = r; id_set_ = false; return *this; }
-  CRGBAT &setGreen(T g) { g_ = g; id_set_ = false; return *this; }
-  CRGBAT &setBlue (T b) { b_ = b; id_set_ = false; return *this; }
-  CRGBAT &setAlpha(T a) { a_ = a; id_set_ = false; return *this; }
+  CRGBA &setRed  (double r) { r_ = r; id_set_ = false; return *this; }
+  CRGBA &setGreen(double g) { g_ = g; id_set_ = false; return *this; }
+  CRGBA &setBlue (double b) { b_ = b; id_set_ = false; return *this; }
+  CRGBA &setAlpha(double a) { a_ = a; id_set_ = false; return *this; }
 
-  CRGBAT &setGray(T g) {
-    r_ = g; g_ = g; b_ = g;
+  CRGBA &setGray(double g, double a=1.0) {
+    r_ = g; g_ = g; b_ = g; a_ = a;
 
     id_set_ = false;
 
@@ -458,7 +459,7 @@ class CRGBAT {
   }
 #endif
 
-  CRGBAT &scaleRGB(T f) {
+  CRGBA &scaleRGB(double f) {
     r_ *= f;
     g_ *= f;
     b_ *= f;
@@ -468,7 +469,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &scaleAlpha(T a) {
+  CRGBA &scaleAlpha(double a) {
     a_ *= a;
 
     id_set_ = false;
@@ -476,7 +477,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &setRGB(T r, T g, T b) {
+  CRGBA &setRGB(double r, double g, double b) {
     r_ = r; g_ = g; b_ = b;
 
     id_set_ = false;
@@ -484,7 +485,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &setRGB(const RGB &rgb) {
+  CRGBA &setRGB(const CRGB &rgb) {
     r_ = rgb.getRed();
     g_ = rgb.getGreen();
     b_ = rgb.getBlue();
@@ -494,7 +495,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &setRGBA(T r, T g, T b, T a=1.0) {
+  CRGBA &setRGBA(double r, double g, double b, double a=1.0) {
     r_ = r; g_ = g; b_ = b; a_ = a;
 
     id_set_ = false;
@@ -502,7 +503,7 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &setRGBA(const CRGBAT &rgba) {
+  CRGBA &setRGBA(const CRGBA &rgba) {
     r_ = rgba.r_; g_ = rgba.g_; b_ = rgba.b_; a_ = rgba.a_;
 
     id_set_ = false;
@@ -510,40 +511,40 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT &setGrayI(uint ig, uint ia=255) {
-    return setGray(ig*CRGBA_IFACTORI, ia);
+  CRGBA &setGrayI(uint ig, uint ia=255) {
+    return setGray(rvalue(ig), ia);
   }
 
-  CRGBAT &setRGBAI(uint ir, uint ig, uint ib, uint ia=255) {
-    return setRGBA(ir*CRGBA_IFACTORI, ig*CRGBA_IFACTORI, ib*CRGBA_IFACTORI, ia*CRGBA_IFACTORI);
+  CRGBA &setRGBAI(uint ir, uint ig, uint ib, uint ia=255) {
+    return setRGBA(rvalue(ir), rvalue(ig), rvalue(ib), rvalue(ia));
   }
 
-  RGB getRGB() const {
-    return RGB(r_, g_, b_);
+  CRGB getRGB() const {
+    return CRGB(r_, g_, b_);
   }
 
-  void getRGBA(T *r, T *g, T *b, T *a) const {
+  void getRGBA(double *r, double *g, double *b, double *a) const {
     *r = r_; *g = g_; *b = b_; *a = a_;
   }
 
   void getRGBAI(uint *r, uint *g, uint *b, uint *a) const {
-    *r = iround(r_);
-    *g = iround(g_);
-    *b = iround(b_);
-    *a = iround(a_);
+    *r = ivalue(r_);
+    *g = ivalue(g_);
+    *b = ivalue(b_);
+    *a = ivalue(a_);
   }
 
-  T getRed  () const { return r_; }
-  T getGreen() const { return g_; }
-  T getBlue () const { return b_; }
-  T getAlpha() const { return a_; }
+  double getRed  () const { return r_; }
+  double getGreen() const { return g_; }
+  double getBlue () const { return b_; }
+  double getAlpha() const { return a_; }
 
-  uint getRedI  () const { return Util::clampI(iround(r_)); }
-  uint getGreenI() const { return Util::clampI(iround(g_)); }
-  uint getBlueI () const { return Util::clampI(iround(b_)); }
-  uint getAlphaI() const { return Util::clampI(iround(a_)); }
+  uint getRedI  () const { return clampI(ivalue(r_)); }
+  uint getGreenI() const { return clampI(ivalue(g_)); }
+  uint getBlueI () const { return clampI(ivalue(b_)); }
+  uint getAlphaI() const { return clampI(ivalue(a_)); }
 
-  T getComponent(CColorComponent component) const {
+  double getComponent(CColorComponent component) const {
     switch (component) {
       case CCOLOR_COMPONENT_RED  : return r_;
       case CCOLOR_COMPONENT_GREEN: return g_;
@@ -563,7 +564,7 @@ class CRGBAT {
     }
   }
 
-  const CRGBAT &normalize() {
+  const CRGBA &normalize() {
     r_ *= a_;
     g_ *= a_;
     b_ *= a_;
@@ -572,13 +573,13 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT normalized() const {
-    return CRGBAT(r_*a_, g_*a_, b_*a_, 1.0);
+  CRGBA normalized() const {
+    return CRGBA(r_*a_, g_*a_, b_*a_, 1.0);
   }
 
   uint getId() const {
     if (! id_set_) {
-      CRGBAT *th = const_cast<CRGBAT *>(this);
+      CRGBA *th = const_cast<CRGBA *>(this);
 
       th->id_ = calcId(r_, g_, b_, a_);
 
@@ -588,116 +589,116 @@ class CRGBAT {
     return id_;
   }
 
-  T getClampRed() const {
+  double getClampRed() const {
     return std::max(0.0, std::min(1.0, r_));
   }
 
-  T getClampGreen() const {
+  double getClampGreen() const {
     return std::max(0.0, std::min(1.0, g_));
   }
 
-  T getClampBlue() const {
+  double getClampBlue() const {
     return std::max(0.0, std::min(1.0, b_));
   }
 
-  T getClampAlpha() const {
+  double getClampAlpha() const {
     return std::max(0.0, std::min(1.0, a_));
   }
 
-  T getGray() const {
+  double getGray() const {
     return (CRGBA_R_FACTOR*r_ + CRGBA_G_FACTOR*g_ + CRGBA_B_FACTOR*b_);
   }
 
-  uint getGrayI() const { return iround(getGray()); }
+  uint getGrayI() const { return ivalue(getGray()); }
 
-  T getClampGray() const {
+  double getClampGray() const {
     return clamped().getGray();
   }
 
-  CRGBAT getGrayRGBA() const {
-    T gray = getGray();
+  CRGBA getGrayRGBA() const {
+    double gray = getGray();
 
-    return CRGBAT(gray, gray, gray, a_);
+    return CRGBA(gray, gray, gray, a_);
   }
 
-  T getIntensity() const {
+  double getIntensity() const {
     return std::max(r_, std::max(g_, b_));
   }
 
   //---
 
-  T getLightRed(double f=CRGBA_LIGHT_FACTOR) const {
+  double getLightRed(double f=CRGBA_LIGHT_FACTOR) const {
     return std::min(r_*f, 1.0);
   }
 
-  T getLightGreen(double f=CRGBA_LIGHT_FACTOR) const {
+  double getLightGreen(double f=CRGBA_LIGHT_FACTOR) const {
     return std::min(g_*f, 1.0);
   }
 
-  T getLightBlue(double f=CRGBA_LIGHT_FACTOR) const {
+  double getLightBlue(double f=CRGBA_LIGHT_FACTOR) const {
     return std::min(b_*f, 1.0);
   }
 
-  T getLightGray(double f=CRGBA_LIGHT_FACTOR) const {
-    T gray = getGray();
+  double getLightGray(double f=CRGBA_LIGHT_FACTOR) const {
+    double gray = getGray();
 
     return std::min(gray*f, 1.0);
   }
 
-  CRGBAT getLightRGBA(double f=CRGBA_LIGHT_FACTOR) const {
-    return CRGBAT(getLightRed(f), getLightGreen(f), getLightBlue(f), a_);
+  CRGBA getLightRGBA(double f=CRGBA_LIGHT_FACTOR) const {
+    return CRGBA(getLightRed(f), getLightGreen(f), getLightBlue(f), a_);
   }
 
   //---
 
-  T getDarkRed(double f=CRGBA_DARK_FACTOR) const {
+  double getDarkRed(double f=CRGBA_DARK_FACTOR) const {
     return std::min(r_*f, 1.0);
   }
 
-  T getDarkGreen(double f=CRGBA_DARK_FACTOR) const {
+  double getDarkGreen(double f=CRGBA_DARK_FACTOR) const {
     return std::min(g_*f, 1.0);
   }
 
-  T getDarkBlue(double f=CRGBA_DARK_FACTOR) const {
+  double getDarkBlue(double f=CRGBA_DARK_FACTOR) const {
     return std::min(b_*f, 1.0);
   }
 
-  T getDarkGray(double f=CRGBA_DARK_FACTOR) const {
-    T gray = getGray();
+  double getDarkGray(double f=CRGBA_DARK_FACTOR) const {
+    double gray = getGray();
 
     return std::min(gray*f, 1.0);
   }
 
-  CRGBAT getDarkRGBA(double f=CRGBA_DARK_FACTOR) const {
-    return CRGBAT(getDarkRed(f), getDarkGreen(f), getDarkBlue(f), a_);
+  CRGBA getDarkRGBA(double f=CRGBA_DARK_FACTOR) const {
+    return CRGBA(getDarkRed(f), getDarkGreen(f), getDarkBlue(f), a_);
   }
 
   //---
 
-  T getInverseRed() const {
+  double getInverseRed() const {
     return 1.0 - r_;
   }
 
-  T getInverseGreen() const {
+  double getInverseGreen() const {
     return 1.0 - g_;
   }
 
-  T getInverseBlue() const {
+  double getInverseBlue() const {
     return 1.0 - b_;
   }
 
-  T getInverseGray() const {
-    T gray = getGray();
+  double getInverseGray() const {
+    double gray = getGray();
 
     return 1.0 - gray;
   }
 
-  CRGBAT getInverseRGBA() const {
-    return CRGBAT(getInverseRed(), getInverseGreen(), getInverseBlue(), a_);
+  CRGBA getInverseRGBA() const {
+    return CRGBA(getInverseRed(), getInverseGreen(), getInverseBlue(), a_);
   }
 
-  const CRGBAT &toGray() {
-    T gray = getGray();
+  const CRGBA &toGray() {
+    double gray = getGray();
 
     r_ = gray;
     g_ = gray;
@@ -708,8 +709,8 @@ class CRGBAT {
     return *this;
   }
 
-  const CRGBAT &toBW() {
-    T gray = getGray();
+  const CRGBA &toBW() {
+    double gray = getGray();
 
     if (gray > 0.5)
       gray = 1;
@@ -725,20 +726,20 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT bwContrast() const {
-    T gray = getGray();
+  CRGBA bwContrast() const {
+    double gray = getGray();
 
     if (gray > 0.5)
       gray = 0;
     else
       gray = 1;
 
-    return CRGBAT(gray, gray, gray);
+    return CRGBA(gray, gray, gray);
   }
 
   // TODO: clamp by scaling by largest color to retain color ?
 
-  const CRGBAT &clamp(double cmin=0.0, double cmax=1.0) {
+  const CRGBA &clamp(double cmin=0.0, double cmax=1.0) {
     r_ = std::max(cmin, std::min(cmax, r_));
     g_ = std::max(cmin, std::min(cmax, g_));
     b_ = std::max(cmin, std::min(cmax, b_));
@@ -749,15 +750,15 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT clamped(double cmin=0.0, double cmax=1.0) const {
-    return CRGBAT(std::max(cmin, std::min(cmax, r_)),
-                  std::max(cmin, std::min(cmax, g_)),
-                  std::max(cmin, std::min(cmax, b_)),
-                  std::max(cmin, std::min(cmax, a_)));
+  CRGBA clamped(double cmin=0.0, double cmax=1.0) const {
+    return CRGBA(std::max(cmin, std::min(cmax, r_)),
+                 std::max(cmin, std::min(cmax, g_)),
+                 std::max(cmin, std::min(cmax, b_)),
+                 std::max(cmin, std::min(cmax, a_)));
   }
 
-  const CRGBAT &blend(const CRGBAT &rgb, T factor) {
-    T factor1 = 1.0 - factor;
+  const CRGBA &blend(const CRGBA &rgb, double factor) {
+    double factor1 = 1.0 - factor;
 
     r_ = r_*factor + rgb.r_*factor1;
     g_ = g_*factor + rgb.g_*factor1;
@@ -769,21 +770,20 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT blended(const CRGBAT &rgb, T factor) const {
-    T factor1 = 1.0 - factor;
+  CRGBA blended(const CRGBA &rgb, double factor) const {
+    CRGBA c = *this;
 
-    return CRGBAT(r_*factor + rgb.r_*factor1,
-                  g_*factor + rgb.g_*factor1,
-                  b_*factor + rgb.b_*factor1,
-                  a_*factor + rgb.a_*factor1);
+    c.blend(rgb, factor);
+
+    return c;
   }
 
   // combine new color on top of old color
-  const CRGBAT &combine(const CRGBAT &rgb) {
-    T a1 = 1.0 - a_;
-    T a2 = 1.0 - rgb.a_;
+  const CRGBA &combine(const CRGBA &rgb) {
+    double a1 = 1.0 - a_;
+    double a2 = 1.0 - rgb.a_;
 
-    T af = 1.0 - a1*a2;
+    double af = 1.0 - a1*a2;
 
     if (af > 0.0) {
       r_ = r_*a_*a2/af + rgb.r_*rgb.a_/af;
@@ -803,38 +803,38 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT combined(const CRGBAT &rgb) const {
-    CRGBAT rgba1(*this);
+  CRGBA combined(const CRGBA &rgb) const {
+    CRGBA rgba1(*this);
 
     rgba1.combine(rgb);
 
     return rgba1;
   }
 
-  CRGBAT modeCombine(const CRGBAT &src,
-                     CRGBACombineMode src_mode=CRGBA_COMBINE_SRC_ALPHA,
-                     CRGBACombineMode dst_mode=CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA,
-                     CRGBACombineFunc func=CRGBA_COMBINE_ADD,
-                     const CRGBAT &factor=CRGBAT(0,0,0,1)) {
+  CRGBA modeCombine(const CRGBA &src,
+                    CRGBACombineMode src_mode=CRGBA_COMBINE_SRC_ALPHA,
+                    CRGBACombineMode dst_mode=CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA,
+                    CRGBACombineFunc func=CRGBA_COMBINE_ADD,
+                    const CRGBA &factor=CRGBA(0,0,0,1)) {
     return modeCombine(src, *this, src_mode, dst_mode, func, factor);
   }
 
-  static CRGBAT modeCombine(const CRGBAT &src, const CRGBAT &dst,
-                            CRGBACombineMode src_mode=CRGBA_COMBINE_SRC_ALPHA,
-                            CRGBACombineMode dst_mode=CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA,
-                            CRGBACombineFunc func=CRGBA_COMBINE_ADD,
-                            const CRGBAT &factor=CRGBAT(0,0,0,1)) {
-    CRGBAT sf(1,1,1,1);
-    CRGBAT df(0,0,0,0);
+  static CRGBA modeCombine(const CRGBA &src, const CRGBA &dst,
+                           CRGBACombineMode src_mode=CRGBA_COMBINE_SRC_ALPHA,
+                           CRGBACombineMode dst_mode=CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA,
+                           CRGBACombineFunc func=CRGBA_COMBINE_ADD,
+                           const CRGBA &factor=CRGBA(0,0,0,1)) {
+    CRGBA sf(1,1,1,1);
+    CRGBA df(0,0,0,0);
 
     double a;
 
     switch (src_mode) {
       case CRGBA_COMBINE_ZERO:
-        sf = CRGBAT(0,0,0,0);
+        sf = CRGBA(0,0,0,0);
         break;
       case CRGBA_COMBINE_ONE:
-        sf = CRGBAT(1,1,1,1);
+        sf = CRGBA(1,1,1,1);
         break;
       case CRGBA_COMBINE_SRC_COLOR:
         sf = src;
@@ -843,48 +843,48 @@ class CRGBAT {
         sf = dst;
         break;
       case CRGBA_COMBINE_ONE_MINUS_SRC_COLOR:
-        sf = CRGBAT(1,1,1,1) - src;
+        sf = CRGBA(1,1,1,1) - src;
         break;
       case CRGBA_COMBINE_ONE_MINUS_DST_COLOR:
-        sf = CRGBAT(1,1,1,1) - dst;
+        sf = CRGBA(1,1,1,1) - dst;
         break;
       case CRGBA_COMBINE_SRC_ALPHA:
         a  = src.getAlpha();
-        sf = CRGBAT(a,a,a,a);
+        sf = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_DST_ALPHA:
         a  = dst.getAlpha();
-        sf = CRGBAT(a,a,a,a);
+        sf = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA:
         a  = 1.0 - src.getAlpha();
-        sf = CRGBAT(a,a,a,a);
+        sf = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_ONE_MINUS_DST_ALPHA:
         a  = 1.0 - dst.getAlpha();
-        sf = CRGBAT(a,a,a,a);
+        sf = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_SRC_ALPHA_SATURATE:
         a  = std::min(src.getAlpha(), 1 - dst.getAlpha());
-        sf = CRGBAT(a,a,a,1);
+        sf = CRGBA(a,a,a,1);
         break;
       case CRGBA_COMBINE_DST_ALPHA_SATURATE:
         a  = std::min(dst.getAlpha(), 1 - src.getAlpha());
-        sf = CRGBAT(a,a,a,1);
+        sf = CRGBA(a,a,a,1);
         break;
       case CRGBA_COMBINE_CONSTANT_COLOR:
         sf = factor;
         break;
       case CRGBA_COMBINE_ONE_MINUS_CONSTANT_COLOR:
-        sf = CRGBAT(1,1,1,1) - factor;
+        sf = CRGBA(1,1,1,1) - factor;
         break;
       case CRGBA_COMBINE_CONSTANT_ALPHA:
         a = factor.getAlpha();
-        sf = CRGBAT(a,a,a,a);
+        sf = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_ONE_MINUS_CONSTANT_ALPHA:
         a = 1.0 - factor.getAlpha();
-        sf = CRGBAT(a,a,a,a);
+        sf = CRGBA(a,a,a,a);
         break;
       default:
         break;
@@ -892,10 +892,10 @@ class CRGBAT {
 
     switch (dst_mode) {
       case CRGBA_COMBINE_ZERO:
-        df = CRGBAT(0,0,0,0);
+        df = CRGBA(0,0,0,0);
         break;
       case CRGBA_COMBINE_ONE:
-        df = CRGBAT(1,1,1,1);
+        df = CRGBA(1,1,1,1);
         break;
       case CRGBA_COMBINE_SRC_COLOR:
         df = src;
@@ -904,47 +904,47 @@ class CRGBAT {
         df = dst;
         break;
       case CRGBA_COMBINE_ONE_MINUS_SRC_COLOR:
-        df = CRGBAT(1,1,1,1) - src;
+        df = CRGBA(1,1,1,1) - src;
         break;
       case CRGBA_COMBINE_ONE_MINUS_DST_COLOR:
-        df = CRGBAT(1,1,1,1) - dst;
+        df = CRGBA(1,1,1,1) - dst;
         break;
       case CRGBA_COMBINE_SRC_ALPHA:
         a  = src.getAlpha();
-        df = CRGBAT(a,a,a,a);
+        df = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_DST_ALPHA:
         a  = dst.getAlpha();
-        df = CRGBAT(a,a,a,a);
+        df = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_ONE_MINUS_SRC_ALPHA:
         a  = 1.0 - src.getAlpha();
-        df = CRGBAT(a,a,a,a);
+        df = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_ONE_MINUS_DST_ALPHA:
         a  = 1.0 - dst.getAlpha();
-        df = CRGBAT(a,a,a,a);
+        df = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_CONSTANT_COLOR:
         df = factor;
         break;
       case CRGBA_COMBINE_ONE_MINUS_CONSTANT_COLOR:
-        df = CRGBAT(1,1,1,1) - factor;
+        df = CRGBA(1,1,1,1) - factor;
         break;
       case CRGBA_COMBINE_CONSTANT_ALPHA:
         a = factor.getAlpha();
-        df = CRGBAT(a,a,a,a);
+        df = CRGBA(a,a,a,a);
         break;
       case CRGBA_COMBINE_ONE_MINUS_CONSTANT_ALPHA:
         a = 1.0 - factor.getAlpha();
-        df = CRGBAT(a,a,a,a);
+        df = CRGBA(a,a,a,a);
         break;
       default:
         break;
     }
 
-    CRGBAT rgba_s = sf*src;
-    CRGBAT rgba_d = df*dst;
+    CRGBA rgba_s = sf*src;
+    CRGBA rgba_d = df*dst;
 
     if      (func == CRGBA_COMBINE_ADD)
       return rgba_s + rgba_d;
@@ -970,14 +970,13 @@ class CRGBAT {
     return rgba_s;
   }
 
-  static CRGBAT porterDuffCombine(const CRGBAT &src, const CRGBAT &dst,
-                                  CRGBACombineFunc func) {
+  static CRGBA porterDuffCombine(const CRGBA &src, const CRGBA &dst, CRGBACombineFunc func) {
     // Porter Duff source, destination and both factors
     double Asrc  = src.a_*(1 - dst.a_);
     double Adest = dst.a_*(1 - src.a_);
     double Aboth = src.a_*dst.a_;
 
-    CRGBAT res;
+    CRGBA res;
 
     // s, 0, s
     if      (func == CRGBA_COMBINE_SRC      ) { res    = Asrc*src +             Aboth*src;
@@ -1013,38 +1012,40 @@ class CRGBAT {
     else if (func == CRGBA_COMBINE_XOR      ) { res    = Asrc*src + Adest*dst;
                                                 res.a_ = Asrc     + Adest;             }
     // 0, 0, 0
-    else if (func == CRGBA_COMBINE_CLEAR    ) { res    = CRGBAT(0,0,0,0);
+    else if (func == CRGBA_COMBINE_CLEAR    ) { res    = CRGBA(0,0,0,0);
                                                 res.a_ = 0;                            }
 
     // assert ?
     return res;
   }
 
-  static CRGBAT arithmeticCombine(const CRGBAT &src, const CRGBAT &dst,
-                                  double k1, double k2, double k3, double k4) {
-    return k1*src*dst + k2*src + k3*dst + k4;
+  static CRGBA arithmeticCombine(const CRGBA &src, const CRGBA &dst,
+                                 double k1, double k2, double k3, double k4) {
+    // + k4 is + CRGBA(k4, k4, k4, 0);
 #if 0
-    double a = k1*src.a_*dst.a_ + k2*src.a_ + k3*dst.a_ + k4;
+    return k1*src*dst + k2*src + k3*dst + k4;
+#else
+    double a = k1*src.a_*dst.a_ + k2*src.a_ + k3*dst.a_;
 
     if (a > 0.0) {
       double r = k1*src.r_*dst.r_ + k2*src.r_ + k3*dst.r_ + k4;
       double g = k1*src.g_*dst.g_ + k2*src.g_ + k3*dst.g_ + k4;
       double b = k1*src.b_*dst.b_ + k2*src.b_ + k3*dst.b_ + k4;
 
-      return CRGBAT(r, g, b, a).clamped();
+      return CRGBA(r, g, b, a).clamped();
     }
     else
-      return CRGBAT(0, 0, 0, 0);
+      return CRGBA(0, 0, 0, 0);
 #endif
   }
 
 #if 0
-  static RGB blendCombine(const CRGBAT &src, const CRGBAT &dst, CRGBABlendMode mode) {
+  static CRGB blendCombine(const CRGBA &src, const CRGBA &dst, CRGBABlendMode mode) {
     double qa = src.getAlpha();
     double qb = dst.getAlpha();
 
-    RGB ca = src.getRGB();
-    RGB cb = dst.getRGB();
+    CRGB ca = src.getRGB();
+    CRGB cb = dst.getRGB();
 
     if      (mode == CRGBA_BLEND_NORMAL)
       return (1 - qa)*cb + ca;
@@ -1053,15 +1054,15 @@ class CRGBAT {
     else if (mode == CRGBA_BLEND_SCREEN)
       return cb + ca - ca*cb;
     else if (mode == CRGBA_BLEND_DARKEN)
-      return RGB::minParts((1 - qa)*cb + ca, (1 - qb)*ca + cb);
+      return CRGB::minParts((1 - qa)*cb + ca, (1 - qb)*ca + cb);
     else if (mode == CRGBA_BLEND_LIGHTEN)
-      return RGB::maxParts((1 - qa)*cb + ca, (1 - qb)*ca + cb);
+      return CRGB::maxParts((1 - qa)*cb + ca, (1 - qb)*ca + cb);
     else
       return ca;
   }
 #endif
 
-  static CRGBAT blendCombine(const CRGBAT &src, const CRGBAT &dst, CRGBABlendMode mode) {
+  static CRGBA blendCombine(const CRGBA &src, const CRGBA &dst, CRGBABlendMode mode) {
     double qa = src.getAlpha();
     double qb = dst.getAlpha();
 
@@ -1079,21 +1080,21 @@ class CRGBAT {
       return src;
   }
 
-  static CRGBAT minParts(const CRGBAT &rgba_s, const CRGBAT &rgba_d) {
-    return CRGBAT(std::min(rgba_s.r_, rgba_d.r_),
-                  std::min(rgba_s.g_, rgba_d.g_),
-                  std::min(rgba_s.b_, rgba_d.b_),
-                  std::min(rgba_s.a_, rgba_d.a_));
+  static CRGBA minParts(const CRGBA &rgba_s, const CRGBA &rgba_d) {
+    return CRGBA(std::min(rgba_s.r_, rgba_d.r_),
+                 std::min(rgba_s.g_, rgba_d.g_),
+                 std::min(rgba_s.b_, rgba_d.b_),
+                 std::min(rgba_s.a_, rgba_d.a_));
   }
 
-  static CRGBAT maxParts(const CRGBAT &rgba_s, const CRGBAT &rgba_d) {
-    return CRGBAT(std::max(rgba_s.r_, rgba_d.r_),
-                  std::max(rgba_s.g_, rgba_d.g_),
-                  std::max(rgba_s.b_, rgba_d.b_),
-                  std::max(rgba_s.a_, rgba_d.a_));
+  static CRGBA maxParts(const CRGBA &rgba_s, const CRGBA &rgba_d) {
+    return CRGBA(std::max(rgba_s.r_, rgba_d.r_),
+                 std::max(rgba_s.g_, rgba_d.g_),
+                 std::max(rgba_s.b_, rgba_d.b_),
+                 std::max(rgba_s.a_, rgba_d.a_));
   }
 
-  const CRGBAT &invert() {
+  const CRGBA &invert() {
     r_ = 1.0 - r_;
     g_ = 1.0 - g_;
     b_ = 1.0 - b_;
@@ -1103,14 +1104,14 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT inverse() const {
-    CRGBAT rgba(*this);
+  CRGBA inverse() const {
+    CRGBA rgba(*this);
 
     return rgba.invert();
   }
 
-  const CRGBAT &toSepia() {
-    T gray = getGray();
+  const CRGBA &toSepia() {
+    double gray = getGray();
 
     r_ = gray + CRGBA_SEPIA_R2;
     g_ = gray + CRGBA_SEPIA_G2;
@@ -1123,8 +1124,8 @@ class CRGBAT {
     return *this;
   }
 
-  CRGBAT sepia() {
-    CRGBAT rgba(*this);
+  CRGBA sepia() {
+    CRGBA rgba(*this);
 
     return rgba.toSepia();
   }
@@ -1133,23 +1134,23 @@ class CRGBAT {
     return a_ <= 0.01;
   }
 
-  CRGBAT solid() const {
-    CRGBAT rgba(*this);
+  CRGBA solid() const {
+    CRGBA rgba(*this);
 
     rgba.a_ = 1.0;
 
     return rgba;
   }
 
-  CRGBAT bwColor() const {
+  CRGBA bwColor() const {
     if (getGray() < 0.5)
-      return CRGBAT(1,1,1);
+      return CRGBA(1,1,1);
     else
-      return CRGBAT(0,0,0);
+      return CRGBA(0,0,0);
   }
 
   void setAlphaByGray(bool positive=true) {
-    T g = getGray();
+    double g = getGray();
 
     if (! positive) g = 1.0 - g;
 
@@ -1157,14 +1158,14 @@ class CRGBAT {
   }
 
   void setGrayByAlpha(bool positive=true) {
-    T a = getAlpha();
+    double a = getAlpha();
 
     if (! positive) a = 1.0 - a;
 
     setRGBA(a, a, a, 1);
   }
 
-  void setAlphaByColor(const CRGBAT &rgba, T a=1.0) {
+  void setAlphaByColor(const CRGBA &rgba, double a=1.0) {
     if (*this == rgba)
       setAlpha(a);
   }
@@ -1220,25 +1221,30 @@ class CRGBAT {
     *b = (id      ) & 0xFF;
   }
 
-  static void decodeARGB(uint id, CRGBAT &rgba) {
+  static void decodeARGB(uint id, CRGBA &rgba) {
     uint r, g, b, a;
 
     decodeARGB(id, &r, &g, &b, &a);
 
-    rgba = CRGBAT(r/255.0, g/255.0, b/255.0, a/255.0);
+    rgba = CRGBA(rvalue(r), rvalue(g), rvalue(b), rvalue(a));
   }
 
-  CHSVT<T>  toHSV () const { return Util::RGBtoHSV (getRGB()); }
-  CHSLT<T>  toHSL () const { return Util::RGBtoHSL (getRGB()); }
-  CCMYKT<T> toCMYK() const { return Util::RGBtoCMYK(getRGB()); }
-  CHSBT<T>  toHSB () const { return Util::RGBtoHSB (getRGB()); }
+  //CHSV  toHSV () const;
+  //CHSL  toHSL () const;
+  //CCMYK toCMYK() const;
+  //CHSB  toHSB () const;
 
  private:
-  T    r_, g_, b_, a_;
-  uint id_;
-  bool id_set_;
+  double r_, g_, b_, a_;
+  uint   id_;
+  bool   id_set_;
 };
 
-typedef CRGBAT<double> CRGBA;
+//------
+
+//inline CHSV  CRGBA::toHSV () const { return CRGBUtil::RGBtoHSV (getRGB()); }
+//inline CHSL  CRGBA::toHSL () const { return CRGBUtil::RGBtoHSL (getRGB()); }
+//inline CCMYK CRGBA::toCMYK() const { return CRGBUtil::RGBtoCMYK(getRGB()); }
+//inline CHSB  CRGBA::toHSB () const { return CRGBUtil::RGBtoHSB (getRGB()); }
 
 #endif

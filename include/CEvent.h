@@ -60,7 +60,7 @@ class CMouseEvent : public CEvent {
    count_(event.count_), modifier_(event.modifier_) {
   }
 
-  const CMouseEvent &operator=(const CMouseEvent &event) {
+  CMouseEvent &operator=(const CMouseEvent &event) {
     position_ = event.position_;
     button_   = event.button_;
     count_    = event.count_;
@@ -115,7 +115,7 @@ class CKeyEvent : public CEvent {
    text_(event.text_), modifier_(event.modifier_) {
   }
 
-  const CKeyEvent &operator=(const CKeyEvent &event) {
+  CKeyEvent &operator=(const CKeyEvent &event) {
     position_ = event.position_;
     type_     = event.type_;
     text_     = event.text_;

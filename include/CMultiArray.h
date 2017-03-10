@@ -22,7 +22,7 @@ class CMultiArrayT {
       setNumData();
     }
 
-    Dims(uint d1) {
+    explicit Dims(uint d1) {
       num_dims = 1;
 
       init();
@@ -66,7 +66,7 @@ class CMultiArrayT {
       setNumData();
     }
 
-    Dims(const std::vector<uint> &dims1) {
+    explicit Dims(const std::vector<uint> &dims1) {
       num_dims = dims1.size();
 
       init();
@@ -96,7 +96,7 @@ class CMultiArrayT {
         delete [] dims;
     }
 
-    const Dims &operator=(const Dims &dims1) {
+    Dims &operator=(const Dims &dims1) {
       if (num_dims > 3)
         delete [] dims;
 
@@ -154,7 +154,7 @@ class CMultiArrayT {
     uint  num;
 
     Slice() :
-     start(NULL), len(NULL), num(0) {
+     start(nullptr), len(nullptr), num(0) {
     }
 
     Slice(uint start1, uint len1) {
@@ -252,7 +252,7 @@ class CMultiArrayT {
         delete [] len;
     }
 
-    const Slice &operator=(const Slice &slice) {
+    Slice &operator=(const Slice &slice) {
       if (num > 3)
         delete [] start;
 
@@ -392,7 +392,7 @@ class CMultiArrayT {
 
    public:
     Data() {
-      init(NULL);
+      init(nullptr);
     }
 
     Data(uint d1, const T *data) :
@@ -449,7 +449,7 @@ class CMultiArrayT {
       delete [] data_;
     }
 
-    const Data &operator=(const Data &data) {
+    Data &operator=(const Data &data) {
       delete [] data_;
 
       dims_ = data.dims_;
@@ -573,25 +573,25 @@ class CMultiArrayT {
     init();
   }
 
-  CMultiArrayT(uint d1, const T *data = NULL) {
+  CMultiArrayT(uint d1, const T *data=nullptr) {
     data_ = new Data(d1, data);
 
     init();
   }
 
-  CMultiArrayT(uint d1, uint d2, const T *data = NULL) {
+  CMultiArrayT(uint d1, uint d2, const T *data=nullptr) {
     data_ = new Data(d1, d2, data);
 
     init();
   }
 
-  CMultiArrayT(uint d1, uint d2, uint d3, const T *data = NULL) {
+  CMultiArrayT(uint d1, uint d2, uint d3, const T *data=nullptr) {
     data_ = new Data(d1, d2, d3, data);
 
     init();
   }
 
-  CMultiArrayT(const uint *dims, uint num_dims, const T *data = NULL) {
+  CMultiArrayT(const uint *dims, uint num_dims, const T *data=nullptr) {
     data_ = new Data(dims, num_dims, data);
 
     init();
@@ -609,7 +609,7 @@ class CMultiArrayT {
     init();
   }
 
-  CMultiArrayT(const std::vector<uint> &dims, const T *data = NULL) {
+  CMultiArrayT(const std::vector<uint> &dims, const T *data=nullptr) {
     data_ = new Data(dims, data);
 
     init();
@@ -1035,7 +1035,7 @@ class CMultiArrayT {
 
     bool b = i.begin();
 
-    for ( ; b && ! i.isPos(ind); b = i.next())
+    for ( ; b && ! i.isLinearPos(ind); b = i.next())
       ;
 
     if (b)

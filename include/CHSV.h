@@ -2,33 +2,25 @@
 #define CHSV_H
 
 #include <CRGB.h>
-#include <CRGBUtil.h>
-
-template<typename T>
-class CRGBT;
-
-template<typename T>
-class CRGBUtilT;
 
 // hue, saturation, value
 //
 // hue        (0-360)
 // value      (0-1)
 // saturation (0-1)
-template<typename T>
-class CHSVT {
+class CHSV {
  public:
-  CHSVT(T h=0, T s=0, T v=0) :
+  CHSV(double h=0, double s=0, double v=0) :
    h_(h), s_(s), v_(v) {
   }
 
-  CHSVT(const CHSVT &hsv) :
+  CHSV(const CHSV &hsv) :
    h_(hsv.h_), s_(hsv.s_), v_(hsv.v_) {
   }
 
- ~CHSVT() { }
+ ~CHSV() { }
 
-  CHSVT &operator=(const CHSVT &hsv) {
+  CHSV &operator=(const CHSV &hsv) {
     if (&hsv == this)
       return *this;
 
@@ -41,15 +33,15 @@ class CHSVT {
 
   //------
 
-  CHSVT operator+() const {
-    return CHSVT(h_, s_, v_);
+  CHSV operator+() const {
+    return CHSV(h_, s_, v_);
   }
 
-  CHSVT operator-() const {
-    return CHSVT(-h_, -s_, -v_);
+  CHSV operator-() const {
+    return CHSV(-h_, -s_, -v_);
   }
 
-  CHSVT &operator+=(const CHSVT &rhs) {
+  CHSV &operator+=(const CHSV &rhs) {
     h_ += rhs.h_;
     s_ += rhs.s_;
     v_ += rhs.v_;
@@ -57,11 +49,11 @@ class CHSVT {
     return *this;
   }
 
-  CHSVT operator+(const CHSVT &rhs) const {
-    return CHSVT(h_ + rhs.h_, s_ + rhs.s_, v_ + rhs.v_);
+  CHSV operator+(const CHSV &rhs) const {
+    return CHSV(h_ + rhs.h_, s_ + rhs.s_, v_ + rhs.v_);
   }
 
-  CHSVT &operator-=(const CHSVT &rhs) {
+  CHSV &operator-=(const CHSV &rhs) {
     h_ -= rhs.h_;
     s_ -= rhs.s_;
     v_ -= rhs.v_;
@@ -69,11 +61,11 @@ class CHSVT {
     return *this;
   }
 
-  CHSVT operator-(const CHSVT &rhs) const {
-    return CHSVT(h_ - rhs.h_, s_ - rhs.s_, v_ - rhs.v_);
+  CHSV operator-(const CHSV &rhs) const {
+    return CHSV(h_ - rhs.h_, s_ - rhs.s_, v_ - rhs.v_);
   }
 
-  CHSVT &operator*=(const CHSVT &rhs) {
+  CHSV &operator*=(const CHSV &rhs) {
     h_ *= rhs.h_;
     s_ *= rhs.s_;
     v_ *= rhs.v_;
@@ -81,7 +73,7 @@ class CHSVT {
     return *this;
   }
 
-  CHSVT &operator*=(T rhs) {
+  CHSV &operator*=(double rhs) {
     h_ *= rhs;
     s_ *= rhs;
     v_ *= rhs;
@@ -89,11 +81,11 @@ class CHSVT {
     return *this;
   }
 
-  CHSVT operator*(const CHSVT &rhs) const {
-    return CHSVT(h_*rhs.h_, s_*rhs.s_, v_*rhs.v_);
+  CHSV operator*(const CHSV &rhs) const {
+    return CHSV(h_*rhs.h_, s_*rhs.s_, v_*rhs.v_);
   }
 
-  CHSVT &operator/=(const CHSVT &rhs) {
+  CHSV &operator/=(const CHSV &rhs) {
     h_ /= rhs.h_;
     s_ /= rhs.s_;
     v_ /= rhs.v_;
@@ -101,8 +93,8 @@ class CHSVT {
     return *this;
   }
 
-  CHSVT &operator/=(T rhs) {
-    T irhs = 1.0/rhs;
+  CHSV &operator/=(double rhs) {
+    double irhs = 1.0/rhs;
 
     h_ *= irhs;
     s_ *= irhs;
@@ -111,40 +103,44 @@ class CHSVT {
     return *this;
   }
 
-  CHSVT operator/(const CHSVT &rhs) const {
-    return CHSVT(h_/rhs.h_, s_/rhs.s_, v_/rhs.v_);
+  CHSV operator/(const CHSV &rhs) const {
+    return CHSV(h_/rhs.h_, s_/rhs.s_, v_/rhs.v_);
   }
 
-  CHSVT operator/(T rhs) const {
-    T irhs = 1.0/rhs;
+  CHSV operator/(double rhs) const {
+    double irhs = 1.0/rhs;
 
-    return CHSVT(h_*irhs, s_*irhs, v_*irhs);
+    return CHSV(h_*irhs, s_*irhs, v_*irhs);
   }
 
-  friend CHSVT operator*(const CHSVT &lhs, T rhs) {
-    return CHSVT(lhs.h_*rhs, lhs.s_*rhs, lhs.v_*rhs);
+  friend CHSV operator*(const CHSV &lhs, double rhs) {
+    return CHSV(lhs.h_*rhs, lhs.s_*rhs, lhs.v_*rhs);
   }
 
-  friend CHSVT operator*(T lhs, const CHSVT &rhs) {
-    return CHSVT(lhs*rhs.h_, lhs*rhs.s_, lhs*rhs.v_);
+  friend CHSV operator*(double lhs, const CHSV &rhs) {
+    return CHSV(lhs*rhs.h_, lhs*rhs.s_, lhs*rhs.v_);
   }
 
   //------
 
-  T getHue       () const { return h_; }
-  T getSaturation() const { return s_; }
-  T getValue     () const { return v_; }
+  double getHue       () const { return h_; }
+  double getSaturation() const { return s_; }
+  double getValue     () const { return v_; }
 
-  void setHue       (T h) { h_ = h; }
-  void setSaturation(T s) { s_ = s; }
-  void setValue     (T v) { v_ = v; }
+  void setHue       (double h) { h_ = h; }
+  void setSaturation(double s) { s_ = s; }
+  void setValue     (double v) { v_ = v; }
 
-  CRGBT<T> toRGB() const { return CRGBUtilT<T>::HSVtoRGB(*this); }
+  //CRGB toRGB() const;
 
  private:
-  T h_, s_, v_;
+  double h_, s_, v_;
 };
 
-typedef CHSVT<double> CHSV;
+//------
+
+//#include <CRGBUtil.h>
+
+//inline CRGB CHSV::toRGB() const { return CRGBUtil::HSVtoRGB(*this); }
 
 #endif

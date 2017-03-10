@@ -1,8 +1,6 @@
 #ifndef CGENERIC_H
 #define CGENERIC_H
 
-#include <vector>
-
 //----------
 
 // If then else for to select one of type types using compiler evaluable expression
@@ -71,6 +69,8 @@ class CGenericTypePromotion<T2, T1> { \
  public: \
   typedef Tr Result; \
 };
+
+#include <vector>
 
 template<typename T1, typename T2>
 class CGenericTypePromotion<std::vector<T1>, std::vector<T2> > {
@@ -407,6 +407,7 @@ class CIsDerivedFrom<T, T> {
 
 #define CGenericIsDerived(D,B) CIsDerivedFrom<D,B>::Value
 
+#if 0
 // similar to CIsDerivedFrom: test if convertable
 template <typename T, typename U>
 class CCanConvert {
@@ -441,6 +442,7 @@ class CCanConvert<T, T> {
 // test if D inherits from B (not same type)
 #define CGenericIsInheritedStrict(B,D) \
   (CGenericIsInherited(B,D) && ! CCanConvert<const B,const D>::Same)
+#endif
 
 //------
 

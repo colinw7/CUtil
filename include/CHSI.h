@@ -2,30 +2,22 @@
 #define CHSI_H
 
 #include <CRGB.h>
-#include <CRGBUtil.h>
 
-template<typename T>
-class CRGBUtilT;
-
-template<typename T>
-class CHSIT {
- private:
-  T h_, s_, i_;
-
+class CHSI {
  public:
-  CHSIT() { }
+  CHSI() { }
 
-  CHSIT(T h, T s, T i) :
+  CHSI(double h, double s, double i) :
    h_(h), s_(s), i_(i) {
   }
 
-  CHSIT(const CHSIT &hsi) :
+  CHSI(const CHSI &hsi) :
    h_(hsi.h_), s_(hsi.s_), i_(hsi.i_) {
   }
 
- ~CHSIT() { }
+ ~CHSI() { }
 
-  CHSIT &operator=(const CHSIT &hsi) {
+  CHSI &operator=(const CHSI &hsi) {
     if (this == &hsi)
       return *this;
 
@@ -36,13 +28,20 @@ class CHSIT {
     return *this;
   }
 
-  T getHue       () const { return h_; }
-  T getSaturation() const { return s_; }
-  T getIntensity () const { return i_; }
+  double getHue       () const { return h_; }
+  double getSaturation() const { return s_; }
+  double getIntensity () const { return i_; }
 
-  CRGBT<T> toRGB() const { return CRGBUtilT<T>::HSItoRGB(*this); }
+  //CRGB toRGB() const;
+
+ private:
+  double h_, s_, i_;
 };
 
-typedef CHSIT<double> CHSI;
+//------
+
+//#include <CRGBUtil.h>
+
+//CRGB CHSI::toRGB() const { return CRGBUtil::HSItoRGB(*this); }
 
 #endif

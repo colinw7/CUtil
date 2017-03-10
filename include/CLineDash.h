@@ -5,6 +5,7 @@
 
 #include <CILineDash.h>
 
+#include <cassert>
 #include <vector>
 #include <sstream>
 
@@ -18,19 +19,27 @@ class CLineDash {
 
       va_start(vargs, len);
 
-      while (len > 1E-3) {
+      while (len > 1E-5) {
         lengths_.push_back(len);
 
         len = va_arg(vargs, double);
       }
+
+      va_end(vargs);
     }
 
-    Lengths(const std::vector<double> &lengths) :
-     lengths_(lengths) {
+    Lengths(const std::vector<double> &lengths) {
+      for (const auto &len : lengths) {
+        if (len > 1E-5)
+          lengths_.push_back(len);
+      }
     }
 
-    Lengths(const std::initializer_list<double> &lengths) :
-     lengths_(lengths) {
+    explicit Lengths(const std::initializer_list<double> &lengths) {
+      for (const auto &len : lengths) {
+        if (len > 1E-5)
+          lengths_.push_back(len);
+      }
     }
 
     uint size() const {
@@ -44,6 +53,8 @@ class CLineDash {
    private:
     std::vector<double> lengths_;
   };
+
+  //---
 
  public:
   CLineDash() {
@@ -59,12 +70,12 @@ class CLineDash {
   CLineDash(const double *lengths, uint num_lengths, double offset=0.0) {
     init();
 
-    lengths_.resize(num_lengths);
-
     offset_ = offset;
 
-    for (uint i = 0; i < num_lengths; ++i)
-      lengths_[i] = lengths[i];
+    for (uint i = 0; i < num_lengths; ++i) {
+      if (lengths[i] > 1E-5)
+        lengths_.push_back(lengths[i]);
+    }
   }
 
   explicit CLineDash(const Lengths &lengths, double offset=0.0) {
@@ -72,12 +83,12 @@ class CLineDash {
 
     uint num_lengths = lengths.size();
 
-    lengths_.resize(num_lengths);
-
     offset_ = offset;
 
-    for (uint i = 0; i < num_lengths; ++i)
-      lengths_[i] = lengths.value(i);
+    for (uint i = 0; i < num_lengths; ++i) {
+      if (lengths.value(i) > 1E-5)
+        lengths_.push_back(lengths.value(i));
+    }
   }
 
   explicit CLineDash(ushort pattern) {
@@ -109,17 +120,22 @@ class CLineDash {
     if (position_ != dash.position_) return false;
     if (offset_   != dash.offset_  ) return false;
 
-    if (lengths_.size() != dash.lengths_.size()) return false;
+    if (lengths_.size() != dash.lengths_.size())
+      return false;
 
     uint num_lengths = lengths_.size();
 
-    for (uint i = 0; i < num_lengths; ++i)
-      if (lengths_[i] != dash.lengths_[i]) return false;
+    for (uint i = 0; i < num_lengths; ++i) {
+      if (lengths_[i] != dash.lengths_[i])
+        return false;
+    }
 
     return true;
   }
 
   void scale(double factor) {
+    assert(factor > 0);
+
     offset_ *= factor;
 
     uint num_lengths = lengths_.size();
@@ -190,19 +206,27 @@ class CLineDash {
   }
 
   void setDashes(std::vector<double> &lengths, double offset=0.0) {
-    lengths_ = lengths;
-    offset_  = offset;
+    lengths_.clear();
+
+    for (const auto &len : lengths) {
+      if (len > 1E-5)
+        lengths_.push_back(len);
+    }
+
+    offset_ = offset;
 
     updateInd();
   }
 
   void setDashes(const double *lengths, uint num_lengths, double offset=0.0) {
-    lengths_.resize(num_lengths);
+    lengths_.clear();
+
+    for (uint i = 0; i < num_lengths; ++i) {
+      if (lengths[i] > 1E-5)
+        lengths_.push_back(lengths[i]);
+    }
 
     offset_ = offset;
-
-    for (uint i = 0; i < num_lengths; ++i)
-      lengths_[i] = lengths[i];
 
     updateInd();
   }
@@ -216,8 +240,6 @@ class CLineDash {
       bits[i] = (pattern & mask) ? 1 : 0;
     }
 
-    lengths_.resize(16);
-
     double dash_value[16];
 
     uint num_lengths = 0;
@@ -225,6 +247,8 @@ class CLineDash {
     uint i = 0;
 
     while (i < 16) {
+      lengths_.push_back(0);
+
       lengths_  [num_lengths] = 0;
       dash_value[num_lengths] = bits[i];
 
