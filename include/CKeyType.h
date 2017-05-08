@@ -200,6 +200,7 @@ enum CKeyType {
   CKEY_TYPE_ydiaeresis    = 0x0ff,
 
   CKEY_TYPE_Tab           = 0x0ff09,
+  CKEY_TYPE_Backtab       = 0x0ff0a, // ??
 
   CKEY_TYPE_Home          = 0x0ff50,
   CKEY_TYPE_Left          = 0x0ff51,

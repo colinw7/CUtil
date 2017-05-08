@@ -16,6 +16,7 @@ keyTypeName(CKeyType type)
     case CKEY_TYPE_BackSpace:     return "BackSpace";
     case CKEY_TYPE_TAB:           return "Tab";
     case CKEY_TYPE_Tab:           return "Tab";
+    case CKEY_TYPE_Backtab:       return "BackTab";
     case CKEY_TYPE_LineFeed:      return "LineFeed";
     case CKEY_TYPE_Clear:         return "Clear";
     case CKEY_TYPE_FF:            return "FF";
@@ -324,6 +325,7 @@ keyTypeChar(CKeyType type)
     case CKEY_TYPE_BackSpace:     return '\b';
     case CKEY_TYPE_TAB:           return '\t';
     case CKEY_TYPE_Tab:           return '\t';
+    case CKEY_TYPE_Backtab:       return '\0';
     case CKEY_TYPE_LineFeed:      return '\n';
     case CKEY_TYPE_Clear:         return '\v';
     case CKEY_TYPE_FF:            return '\n';
