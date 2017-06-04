@@ -8,21 +8,21 @@
 #include <CAutoPtr.h>
 #include <CGenGradient.h>
 
-enum CBrushPattern {
-  CBRUSH_PATTERN_NONE,
-  CBRUSH_PATTERN_HORIZONTAL,
-  CBRUSH_PATTERN_VERTICAL,
-  CBRUSH_PATTERN_CROSS,
-  CBRUSH_PATTERN_DIAGONAL_UP,
-  CBRUSH_PATTERN_DIAGONAL_DOWN,
-  CBRUSH_PATTERN_DIAGONAL_CROSS,
-  CBRUSH_PATTERN_DOTTED1,
-  CBRUSH_PATTERN_DOTTED2,
-  CBRUSH_PATTERN_DOTTED3,
-  CBRUSH_PATTERN_DOTTED4,
-  CBRUSH_PATTERN_DOTTED5,
-  CBRUSH_PATTERN_DOTTED6,
-  CBRUSH_PATTERN_DOTTED7
+enum class CBrushPattern {
+  NONE,
+  HORIZONTAL,
+  VERTICAL,
+  CROSS,
+  DIAGONAL_UP,
+  DIAGONAL_DOWN,
+  DIAGONAL_CROSS,
+  DOTTED1,
+  DOTTED2,
+  DOTTED3,
+  DOTTED4,
+  DOTTED5,
+  DOTTED6,
+  DOTTED7
 };
 
 class CBrush {
@@ -58,6 +58,8 @@ class CBrush {
     return *this;
   }
 
+  bool isValid() const { return style_ != CBRUSH_STYLE_NONE; }
+
   CBrushStyle getStyle() const { return style_; }
 
   const CRGBA& getColor() const { assert(style_ == CBRUSH_STYLE_SOLID); return color_; }
@@ -80,7 +82,7 @@ class CBrush {
   CBrushStyle   style_ { CBRUSH_STYLE_SOLID };
   CRGBA         color_ { 0, 0, 0 };
   CFillType     fill_rule_ { FILL_TYPE_EVEN_ODD };
-  CBrushPattern pattern_ { CBRUSH_PATTERN_HORIZONTAL };
+  CBrushPattern pattern_ { CBrushPattern::HORIZONTAL };
   CImagePtr     texture_;
   GradientPtr   gradient_;
 };

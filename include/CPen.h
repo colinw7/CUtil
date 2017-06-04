@@ -47,6 +47,8 @@ class CPen {
     return *this;
   }
 
+  bool isValid() const { return width_ > 0.0; }
+
   const CRGBA     &getColor     () const { return color_      ; }
   double           getWidth     () const { return width_      ; }
   const CLineDash &getLineDash  () const { return dash_       ; }
