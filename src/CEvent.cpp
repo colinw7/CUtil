@@ -674,6 +674,42 @@ keyTypeIsAlpha(CKeyType type)
   }
 }
 
+CKeyType
+CEvent::
+keyTypeToUpper(CKeyType type)
+{
+  switch (type) {
+    case CKEY_TYPE_a: case CKEY_TYPE_b: case CKEY_TYPE_c: case CKEY_TYPE_d:
+    case CKEY_TYPE_e: case CKEY_TYPE_f: case CKEY_TYPE_g: case CKEY_TYPE_h:
+    case CKEY_TYPE_i: case CKEY_TYPE_j: case CKEY_TYPE_k: case CKEY_TYPE_l:
+    case CKEY_TYPE_m: case CKEY_TYPE_n: case CKEY_TYPE_o: case CKEY_TYPE_p:
+    case CKEY_TYPE_q: case CKEY_TYPE_r: case CKEY_TYPE_s: case CKEY_TYPE_t:
+    case CKEY_TYPE_u: case CKEY_TYPE_v: case CKEY_TYPE_w: case CKEY_TYPE_x:
+    case CKEY_TYPE_y: case CKEY_TYPE_z:
+      return (CKeyType)(int(type) + 32);
+    default:
+      return type;
+  }
+}
+
+CKeyType
+CEvent::
+keyTypeToLower(CKeyType type)
+{
+  switch (type) {
+    case CKEY_TYPE_A: case CKEY_TYPE_B: case CKEY_TYPE_C: case CKEY_TYPE_D:
+    case CKEY_TYPE_E: case CKEY_TYPE_F: case CKEY_TYPE_G: case CKEY_TYPE_H:
+    case CKEY_TYPE_I: case CKEY_TYPE_J: case CKEY_TYPE_K: case CKEY_TYPE_L:
+    case CKEY_TYPE_M: case CKEY_TYPE_N: case CKEY_TYPE_O: case CKEY_TYPE_P:
+    case CKEY_TYPE_Q: case CKEY_TYPE_R: case CKEY_TYPE_S: case CKEY_TYPE_T:
+    case CKEY_TYPE_U: case CKEY_TYPE_V: case CKEY_TYPE_W: case CKEY_TYPE_X:
+    case CKEY_TYPE_Y: case CKEY_TYPE_Z:
+      return (CKeyType)(int(type) - 32);
+    default:
+      return type;
+  }
+}
+
 bool
 CEvent::
 keyTypeIsDigit(CKeyType type)

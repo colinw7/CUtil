@@ -37,6 +37,8 @@ class CEvent {
   static CKeyType    charKeyType(char c);
   static bool        keyTypeIsAlpha(CKeyType type);
   static bool        keyTypeIsDigit(CKeyType type);
+  static CKeyType    keyTypeToUpper(CKeyType type);
+  static CKeyType    keyTypeToLower(CKeyType type);
 
   CEvent() { }
 
