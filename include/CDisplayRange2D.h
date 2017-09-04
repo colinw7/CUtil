@@ -1,7 +1,7 @@
 #ifndef CDISPLAY_RANGE_2D_H
 #define CDISPLAY_RANGE_2D_H
 
-#include <CMathGen.h>
+#include <CMathRound.h>
 #include <CMatrix2D.h>
 #include <CBBox2D.h>
 #include <CAlignType.h>
@@ -256,8 +256,8 @@ class CDisplayRange2D {
 
     windowToPixel(window_x, window_y, &pixel_x1, &pixel_y1);
 
-    *pixel_x = CMathGen::Round(pixel_x1);
-    *pixel_y = CMathGen::Round(pixel_y1);
+    *pixel_x = CMathRound::Round(pixel_x1);
+    *pixel_y = CMathRound::Round(pixel_y1);
   }
 
   void pixelToWindow(const CPoint2D &pixel, CPoint2D &window) const {

@@ -7,7 +7,8 @@
 #include <CHSV.h>
 #include <CHSB.h>
 #include <CHSI.h>
-#include <CMathGen.h>
+#include <CMathRound.h>
+#include <cmath>
 
 class CRGBUtil {
  public:
@@ -116,7 +117,7 @@ class CRGBUtil {
 
     double hp = h*M_PI*0.5;
 
-    int h1 = CMathGen::Round(hp)/120;
+    int h1 = CMathRound::Round(hp)/120;
 
     double r = 0.0, g = 0.0, b = 0.0;
 
