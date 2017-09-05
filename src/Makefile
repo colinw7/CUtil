@@ -9,7 +9,11 @@ INC_DIR = ../include
 OBJ_DIR = ../obj
 LIB_DIR = ../lib
 
-all: $(LIB_DIR)/libCUtil.a
+all: dirs $(LIB_DIR)/libCUtil.a
+
+dirs:
+	@if [ ! -e ../obj ]; then mkdir ../obj; fi
+	@if [ ! -e ../bin ]; then mkdir ../bin; fi
 
 SRC = \
 CWindow.cpp \
