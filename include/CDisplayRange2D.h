@@ -4,10 +4,28 @@
 #include <CMathRound.h>
 #include <CMatrix2D.h>
 #include <CBBox2D.h>
-#include <CAlignType.h>
 
 // Class to represent a 2D mapping from window to pixel coordinates
 class CDisplayRange2D {
+ public:
+  enum class HAlign {
+    NONE,
+    LEFT,
+    CENTER,
+    RIGHT,
+    JUSTIFY,
+    INSIDE,
+    OUTSIDE,
+  };
+
+  enum class VAlign {
+    NONE,
+    TOP,
+    CENTER,
+    BOTTOM,
+    BASELINE,
+  };
+
  public:
   template<typename T>
   struct RangeT {
@@ -105,13 +123,13 @@ class CDisplayRange2D {
   bool getScaleMin() const { return scale_min_; }
   void setScaleMin(bool flag) { scale_min_ = flag; recalc(); }
 
-  CHAlignType getHAlign() const { return halign_; }
-  void setHAlign(CHAlignType halign) { halign_ = halign; recalc(); }
+  HAlign getHAlign() const { return halign_; }
+  void setHAlign(HAlign halign) { halign_ = halign; recalc(); }
 
-  CVAlignType getVAlign() const { return valign_; }
-  void setVAlign(CVAlignType valign) { valign_ = valign; recalc(); }
+  VAlign getVAlign() const { return valign_; }
+  void setVAlign(VAlign valign) { valign_ = valign; recalc(); }
 
-  void setAlign(CHAlignType halign, CVAlignType valign) {
+  void setAlign(HAlign halign, VAlign valign) {
     halign_ = halign; valign_ = valign;
     recalc();
   }
@@ -195,18 +213,18 @@ class CDisplayRange2D {
 
       windowToPixel(window1_.xmax, window1_.ymin, &px, &py);
 
-      if      (halign_ == CHALIGN_TYPE_LEFT)
+      if      (halign_ == HAlign::LEFT)
         pdx_ = 0;
-      else if (halign_ == CHALIGN_TYPE_CENTER)
+      else if (halign_ == HAlign::CENTER)
         pdx_ = (pixel_.xmax - px)/2;
-      else if (halign_ == CHALIGN_TYPE_RIGHT)
+      else if (halign_ == HAlign::RIGHT)
         pdx_ = pixel_.xmax - px;
 
-      if      (valign_ == CVALIGN_TYPE_TOP)
+      if      (valign_ == VAlign::TOP)
         pdy_ = 0;
-      else if (valign_ == CVALIGN_TYPE_CENTER)
+      else if (valign_ == VAlign::CENTER)
         pdy_ = (pixel_.ymax - py)/2;
-      else if (valign_ == CVALIGN_TYPE_BOTTOM)
+      else if (valign_ == VAlign::BOTTOM)
         pdy_ = pixel_.ymax - py;
     }
     else {
@@ -344,8 +362,8 @@ class CDisplayRange2D {
   bool equal_scale_ { false };
   bool scale_min_   { true };
 
-  CHAlignType halign_ { CHALIGN_TYPE_CENTER };
-  CVAlignType valign_ { CVALIGN_TYPE_CENTER };
+  HAlign halign_ { HAlign::CENTER };
+  VAlign valign_ { VAlign::CENTER };
 
   bool flip_x_ { false };
   bool flip_y_ { false };

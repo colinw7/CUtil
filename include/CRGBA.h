@@ -1,15 +1,13 @@
 #ifndef CRGBA_H
 #define CRGBA_H
 
-#include <cassert>
-
 #include <CRGB.h>
 
 #ifdef USE_CRGB_NAME
 #include <CRGBName.h>
 #endif
 
-#include <CColorComponent.h>
+#include <cassert>
 
 #define CRGBA_LIGHT_FACTOR 1.25
 #define CRGBA_DARK_FACTOR  0.50
@@ -75,6 +73,16 @@ enum CRGBABlendMode {
   CRGBA_BLEND_DARKEN,
   CRGBA_BLEND_LIGHTEN
 };
+
+enum CRGBAComponent {
+  CRGBA_COMPONENT_NONE =0,
+  CRGBA_COMPONENT_RED  =(1<<0),
+  CRGBA_COMPONENT_GREEN=(1<<1),
+  CRGBA_COMPONENT_BLUE =(1<<2),
+  CRGBA_COMPONENT_ALPHA=(1<<3)
+};
+
+//---
 
 class CRGBA {
  private:
@@ -544,22 +552,22 @@ class CRGBA {
   uint getBlueI () const { return clampI(ivalue(b_)); }
   uint getAlphaI() const { return clampI(ivalue(a_)); }
 
-  double getComponent(CColorComponent component) const {
+  double getComponent(CRGBAComponent component) const {
     switch (component) {
-      case CCOLOR_COMPONENT_RED  : return r_;
-      case CCOLOR_COMPONENT_GREEN: return g_;
-      case CCOLOR_COMPONENT_BLUE : return b_;
-      case CCOLOR_COMPONENT_ALPHA: return a_;
-      default: assert(false);      return 0.0;
+      case CRGBA_COMPONENT_RED  : return r_;
+      case CRGBA_COMPONENT_GREEN: return g_;
+      case CRGBA_COMPONENT_BLUE : return b_;
+      case CRGBA_COMPONENT_ALPHA: return a_;
+      default: assert(false);     return 0.0;
     }
   }
 
-  void setComponent(CColorComponent component, double value) {
+  void setComponent(CRGBAComponent component, double value) {
     switch (component) {
-      case CCOLOR_COMPONENT_RED  : r_ = value; break;
-      case CCOLOR_COMPONENT_GREEN: g_ = value; break;
-      case CCOLOR_COMPONENT_BLUE : b_ = value; break;
-      case CCOLOR_COMPONENT_ALPHA: a_ = value; break;
+      case CRGBA_COMPONENT_RED  : r_ = value; break;
+      case CRGBA_COMPONENT_GREEN: g_ = value; break;
+      case CRGBA_COMPONENT_BLUE : b_ = value; break;
+      case CRGBA_COMPONENT_ALPHA: a_ = value; break;
       default: assert(false); break;
     }
   }

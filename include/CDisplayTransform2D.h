@@ -7,7 +7,7 @@
 class CDisplayTransform2D {
  public:
   CDisplayTransform2D(const CDisplayRange2D *range) :
-   range_(range), scale_(1.0), angle_(0.0), tx_(0.0), ty_(0.0) {
+   range_(range) {
     update();
   }
 
@@ -70,20 +70,20 @@ class CDisplayTransform2D {
     update();
   }
 
-  void zoomIn() {
-    scale_ *= 1.5;
+  void zoomIn(double f=1.5) {
+    scale_ *= f;
 
     update();
   }
 
-  void zoomOut() {
-    scale_ /= 1.5;
+  void zoomOut(double f=1.5) {
+    scale_ /= f;
 
     update();
   }
 
-  void zoomIn(const CPoint2D &c) {
-    scale_ *= 1.5;
+  void zoomIn(const CPoint2D &c, double f=1.5) {
+    scale_ *= f;
 
     CPoint2D c1 = range_->getWindowCenter();
 
@@ -93,8 +93,8 @@ class CDisplayTransform2D {
     update();
   }
 
-  void zoomOut(const CPoint2D &c) {
-    scale_ /= 1.5;
+  void zoomOut(const CPoint2D &c, double f=1.5) {
+    scale_ /= f;
 
     CPoint2D c1 = range_->getWindowCenter();
 
@@ -167,10 +167,11 @@ class CDisplayTransform2D {
   }
 
  private:
-  const CDisplayRange2D *range_;
-  double                 scale_;
-  double                 angle_;
-  double                 tx_, ty_;
+  const CDisplayRange2D *range_ { nullptr };
+  double                 scale_ { 1.0 };
+  double                 angle_ { 0.0 };
+  double                 tx_    { 0.0 };
+  double                 ty_    { 0.0 };
   CMatrix2D              matrix_;
   CMatrix2D              imatrix_;
 };
