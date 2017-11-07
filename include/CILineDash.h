@@ -1,5 +1,5 @@
-#ifndef CILINE_DASH_H
-#define CILINE_DASH_H
+#ifndef CILineDash_H
+#define CILineDash_H
 
 #include <cstdarg>
 #include <cstring>
