@@ -16,6 +16,7 @@ class CTrie {
 
   struct Node {
     CharNode nodes;
+    int      count { 0 };
   };
 
  public:
@@ -29,6 +30,8 @@ class CTrie {
     }
 
     node = addNode(node, '\0');
+
+    ++node->count;
   }
 
  private:
@@ -36,7 +39,7 @@ class CTrie {
   void visit(VISITOR &v, Node *node, const std::string &str) {
     for (const auto &n : node->nodes) {
       if (! n.first)
-        v.visit(str);
+        v.visit(str, n.second->count);
       else
         visit(v, n.second, str + n.first);
     }
@@ -59,8 +62,8 @@ class CTrie {
        os_(os) {
       }
 
-      void visit(const std::string &str) {
-        std::cerr << str << std::endl;
+      void visit(const std::string &str, int n) {
+        std::cerr << str << "(#" << n << ")" << std::endl;
       }
 
      private:

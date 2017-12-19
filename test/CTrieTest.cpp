@@ -1,5 +1,6 @@
 #include <CTrie.h>
 #include <CFile.h>
+#include <CStrUtil.h>
 
 int
 main(int argc, char **argv)
@@ -37,8 +38,14 @@ main(int argc, char **argv)
 
     file.toLines(lines);
 
-    for (const auto &l : lines)
-      trie.addWord(l);
+    for (const auto &l : lines) {
+      std::vector<std::string> words;
+
+      CStrUtil::addWords(l, words);
+
+      for (const auto &w : words)
+        trie.addWord(w);
+    }
   }
   else {
     trie.addWord("One");
@@ -53,8 +60,14 @@ main(int argc, char **argv)
     trie.addWord("Ten");
   }
 
-  if (complete != "")
-    trie.complete(complete);
+  if (complete != "") {
+    CTrie::Strings strs;
+
+    trie.complete(complete, strs);
+
+    for (const auto &s : strs)
+      std::cerr << s << std::endl;
+  }
   else
     trie.dump();
 }
