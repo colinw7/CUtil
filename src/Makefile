@@ -16,6 +16,7 @@ dirs:
 	@if [ ! -e ../bin ]; then mkdir ../bin; fi
 
 SRC = \
+CUtil.cpp \
 CWindow.cpp \
 CEvent.cpp \
 CEnv.cpp \
