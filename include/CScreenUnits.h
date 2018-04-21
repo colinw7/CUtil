@@ -11,12 +11,20 @@
 class CScreenUnitsMgr {
  public:
   static CScreenUnitsMgr *instance() {
-    static CScreenUnitsMgr *inst;
+    CScreenUnitsMgr **p = instPtr();
 
-    if (! inst)
-      inst = new CScreenUnitsMgr;
+    if (! *p)
+      *p = new CScreenUnitsMgr;
 
-    return inst;
+    return *p;
+  }
+
+  static void release() {
+    CScreenUnitsMgr **p = instPtr();
+
+    delete *p;
+
+    *p = nullptr;
   }
 
   // em size in pixels
@@ -34,14 +42,34 @@ class CScreenUnitsMgr {
   // mm size in pixels
   double mmSize() const { return dpi()/25.4; }
 
+  // screen size (percent) ?
+  double screenScale() const { return screenScale_; }
+  void setScreenScale(double s) { screenScale_ = s; }
+
+  double screenWidth() const { return screenWidth_; }
+  void setScreenWidth(double r) { screenWidth_ = r; }
+
+  double screenHeight() const { return screenHeight_; }
+  void setScreenHeight(double r) { screenHeight_ = r; }
+
+ private:
+  static CScreenUnitsMgr **instPtr() {
+    static CScreenUnitsMgr *inst;
+
+    return &inst;
+  }
+
  private:
   CScreenUnitsMgr() { }
  ~CScreenUnitsMgr() { }
 
  private:
-  double emSize_ { 1 };
-  double exSize_ { 1 };
-  double dpi_    { 75.0 };
+  double emSize_       { 1 };
+  double exSize_       { 1 };
+  double dpi_          { 75.0 };
+  double screenScale_  { 100.0 };
+  double screenWidth_  { 1280.0 };
+  double screenHeight_ { 1024.0 };
 };
 
 //------
@@ -324,9 +352,10 @@ class CScreenUnits {
  private:
   double toPixel(const CScreenUnits &rvalue=CScreenUnits()) const {
     if      (units_ == Units::PERCENT) {
-      assert(rvalue.units_ != Units::NONE);
-
-      return rvalue.toPixel()*value_/100.0;
+      if (rvalue.units_ != Units::NONE)
+        return rvalue.toPixel()*value_/100.0;
+      else
+        return CScreenUnitsMgrInst->screenScale()*value_/100.0;
     }
     else if (units_ == Units::RATIO) {
       assert(rvalue.units_ != Units::NONE);
