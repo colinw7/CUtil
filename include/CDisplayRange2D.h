@@ -170,8 +170,8 @@ class CDisplayRange2D {
     window_width1_  = window1_.dx();
     window_height1_ = window1_.dy();
 
-    factor_x_ =  getPixelWidth ()/window_width1_ ;
-    factor_y_ = -getPixelHeight()/window_height1_;
+    factor_x_ = (window_width_   != 0 ?  getPixelWidth ()/window_width1_  : 1);
+    factor_y_ = (window_height1_ != 0 ? -getPixelHeight()/window_height1_ : 1);
 
     if (equal_scale_) {
       factor_x1_ = factor_x_;
