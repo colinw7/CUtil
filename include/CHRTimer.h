@@ -1,5 +1,5 @@
-#ifndef CHR_TIMER_H
-#define CHR_TIMER_H
+#ifndef CHRTimer_H
+#define CHRTimer_H
 
 #include <iostream>
 #include <string>
@@ -7,9 +7,46 @@
 #include <cassert>
 #include <sys/time.h>
 
-#include <CHRTime.h>
-
 #define CHRTimerMgrInst CHRTimerMgr::getInstance()
+
+struct CHRTime {
+  long secs;
+  long usecs;
+
+  CHRTime() : secs(0), usecs(0) { }
+
+  friend std::ostream &operator<<(std::ostream &os, const CHRTime &hrtime) {
+    double d = hrtime.secs + hrtime.usecs/1000000.;
+
+    os << d;
+
+    return os;
+  }
+
+  double getSecs () { return         secs + usecs/1000000.0; }
+  double getMSecs() { return    1000*secs + usecs/1000.0   ; }
+  double getUSecs() { return 1000000*secs + usecs          ; }
+
+  const CHRTime &operator+=(const CHRTime &rhs) {
+    usecs += rhs.usecs;
+    secs  += rhs.secs;
+
+    if (usecs > 1000000) {
+      secs  += usecs / 10000000;
+      usecs  = usecs % 10000000;
+    }
+
+    return *this;
+  }
+
+  CHRTime operator+(const CHRTime &rhs) {
+    CHRTime t = *this;
+
+    t += rhs;
+
+    return t;
+  }
+};
 
 class CHRTimerMgr {
  public:
@@ -271,6 +308,72 @@ class CIncrementalTimer {
   int         timer_id_;
   long        elapsed_secs_, elapsed_usecs_;
   long        count_;
+};
+
+//------
+
+#define CIncrementalTimerMgrInst CIncrementalTimerMgr::instance()
+
+class CIncrementalTimerMgr {
+ public:
+  static CIncrementalTimerMgr *instance() {
+    static CIncrementalTimerMgr *inst;
+
+    if (! inst)
+      inst = new CIncrementalTimerMgr;
+
+    return inst;
+  }
+
+ ~CIncrementalTimerMgr() {
+    clear();
+  }
+
+  CIncrementalTimer *get(const std::string &id) {
+    auto p = timers_.find(id);
+
+    if (p == timers_.end())
+      p = timers_.insert(p, Timers::value_type(id, new CIncrementalTimer(id)));
+
+    return (*p).second;
+  }
+
+  void clear() {
+    for (const auto &timer : timers_)
+      delete timer.second;
+
+    timers_.clear();
+  }
+
+ private:
+  CIncrementalTimerMgr() { }
+
+ private:
+  using Timers = std::map<std::string,CIncrementalTimer *>;
+
+  Timers timers_;
+};
+
+//------
+
+class CIncrementalTimerScope {
+ public:
+  CIncrementalTimerScope(const std::string &id) :
+   timer_(CIncrementalTimerMgrInst->get(id)) {
+    timer_->start();
+  }
+
+  CIncrementalTimerScope(CIncrementalTimer *timer) :
+   timer_(timer) {
+    timer_->start();
+  }
+
+ ~CIncrementalTimerScope() {
+   timer_->stop();
+  }
+
+ private:
+  CIncrementalTimer *timer_ { nullptr };
 };
 
 #endif
