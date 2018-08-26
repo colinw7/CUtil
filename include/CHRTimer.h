@@ -1,6 +1,7 @@
 #ifndef CHRTimer_H
 #define CHRTimer_H
 
+#include <map>
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -10,10 +11,10 @@
 #define CHRTimerMgrInst CHRTimerMgr::getInstance()
 
 struct CHRTime {
-  long secs;
-  long usecs;
+  long secs  { 0 };
+  long usecs { 0 };
 
-  CHRTime() : secs(0), usecs(0) { }
+  CHRTime() { }
 
   friend std::ostream &operator<<(std::ostream &os, const CHRTime &hrtime) {
     double d = hrtime.secs + hrtime.usecs/1000000.;
@@ -32,8 +33,8 @@ struct CHRTime {
     secs  += rhs.secs;
 
     if (usecs > 1000000) {
-      secs  += usecs / 10000000;
-      usecs  = usecs % 10000000;
+      secs  += usecs / 1000000;
+      usecs  = usecs % 1000000;
     }
 
     return *this;
@@ -48,6 +49,8 @@ struct CHRTime {
   }
 };
 
+//------
+
 class CHRTimerMgr {
  public:
   static CHRTimerMgr *getInstance() {
@@ -59,38 +62,47 @@ class CHRTimerMgr {
     return instance;
   }
 
+  static bool getBoolEnv(const char *envname) {
+    char *env = getenv(envname);
+    if (! env) return false;
+
+    uint len = strlen(env);
+
+    if (len > 4) return false;
+
+    char str[5];
+
+    uint i = 0;
+
+    for ( ; env[i] != '\0'; ++i) str[i] = tolower(env[i]);
+    for ( ; i < 5         ; ++i) str[i] = '\0';
+
+    if (strcmp(str, "yes" ) == 0 || strcmp(str, "on") == 0 ||
+        strcmp(str, "true") == 0 || strcmp(str, "1" ) == 0)
+      return true;
+
+    return false;
+  }
+
+  static double getRealEnv(const char *envname, double def=0.0) {
+    char *env = getenv(envname);
+    if (! env) return def;
+
+    return atof(env);
+  }
+
   bool isActive() const {
-    if (! active_) {
-      char *env = getenv("HRTIMER_ACTIVE");
+    if (! active_)
+      return getBoolEnv("HRTIMER_ACTIVE");
 
-      if (env == NULL) return false;
-
-      uint len = strlen(env);
-
-      if (len > 4) return false;
-
-      char str[5];
-
-      uint i = 0;
-
-      for ( ; env[i] != '\0'; ++i) str[i] = tolower(env[i]);
-      for ( ; i < 5         ; ++i) str[i] = '\0';
-
-      if (strcmp(str, "yes" ) == 0 || strcmp(str, "on") == 0 ||
-          strcmp(str, "true") == 0 || strcmp(str, "1" ) == 0)
-        return true;
-
-      return false;
-    }
-    else
-      return active_;
+    return active_;
   }
 
   void setActive(bool active=true) {
     active_ = active;
   }
 
-  bool start(int *ind, const char *msg=NULL) {
+  bool start(int *ind, const char *msg=nullptr, bool elapsed=false) {
     HRTimer &timer = timers_[ind_];
 
     if (timer.active) {
@@ -105,9 +117,9 @@ class CHRTimerMgr {
 
     ++num_active_;
 
-    /*----*/
+    //---
 
-    /* Find Next Timer Slot */
+    // Find Next Timer Slot
 
     ++ind_;
 
@@ -125,17 +137,20 @@ class CHRTimerMgr {
     }
 
     if (msg) {
-      std::cout << ">";
+      if (! elapsed) {
+        std::cout << ">" << padStr() << msg;
 
-      for (int i = 0; i < num_active_ - 1; ++i) std::cout << " ";
+        timeStamp(timer);
 
-      std::cout << msg << std::endl;
+        std::cout << std::endl;
+      }
     }
 
     return true;
   }
 
-  bool end(int ind, long *secs=NULL, long *usecs=NULL, const char *msg=NULL) {
+  bool end(int ind, long *secs=nullptr, long *usecs=nullptr,
+           const char *msg=nullptr, bool elapsed=false) {
     HRTimer &timer = timers_[ind];
 
     assert(timer.active);
@@ -152,13 +167,21 @@ class CHRTimerMgr {
     --num_active_;
 
     if (msg) {
-      double elapsed = d.secs + d.usecs/1000000.0;
+      double t = d.secs + d.usecs/1000000.0;
 
-      std::cout << "<";
+      if (! elapsed) {
+        std::cout << "<" << padStr() << msg << " " << t;
 
-      for (int i = 0; i < num_active_; ++i) std::cout << " ";
+        timeStamp(timer);
 
-      std::cout << msg << " " << elapsed << std::endl;
+        std::cout << std::endl;
+      }
+      else {
+        double tol = getRealEnv("HRTIMER_TOL");
+
+        if (tol < 0.0 || t >= tol)
+          std::cout << padStr() << msg << " " << t << std::endl;
+      }
     }
 
     return true;
@@ -177,7 +200,7 @@ class CHRTimerMgr {
 
     struct timeval timeval;
 
-    gettimeofday(&timeval, NULL);
+    gettimeofday(&timeval, nullptr);
 
     hrtime.secs  = timeval.tv_sec;
     hrtime.usecs = timeval.tv_usec;
@@ -197,8 +220,21 @@ class CHRTimerMgr {
   }
 
  private:
-  CHRTimerMgr() :
-   ind_(0), num_active_(0), active_(false) {
+  CHRTimerMgr() {
+   startTime_ = getHRTime();
+  }
+
+  const std::string &padStr() const {
+    static std::string str;
+
+    if (int(str.size()) != num_active_) {
+      str = "";
+
+      for (int i = 0; i < num_active_; ++i)
+        str += " ";
+    }
+
+    return str;
   }
 
  private:
@@ -206,16 +242,31 @@ class CHRTimerMgr {
 
  private:
   struct HRTimer {
-    bool      active;
+    bool    active { false };
     CHRTime time;
 
-    HRTimer() : active(false) { }
+    HRTimer() { }
   };
 
-  int     ind_;
-  int     num_active_;
+ private:
+  void timeStamp(const HRTimer &timer) const {
+    if (getBoolEnv("HRTIMER_STAMP")) {
+      CHRTime now = getHRTime();
+
+      CHRTime d = diffHRTime(timer.time, now);
+
+      double t = d.secs + d.usecs/1000000.0;
+
+      std::cout << " [" << t << "]";
+    }
+  }
+
+ private:
+  int     ind_ { 0 };
+  int     num_active_ { 0 };
   HRTimer timers_[MAX_TIMERS];
-  bool    active_;
+  bool    active_ { false };
+  CHRTime startTime_;
 };
 
 //------
@@ -223,10 +274,10 @@ class CHRTimerMgr {
 class CScopeTimer {
  public:
   CScopeTimer(const std::string &id) :
-   id_(id), timer_id_(-1) {
+   id_(id) {
     if (! CHRTimerMgrInst->isActive()) return;
 
-    if (! CHRTimerMgrInst->start(&timer_id_, id_.c_str()))
+    if (! CHRTimerMgrInst->start(&timer_id_, id_.c_str(), /*elapsed*/false))
       timer_id_ = -1;
   }
 
@@ -235,12 +286,37 @@ class CScopeTimer {
 
     long secs, usecs;
 
-    CHRTimerMgrInst->end(timer_id_, &secs, &usecs, id_.c_str());
+    CHRTimerMgrInst->end(timer_id_, &secs, &usecs, id_.c_str(), /*elapsed*/false);
   }
 
  private:
   std::string id_;
-  int         timer_id_;
+  int         timer_id_ { -1 };
+};
+
+//-----
+
+class CElapsedTimer {
+ public:
+  CElapsedTimer(const std::string &id) :
+   id_(id) {
+    if (! CHRTimerMgrInst->isActive()) return;
+
+    if (! CHRTimerMgrInst->start(&timer_id_, id_.c_str(), /*elapsed*/true))
+      timer_id_ = -1;
+  }
+
+ ~CElapsedTimer() {
+    if (timer_id_ < 0) return;
+
+    long secs, usecs;
+
+    CHRTimerMgrInst->end(timer_id_, &secs, &usecs, id_.c_str(), /*elapsed*/true);
+  }
+
+ private:
+  std::string id_;
+  int         timer_id_ { -1 };
 };
 
 //-----
@@ -248,7 +324,7 @@ class CScopeTimer {
 class CIncrementalTimer {
  public:
   CIncrementalTimer(const std::string &id) :
-   id_(id), active_(false), timer_id_(-1), elapsed_secs_(0), elapsed_usecs_(0), count_(0) {
+   id_(id) {
     active_ = CHRTimerMgrInst->isActive();
   }
 
@@ -268,7 +344,7 @@ class CIncrementalTimer {
 
     ++count_;
 
-    if (! CHRTimerMgrInst->start(&timer_id_, NULL))
+    if (! CHRTimerMgrInst->start(&timer_id_, nullptr, /*elapsed*/false))
       timer_id_ = -1;
   }
 
@@ -279,7 +355,7 @@ class CIncrementalTimer {
 
     long secs, usecs;
 
-    CHRTimerMgrInst->end(timer_id_, &secs, &usecs, NULL);
+    CHRTimerMgrInst->end(timer_id_, &secs, &usecs, nullptr, /*elapsed*/false);
 
     elapsed_secs_  += secs;
     elapsed_usecs_ += usecs;
@@ -304,10 +380,11 @@ class CIncrementalTimer {
 
  private:
   std::string id_;
-  bool        active_;
-  int         timer_id_;
-  long        elapsed_secs_, elapsed_usecs_;
-  long        count_;
+  bool        active_        { false };
+  int         timer_id_      { -1 };
+  long        elapsed_secs_  { 0 };
+  long        elapsed_usecs_ { 0 };
+  long        count_         { 0 };
 };
 
 //------
@@ -369,7 +446,7 @@ class CIncrementalTimerScope {
   }
 
  ~CIncrementalTimerScope() {
-   timer_->stop();
+    timer_->stop();
   }
 
  private:

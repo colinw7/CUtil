@@ -1,27 +1,44 @@
 #include <CWindow.h>
 #include <cassert>
 
+static CWindowMgr *s_instance;
+
 CWindowMgr *
 CWindowMgr::
-getInstance()
+instance()
 {
-  static CWindowMgr *instance;
+  if (! s_instance)
+    s_instance = new CWindowMgr;
 
-  if (! instance)
-    instance = new CWindowMgr;
+  return s_instance;
+}
 
-  return instance;
+void
+CWindowMgr::
+release()
+{
+  delete s_instance;
+
+  s_instance = nullptr;
 }
 
 CWindowMgr::
-CWindowMgr() :
- factory_(NULL)
+CWindowMgr()
 {
 }
 
 CWindowMgr::
 ~CWindowMgr()
 {
+}
+
+void
+CWindowMgr::
+setFactory(CWindowFactory *factory)
+{
+  delete factory_;
+
+  factory_ = factory;
 }
 
 CWindow *

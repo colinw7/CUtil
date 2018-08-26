@@ -15,9 +15,11 @@ enum CWindowType {
   CWINDOW_TYPE_OVERRIDE
 };
 
+//------
+
 class CWindow;
 
-#define CWindowMgrInst CWindowMgr::getInstance()
+#define CWindowMgrInst CWindowMgr::instance()
 
 class CWindowFactory {
  public:
@@ -29,18 +31,19 @@ class CWindowFactory {
   virtual CWindow *createWindow(CWindow *parent, int x, int y, uint width, uint height) = 0;
 };
 
-class CWindowMgr {
- private:
-  CWindowFactory *factory_;
+//------
 
+class CWindowMgr {
  protected:
   CWindowMgr();
  ~CWindowMgr();
 
  public:
-  static CWindowMgr *getInstance();
+  static CWindowMgr *instance();
 
-  void setFactory(CWindowFactory *factory) { factory_ = factory; }
+  static void release();
+
+  void setFactory(CWindowFactory *factory);
 
   CWindow *createWindow(int x, int y, uint width, uint height);
   CWindow *createWindow(CWindow *parent, int x, int y, uint width, uint height);
@@ -48,14 +51,16 @@ class CWindowMgr {
  private:
   CWindowMgr(const CWindowMgr &rhs);
   CWindowMgr &operator=(const CWindowMgr &rhs);
+
+ private:
+  CWindowFactory *factory_ { nullptr };
 };
 
-class CWindow {
- protected:
-  CWindow *parent_;
+//------
 
+class CWindow {
  public:
-  CWindow(CWindow *parent=NULL);
+  CWindow(CWindow *parent=nullptr);
 
   virtual ~CWindow();
 
@@ -151,6 +156,9 @@ class CWindow {
  private:
   CWindow(const CWindow &rhs);
   CWindow &operator=(const CWindow &rhs);
+
+ protected:
+  CWindow *parent_ { nullptr };
 };
 
 #endif
