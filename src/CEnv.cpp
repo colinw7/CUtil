@@ -87,6 +87,22 @@ get(const string &name, int &value) const
 
 bool
 CEnv::
+get(const string &name, bool &value) const
+{
+  value = 0;
+
+  string str;
+
+  if (! get(name, str))
+    return false;
+
+  value = CStrUtil::toBool(str);
+
+  return true;
+}
+
+bool
+CEnv::
 set(const string &name, const string &value)
 {
 #ifdef USE_SETENV

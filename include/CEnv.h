@@ -81,6 +81,7 @@ class CEnv {
   std::string get(const std::string &name) const;
   bool        get(const std::string &name, std::string &value) const;
   bool        get(const std::string &name, int &value) const;
+  bool        get(const std::string &name, bool &value) const;
 
   bool set(const std::string &name, const std::string &value);
   bool set(const std::string &name, int value);

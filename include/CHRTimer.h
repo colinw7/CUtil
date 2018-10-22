@@ -1,55 +1,14 @@
 #ifndef CHRTimer_H
 #define CHRTimer_H
 
+#include <CHRTime.h>
+
 #include <map>
-#include <iostream>
 #include <string>
 #include <cstring>
 #include <cassert>
-#include <sys/time.h>
 
 #define CHRTimerMgrInst CHRTimerMgr::getInstance()
-
-struct CHRTime {
-  long secs  { 0 };
-  long usecs { 0 };
-
-  CHRTime() { }
-
-  friend std::ostream &operator<<(std::ostream &os, const CHRTime &hrtime) {
-    double d = hrtime.secs + hrtime.usecs/1000000.;
-
-    os << d;
-
-    return os;
-  }
-
-  double getSecs () { return         secs + usecs/1000000.0; }
-  double getMSecs() { return    1000*secs + usecs/1000.0   ; }
-  double getUSecs() { return 1000000*secs + usecs          ; }
-
-  const CHRTime &operator+=(const CHRTime &rhs) {
-    usecs += rhs.usecs;
-    secs  += rhs.secs;
-
-    if (usecs > 1000000) {
-      secs  += usecs / 1000000;
-      usecs  = usecs % 1000000;
-    }
-
-    return *this;
-  }
-
-  CHRTime operator+(const CHRTime &rhs) {
-    CHRTime t = *this;
-
-    t += rhs;
-
-    return t;
-  }
-};
-
-//------
 
 class CHRTimerMgr {
  public:
@@ -112,7 +71,7 @@ class CHRTimerMgr {
 
     *ind = ind_;
 
-    timer.time   = getHRTime();
+    timer.time   = CHRTime::getTime();
     timer.active = true;
 
     ++num_active_;
@@ -155,9 +114,9 @@ class CHRTimerMgr {
 
     assert(timer.active);
 
-    CHRTime now = getHRTime();
+    CHRTime now = CHRTime::getTime();
 
-    CHRTime d = diffHRTime(timer.time, now);
+    CHRTime d = CHRTime::diffTime(timer.time, now);
 
     if (secs ) *secs  = d.secs;
     if (usecs) *usecs = d.usecs;
@@ -167,7 +126,7 @@ class CHRTimerMgr {
     --num_active_;
 
     if (msg) {
-      double t = d.secs + d.usecs/1000000.0;
+      double t = d.getSecs();
 
       if (! elapsed) {
         std::cout << "<" << padStr() << msg << " " << t;
@@ -195,33 +154,9 @@ class CHRTimerMgr {
     return timer.time;
   }
 
-  static CHRTime getHRTime() {
-    CHRTime hrtime;
-
-    struct timeval timeval;
-
-    gettimeofday(&timeval, nullptr);
-
-    hrtime.secs  = timeval.tv_sec;
-    hrtime.usecs = timeval.tv_usec;
-
-    return hrtime;
-  }
-
-  static CHRTime diffHRTime(const CHRTime &hrtime1, const CHRTime &hrtime2) {
-    CHRTime hrtime;
-
-    hrtime.usecs = (hrtime2.secs - hrtime1.secs)*1000000 + (hrtime2.usecs - hrtime1.usecs);
-
-    hrtime.secs   = hrtime.usecs / 1000000;
-    hrtime.usecs %= 1000000;
-
-    return hrtime;
-  }
-
  private:
   CHRTimerMgr() {
-   startTime_ = getHRTime();
+   startTime_ = CHRTime::getTime();
   }
 
   const std::string &padStr() const {
@@ -251,21 +186,21 @@ class CHRTimerMgr {
  private:
   void timeStamp(const HRTimer &timer) const {
     if (getBoolEnv("HRTIMER_STAMP")) {
-      CHRTime now = getHRTime();
+      CHRTime now = CHRTime::getTime();
 
-      CHRTime d = diffHRTime(timer.time, now);
+      CHRTime d = CHRTime::diffTime(timer.time, now);
 
-      double t = d.secs + d.usecs/1000000.0;
+      double t = d.getSecs();
 
       std::cout << " [" << t << "]";
     }
   }
 
  private:
-  int     ind_ { 0 };
+  int     ind_        { 0 };
   int     num_active_ { 0 };
   HRTimer timers_[MAX_TIMERS];
-  bool    active_ { false };
+  bool    active_     { false };
   CHRTime startTime_;
 };
 
@@ -335,8 +270,7 @@ class CIncrementalTimer {
   void reset() {
     active_ = CHRTimerMgrInst->isActive();
 
-    elapsed_secs_  = 0;
-    elapsed_usecs_ = 0;
+    elapsed_ = CHRTime();
   }
 
   void start() {
@@ -357,13 +291,7 @@ class CIncrementalTimer {
 
     CHRTimerMgrInst->end(timer_id_, &secs, &usecs, nullptr, /*elapsed*/false);
 
-    elapsed_secs_  += secs;
-    elapsed_usecs_ += usecs;
-
-    if (elapsed_usecs_ > 1000000) {
-      elapsed_secs_  += elapsed_usecs_ / 1000000;
-      elapsed_usecs_ %= 1000000;
-    }
+    elapsed_ += CHRTime(secs, usecs);
   }
 
   void report() {
@@ -371,7 +299,7 @@ class CIncrementalTimer {
 
     if (! count_) return;
 
-    double elapsed  = elapsed_secs_ + elapsed_usecs_/1000000.0;
+    double elapsed  = elapsed_.getSecs();
     double interval = elapsed/count_;
 
     std::cout << id_ << ": total=" << elapsed << " calls=" << count_ <<
@@ -380,11 +308,10 @@ class CIncrementalTimer {
 
  private:
   std::string id_;
-  bool        active_        { false };
-  int         timer_id_      { -1 };
-  long        elapsed_secs_  { 0 };
-  long        elapsed_usecs_ { 0 };
-  long        count_         { 0 };
+  bool        active_   { false };
+  int         timer_id_ { -1 };
+  CHRTime     elapsed_  { 0 };
+  long        count_    { 0 };
 };
 
 //------
