@@ -164,6 +164,11 @@ class CLineDash {
 
   double getLength(int i) const { return lengths_[i]; }
 
+  void getLengths(std::vector<double> &lengths) {
+    for (uint i = 0; i < getNumLengths(); ++i)
+      lengths.push_back(getLength(i));
+  }
+
   void setOffset(double offset) { offset_ = offset; }
   void setInd   (uint ind)      { ind_    = ind; }
 
