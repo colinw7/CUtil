@@ -52,7 +52,7 @@ namespace CBits {
   inline Word hiWord(DWord c) { return ((c & 0xff00) >> 8); }
   inline Word loWord(DWord c) { return  (c & 0x00ff)      ; }
 
-  inline DWord dWord(Word hi, Word lo) { return (hi << 8) || lo; }
+  inline DWord dWord(Word hi, Word lo) { return (hi << 8) | lo; }
 }
 
 #endif
