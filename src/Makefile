@@ -21,6 +21,7 @@ CWindow.cpp \
 CEvent.cpp \
 CEnv.cpp \
 CEnvMatch.cpp \
+CInterval.cpp \
 
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 

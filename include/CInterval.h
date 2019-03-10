@@ -2,6 +2,7 @@
 #define CInterval_H
 
 #include <iostream>
+#include <boost/optional.hpp>
 
 class CInterval {
  public:
@@ -25,44 +26,51 @@ class CInterval {
     double second { 0.0 }; // second
   };
 
+  using OptInt  = boost::optional<int>;
+  using OptReal = boost::optional<double>;
+
  public:
   CInterval(double min=0.0, double max=1.0, int n=10);
 
   //! get/set ideal interval start
   double start() const { return data_.start; }
-  void setStart(double r) { data_.start = r; valid_ = false; }
+  void setStart(double r) { data_.start = r; invalidate(); }
 
   //! get/set ideal interval end
   double end() const { return data_.end; }
-  void setEnd(double r) { data_.end = r; valid_ = false; }
+  void setEnd(double r) { data_.end = r; invalidate(); }
 
   //! get/set ideal number of major ticks
   int numMajor() const { return data_.numMajor; }
-  void setNumMajor(int i) { data_.numMajor = i; valid_ = false; }
+  void setNumMajor(int i) { data_.numMajor = i; invalidate(); }
 
-  //! get/set is integral
+  //! get/set values are integral
   bool isIntegral() const { return integral_; }
-  void setIntegral(bool b) { integral_ = b; valid_ = false; }
+  void setIntegral(bool b) { integral_ = b; invalidate(); }
 
-  //! get/set is date
+  //! get/set values are dates
   bool isDate() const { return date_; }
-  void setDate(bool b) { date_ = b; valid_ = false; }
+  void setDate(bool b) { date_ = b; invalidate(); }
 
-  //! get/set is time
+  //! get/set values are times
   bool isTime() const { return time_; }
-  void setTime(bool b) { time_ = b; valid_ = false; }
+  void setTime(bool b) { time_ = b; invalidate(); }
 
-  //! get/set is log
+  //! get/set use log scaling
   bool isLog() const { return log_; }
-  void setLog(bool b) { log_ = b; valid_ = false; }
+  void setLog(bool b) { log_ = b; invalidate(); }
 
   //! get/set required major increment
-  double majorIncrement() const { return majorIncrement_; }
-  void setMajorIncrement(double r) { majorIncrement_ = r; valid_ = false; }
+  double majorIncrement() const { return majorIncrement_.value_or(0.0); }
+  void setMajorIncrement(double r) { majorIncrement_ = r; invalidate(); }
 
   //! get/set required increment multiplier
-  double tickIncrement() const { return tickIncrement_; }
-  void setTickIncrement(double r) { tickIncrement_ = r; valid_ = false; }
+  double tickIncrement() const { return tickIncrement_.value_or(0.0); }
+  void setTickIncrement(double r) { tickIncrement_ = r; invalidate(); }
+
+  //! get/set required origin
+  double origin() const { return origin_.value_or(0.0); }
+  void setOrigin(double r) { origin_ = r; }
 
   //---
 
@@ -74,14 +82,16 @@ class CInterval {
   double calcStart    () const { constInit(); return calcData_.start    ; }
   double calcEnd      () const { constInit(); return calcData_.end      ; }
   double calcIncrement() const { constInit(); return calcData_.increment; }
-  double calcNumMajor () const { constInit(); return calcData_.numMajor ; }
-  double calcNumMinor () const { constInit(); return calcData_.numMinor ; }
+  int    calcNumMajor () const { constInit(); return calcData_.numMajor ; }
+  int    calcNumMinor () const { constInit(); return calcData_.numMinor ; }
 
   // get interval for value
   int valueInterval(double r) const;
 
   // get range of interval
   void intervalValues(int i, double &min, double &max) const;
+
+  //---
 
  private:
   class GapData;
@@ -94,6 +104,10 @@ class CInterval {
 
   bool testAxisGaps(double start, double end, double testIncrement, int testNumGapTicks,
                     GapData &axisGapData);
+
+  void invalidate() { calcValid_ = false; originValid_ = false; }
+
+  double valueStart() const;
 
  private:
   struct GapData {
@@ -135,11 +149,14 @@ class CInterval {
   bool      date_           { false };          // is date
   bool      time_           { false };          // is time
   bool      log_            { false };          // is log
-  int       majorIncrement_ { 0 };              // required major increment (if > 0)
-  int       tickIncrement_  { 0 };              // required tick increment (if > 0)
-  bool      valid_          { false };          // are calculated values valid
+  OptReal   majorIncrement_;                    // required major increment (must be > 0.0)
+  OptInt    tickIncrement_;                     // required tick increment (must be > 0)
   GoodTicks goodTicks_;                         // ideal tick data
   GapData   calcData_;                          // calculated tick data
+  bool      calcValid_      { false };          // are calculated values valid
+  OptReal   origin_;                            // required origin
+  bool      originValid_    { false };          // is calculated origin valid
+  double    originStart_      { 0.0};           // calculated start for explicit origin
   TimeType  timeType_       { TimeType::NONE }; // time type
   TimeData  startTime_;                         // start year
 };
