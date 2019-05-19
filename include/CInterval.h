@@ -65,8 +65,8 @@ class CInterval {
   void setMajorIncrement(double r) { majorIncrement_ = r; invalidate(); }
 
   //! get/set required increment multiplier
-  double tickIncrement() const { return tickIncrement_.value_or(0.0); }
-  void setTickIncrement(double r) { tickIncrement_ = r; invalidate(); }
+  int tickIncrement() const { return tickIncrement_.value_or(0); }
+  void setTickIncrement(int r) { tickIncrement_ = r; invalidate(); }
 
   //! get/set required origin
   double origin() const { return origin_.value_or(0.0); }
