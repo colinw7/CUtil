@@ -94,7 +94,7 @@ class CInterval {
   //---
 
  private:
-  class GapData;
+  struct GapData;
 
   void constInit() const;
 
