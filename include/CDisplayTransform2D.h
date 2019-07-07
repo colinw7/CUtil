@@ -6,10 +6,13 @@
 
 class CDisplayTransform2D {
  public:
-  CDisplayTransform2D(const CDisplayRange2D *range) :
+  CDisplayTransform2D(const CDisplayRange2D *range=nullptr) :
    range_(range) {
     update();
   }
+
+  const CDisplayRange2D *range() const { return range_; }
+  void setRange(const CDisplayRange2D *r) { range_ = r; update(); }
 
   double getScale() const { return scale_; }
 
@@ -152,6 +155,8 @@ class CDisplayTransform2D {
 
  private:
   void update() {
+    if (! range_) return;
+
     CPoint2D c = range_->getWindowCenter();
 
     CMatrix2D m1, m2, m3, m4;
