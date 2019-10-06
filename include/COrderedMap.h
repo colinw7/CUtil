@@ -89,6 +89,8 @@ class COrderedMap {
  public:
   COrderedMap() { }
 
+  std::size_t size() const { return indKeyMap_.size(); }
+
   void insert(const KEY &key, const VALUE &value) {
     auto p = keyIndMap_.find(key);
 
