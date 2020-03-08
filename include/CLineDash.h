@@ -271,8 +271,8 @@ class CLineDash {
     if (dash_value[0] == 0) {
       offset_ = lengths_[0];
 
-      for (uint i = 1; i < num_lengths; ++i)
-        lengths_[i - 1] = lengths_[i];
+      for (uint i1 = 1; i1 < num_lengths; ++i1)
+        lengths_[i1 - 1] = lengths_[i1];
 
       lengths_[num_lengths - 1] = offset_;
     }

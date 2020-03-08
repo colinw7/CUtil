@@ -131,12 +131,12 @@ class CMultiArrayT {
         dims1.push_back(dims[i]);
     }
 
-    bool operator==(const Dims &dims) const {
-      if (num_data != dims.num_data || num_dims != dims.num_dims)
+    bool operator==(const Dims &rdims) const {
+      if (num_data != rdims.num_data || num_dims != rdims.num_dims)
         return false;
 
       for (uint i = 0; i < num_dims; ++i)
-        if (dims[i] != dims.dims[i])
+        if (dims[i] != rdims.dims[i])
           return false;
 
       return true;

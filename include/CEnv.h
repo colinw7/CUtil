@@ -2,7 +2,6 @@
 #define CEnv_H
 
 #include <CRefPtr.h>
-
 #include <vector>
 #include <climits>
 #include <sys/types.h>
@@ -11,8 +10,8 @@
 
 class CEnv {
  public:
-  typedef std::vector<std::string> NameList;
-  typedef std::vector<std::string> ValueList;
+  using NameList  = std::vector<std::string>;
+  using ValueList = std::vector<std::string>;
 
   typedef std::pair<std::string,std::string> NameValue;
 
@@ -26,14 +25,16 @@ class CEnv {
     }
   };
 
+  using NameValuesP = CRefPtr<NameValues>;
+
  public:
   class const_iterator {
    public:
     typedef NameValue value_type;
 
    private:
-    CRefPtr<NameValues> nameValues_;
-    uint                pos_;
+    NameValuesP nameValues_;
+    uint        pos_;
 
    public:
     const_iterator() :
@@ -111,7 +112,7 @@ class CEnv {
 
   void getPathList(const std::string &name, ValueList &paths);
 
-  CRefPtr<NameValues> getSnapShot() {
+  NameValuesP getSnapShot() {
     if (nameValues_.getRef() < 2) {
       NameValues *nameValues = new NameValues;
 
@@ -138,8 +139,10 @@ class CEnv {
   void loadNameValues(NameList &names, ValueList &values) const;
 
  private:
-  CRefPtr<NameValues> nameValues_;
-  std::vector<char *> allocated_;
+  using Allocated = std::vector<char *>;
+
+  NameValuesP nameValues_;
+  Allocated   allocated_;
 };
 
 #endif

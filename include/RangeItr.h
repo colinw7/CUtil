@@ -43,8 +43,21 @@
 
 */
 
-template<typename T, typename RES=T>
+template<typename T, typename RVAL=T, typename DVAL=T>
 class RangeItrT {
+ public:
+  struct Chain { };
+  struct Zip   { };
+
+ private:
+  typedef RangeItrT<T,T>           BaseRangeT;
+  typedef std::pair<T,T>           PairT;
+  typedef std::pair<int,T>         IntT;
+  typedef RangeItrT<T,PairT,PairT> PairTRangeT;
+
+  friend BaseRangeT;
+  friend PairTRangeT;
+
  public:
   typedef std::function<T (T)>    Map;
   typedef std::function<bool (T)> Filter;
@@ -62,7 +75,9 @@ class RangeItrT {
 
     virtual bool next() = 0;
 
-    virtual T value() const = 0;
+    virtual bool valid() const= 0;
+
+    virtual DVAL value() const = 0;
 
     virtual Data *dup() const = 0;
   };
@@ -93,6 +108,10 @@ class RangeItrT {
     bool next() override {
       value_ += step_;
 
+      return valid();
+    }
+
+    bool valid() const override {
       return (! hasEnd_ || value_ < end_);
     }
 
@@ -146,6 +165,10 @@ class RangeItrT {
     bool next() override {
       ++pos_;
 
+      return valid();
+    }
+
+    bool valid() const override {
       return (pos_ < int(list_.size()));
     }
 
@@ -186,6 +209,8 @@ class RangeItrT {
 
     bool next() override { return true; }
 
+    bool valid() const override { return true; }
+
     T value() const override {
       return gen_();
     }
@@ -214,6 +239,8 @@ class RangeItrT {
     void reset() override { data_->reset(); }
 
     bool next() override { return data_->next(); }
+
+    bool valid() const override { return data_->valid(); }
 
     T value() const override {
       return map_(data_->value());
@@ -244,13 +271,15 @@ class RangeItrT {
     void reset() override { data_->reset(); }
 
     bool next() override {
-      bool isEnd = data_->next();
+      bool valid = data_->next();
 
-      while (! isEnd && ! filter_(data_->value()))
-        isEnd = data_->next();
+      while (valid && ! filter_(data_->value()))
+        valid = data_->next();
 
-      return isEnd;
+      return valid;
     }
+
+    bool valid() const override { return data_->valid(); }
 
     T value() const override {
       return data_->value();
@@ -267,7 +296,113 @@ class RangeItrT {
 
   //---
 
+  class ChainData : public Data {
+   public:
+    ChainData(Data *data1, Data *data2) :
+     data1_(data1->dup()), data2_(data2->dup()), first_(true) {
+    }
+
+   ~ChainData() {
+      delete data1_;
+      delete data2_;
+    }
+
+    void reset() override { data1_->reset(); data2_->reset(); first_ = true; }
+
+    bool next() override {
+      bool valid;
+
+      if (first_) {
+        valid = data1_->next();
+
+        if (! valid) {
+          first_ = false;
+          valid  = data2_->valid();
+        }
+      }
+      else
+        valid = data2_->next();
+
+      return valid;
+    }
+
+    bool valid() const override {
+      if (first_)
+        return data1_->valid();
+      else
+        return data2_->valid();
+    }
+
+    T value() const override {
+      if (first_)
+        return data1_->value();
+      else
+        return data2_->value();
+    }
+
+    ChainData *dup() const override {
+      return new ChainData(data1_, data2_);
+    }
+
+   private:
+    Data* data1_ { 0 };
+    Data* data2_ { 0 };
+    bool  first_ { true };
+  };
+
+  //---
+
+  class ZipData : public Data {
+   public:
+    typedef typename RangeItrT<T,T>::Data BaseData;
+
+   public:
+    ZipData(BaseData *data1, BaseData *data2) :
+     data1_(data1->dup()), data2_(data2->dup()) {
+    }
+
+   ~ZipData() {
+      delete data1_;
+      delete data2_;
+    }
+
+    void reset() override { data1_->reset(); data2_->reset(); }
+
+    bool next() override {
+      bool valid1 = false, valid2 = false;
+
+      if (data1_->valid() && data2_->valid()) {
+        valid1 = data1_->next();
+        valid2 = data2_->next();
+      }
+
+      return (valid1 && valid2);
+    }
+
+    bool valid() const override {
+      return (data1_->valid() && data2_->valid());
+    }
+
+    DVAL value() const override {
+      return std::pair<T,T>(data1_->value(), data2_->value());
+    }
+
+    ZipData *dup() const override {
+      return new ZipData(data1_, data2_);
+    }
+
+   private:
+    BaseData* data1_ { 0 };
+    BaseData* data2_ { 0 };
+  };
+
+  //---
+
   class Iterator {
+   public:
+    friend typename BaseRangeT::Iterator;
+    friend typename PairTRangeT::Iterator;
+
    private:
     enum class Type {
       LIST,
@@ -276,6 +411,8 @@ class RangeItrT {
       GENERATE,
       MAP,
       FILTER,
+      CHAIN,
+      ZIP,
       END
     };
 
@@ -283,7 +420,7 @@ class RangeItrT {
     struct RawValue {
       RawValue(Iterator *i) : i_(i) { }
 
-      T value() const { return i_->value(); }
+      DVAL value() const { return i_->value(); }
 
       Iterator *i_;
     };
@@ -291,7 +428,7 @@ class RangeItrT {
     struct PairValue {
       PairValue(Iterator *i) : i_(i) { }
 
-      std::pair<int,T> value() const { return i_->pairValue(); }
+      RVAL value() const { return i_->pairValue(); }
 
       Iterator *i_;
     };
@@ -333,6 +470,15 @@ class RangeItrT {
     Iterator(const Iterator &i, Filter filter) :
      type_(Type::FILTER), data_(new FilterData(i.data_, filter)) {
       reset();
+    }
+
+    Iterator(const Iterator &i1, const Iterator &i2, const Chain &) :
+     type_(Type::CHAIN), data_(new ChainData(i1.data_, i2.data_)) {
+    }
+
+    Iterator(const typename BaseRangeT::Iterator &i1,
+             const typename BaseRangeT::Iterator &i2, const typename BaseRangeT::Zip &) :
+     type_(Type::ZIP), data_(new ZipData(i1.data_, i2.data_)) {
     }
 
     Iterator() :
@@ -378,8 +524,8 @@ class RangeItrT {
       return i;
     }
 
-    RES operator*() {
-      typedef typename std::conditional<std::is_same<T,RES>::value,
+    RVAL operator*() {
+      typedef typename std::conditional<std::is_same<RVAL,DVAL>::value,
         RawValue, PairValue>::type ValueType;
 
       return ValueType(this).value();
@@ -424,13 +570,11 @@ class RangeItrT {
         isEnd_ = true;
     }
 
-    T value() const {
+    RVAL value() const {
       return data_->value();
     }
 
-    std::pair<int,T> pairValue() const {
-      return std::pair<int,T>(count_, data_->value());
-    }
+    std::pair<int,T> pairValue() const { return std::pair<int,T>(count_, data_->value()); }
 
    private:
     Iterator &operator=(const Iterator &it);
@@ -460,8 +604,9 @@ class RangeItrT {
     return RangeItrT(l);
   }
 
+  // enumerate
   static RangeItrT<T,std::pair<int,T>> ofPair(const std::vector<T> &l) {
-    return RangeItrT<T,std::pair<int,T>>::of(l);
+    return RangeItrT<T,std::pair<int,T>,T>::of(l);
   }
 
   // RangeItrT<int>.range(0, 21, 2)
@@ -497,6 +642,12 @@ class RangeItrT {
   // > 0, 2, 4
   static RangeItrT iterate(T start, Map map) {
     return RangeItrT(start).map(map);
+  }
+
+  //---
+
+  static PairTRangeT zip(const RangeItrT &r1, const RangeItrT &r2) {
+    return r1.zip(r2);
   }
 
   //---
@@ -553,13 +704,35 @@ class RangeItrT {
 
   //---
 
+  RangeItrT chain(const RangeItrT &range) const {
+    return RangeItrT(start_, range.start_, Chain());
+  }
+
+  //---
+
+  PairTRangeT zip(const RangeItrT &range) const {
+    return PairTRangeT(start_, range.start_, Zip());
+  }
+
+  //---
+
+  template<typename T1>
+  void printValue(std::ostream &os, const T1 &v) const {
+    os << v;
+  }
+
+  template<typename T1, typename T2>
+  void printValue(std::ostream &os, const std::pair<T1,T2> &v) const {
+    os << v.first << ":" << v.second;
+  }
+
   void print(std::ostream &os=std::cout) const {
     bool first = true;
 
     for (auto v : *this) {
       if (! first) os << ", ";
 
-      os << v;
+      printValue(os, v);
 
       first = false;
     }
@@ -604,6 +777,15 @@ class RangeItrT {
    start_(f), end_() {
   }
 
+  RangeItrT(const Iterator &start1, const Iterator &start2, const Chain &c) :
+   start_(start1, start2, c), end_() {
+  }
+
+  RangeItrT(const typename BaseRangeT::Iterator &start1,
+            const typename BaseRangeT::Iterator &start2, const typename BaseRangeT::Zip &z) :
+   start_(start1, start2, z), end_() {
+  }
+
  private:
   Iterator start_;
   Iterator end_;
@@ -614,6 +796,6 @@ typedef RangeItrT<unsigned int> UIRangeItr;
 typedef RangeItrT<double>       RRangeItr;
 typedef RangeItrT<std::string>  SRangeItr;
 
-typedef RangeItrT<double,std::pair<int,double>> RRangePair;
+typedef RangeItrT<double,std::pair<int,double>,double> RRangeItrPair;
 
 #endif

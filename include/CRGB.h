@@ -448,7 +448,7 @@ class CRGB {
 
 //------
 
-#include <CRGBUtil.h>
+//#include <CRGBUtil.h>
 
 //inline CHSV  CRGB::toHSV () const { return CRGBUtil::RGBtoHSV (*this); }
 //inline CHSL  CRGB::toHSL () const { return CRGBUtil::RGBtoHSL (*this); }

@@ -1,6 +1,7 @@
 #ifndef CTRIPLET_H
 #define CTRIPLET_H
 
+#include <CTypeTraits.h>
 #include <iostream>
 
 template <typename T1, typename T2, typename T3>
@@ -13,7 +14,9 @@ struct CTriplet {
   T2 second;
   T3 third;
 
-  CTriplet(const T1 &nfirst, const T2 &nsecond, const T3 &nthird) :
+  CTriplet(typename CTypeTraits<T1>::RefConstT nfirst,
+           typename CTypeTraits<T2>::RefConstT nsecond,
+           typename CTypeTraits<T3>::RefConstT nthird) :
    first(nfirst), second(nsecond), third(nthird) {
   }
 

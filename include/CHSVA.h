@@ -2,6 +2,7 @@
 #define CHSVA_H
 
 #include <CRGBA.h>
+#include <CHSV.h>
 
 // h (0.0 360.0)
 // s (0.0 1.0)
@@ -73,6 +74,7 @@ class CHSVA {
 
   CHSV getHSV() const { return CHSV(h_, s_, v_); }
 
+#if 0
   CRGBA toRGBA() const {
     CRGBA rgba = CRGBUtil::HSVtoRGB(getHSV());
 
@@ -80,6 +82,7 @@ class CHSVA {
 
     return rgba;
   }
+#endif
 
  private:
   double h_, s_, v_, a_;

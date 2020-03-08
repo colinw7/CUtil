@@ -81,6 +81,8 @@ class CHSBA {
 
 //------
 
+#if 0
+
 #include <CRGBUtil.h>
 
 CRGBA CHSBA::toRGBA() const {
@@ -90,5 +92,7 @@ CRGBA CHSBA::toRGBA() const {
 
   return rgba;
 }
+
+#endif
 
 #endif

@@ -138,8 +138,8 @@ class CILineDash {
     if (dash_value[0] == 0) {
       offset_ = lengths_[0];
 
-      for (uint i = 1; i < num_lengths_; ++i)
-        lengths_[i - 1] = lengths_[i];
+      for (uint il = 1; il < num_lengths_; ++il)
+        lengths_[il - 1] = lengths_[il];
 
       lengths_[num_lengths_ - 1] = offset_;
     }

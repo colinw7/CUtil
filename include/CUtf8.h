@@ -48,11 +48,11 @@ namespace CUtf8 {
     }
 
     for (int i = 1; i < seqlen; ++i) {
-      uchar c1 = str[pos + i];
+      uchar c2 = str[pos + i];
 
-      if ((c1 & 0xC0) != 0x80) {
+      if ((c2 & 0xC0) != 0x80) {
         // malformed data, do something !!!
-        ++pos; return (ulong) c1;
+        ++pos; return (ulong) c2;
       }
     }
 

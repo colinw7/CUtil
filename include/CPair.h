@@ -1,6 +1,8 @@
 #ifndef CPAIR_H
 #define CPAIR_H
 
+#include <CTypeTraits.h>
+
 template <typename T1, typename T2>
 struct CPair {
   typedef T1 first_type;
@@ -9,7 +11,8 @@ struct CPair {
   T1 first;
   T2 second;
 
-  CPair(const T1 &nfirst, const T2 &nsecond) :
+  CPair(typename CTypeTraits<T1>::RefConstT nfirst,
+        typename CTypeTraits<T2>::RefConstT nsecond) :
    first(nfirst), second(nsecond) {
   }
 
