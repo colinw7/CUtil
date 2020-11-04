@@ -22,6 +22,8 @@ CEvent.cpp \
 CEnv.cpp \
 CEnvMatch.cpp \
 CInterval.cpp \
+CEncode64.cpp \
+CEncode85.cpp \
 
 OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
@@ -29,6 +31,7 @@ CPPFLAGS = \
 -std=c++14 \
 -I. \
 -I$(INC_DIR) \
+-I../../CFile/include \
 -I../../CMath/include \
 -I../../CGlob/include \
 -I../../CStrUtil/include \
