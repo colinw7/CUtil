@@ -5,6 +5,7 @@
 #include <CCMYK.h>
 #include <CHSL.h>
 #include <CHSV.h>
+#include <CHSVA.h>
 #include <CHSB.h>
 #include <CHSI.h>
 #include <CMathRound.h>
@@ -102,6 +103,12 @@ class CRGBUtil {
     }
 
     return CRGB(r, g, b);
+  }
+
+  static CRGBA HSVAtoRGBA(const CHSVA &hsva) {
+    CRGBA rgba = HSVtoRGB(hsva.getHSV());
+
+    return rgba.setAlpha(hsva.getAlpha());
   }
 
   static CRGB HSBtoRGB(const CHSB &hsb) {
