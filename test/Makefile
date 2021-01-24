@@ -9,8 +9,9 @@ EXTRA_CFLAGS = \
 -I$(INC_DIR)/CTrie \
 -I$(INC_DIR)/CFile \
 -I$(INC_DIR)/CFileType \
+-I$(INC_DIR)/CStrUtil \
 
 LIBS = \
--lCFile -lCOSFile -lCOSUser -lCStrUtil -lCPrintF \
+-lCFile -lCOS -lCStrUtil -lCPrintF \
 
 include $(MAKE_DIR)/bin.mk
