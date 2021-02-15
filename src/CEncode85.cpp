@@ -31,9 +31,9 @@ CEncode85::
 
 void
 CEncode85::
-setChars(const char ascii85_chars[86])
+setChars(const char chars[86])
 {
-  memcpy(ascii85_chars_, ascii85_chars, 85);
+  memcpy(ascii85_chars_, chars, 85);
 
   ascii85_chars_[85] = '\0';
 }

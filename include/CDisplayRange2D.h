@@ -26,7 +26,12 @@ class CDisplayRange2D {
     BASELINE
   };
 
+  using Point  = CPoint2D;
+  using BBox   = CBBox2D;
+  using Matrix = CMatrix2D;
+
  public:
+  //! value range (TODO: always double ?)
   template<typename T>
   struct RangeT {
    T xmin, ymin, xmax, ymax;
@@ -53,8 +58,8 @@ class CDisplayRange2D {
    void incY(T dy) { ymin += dy; ymax += dy; }
   };
 
-//typedef RangeT<int>    IRange;
-  typedef RangeT<double> RRange;
+//using IRange = RangeT<int>;
+  using RRange = RangeT<double>;
 
  public:
   CDisplayRange2D(double pixel_xmin  =   0, double pixel_ymin  =   0,
@@ -103,18 +108,18 @@ class CDisplayRange2D {
     window_.get(window_xmin, window_ymin, window_xmax, window_ymax);
   }
 
-  void getWindowRange(CBBox2D &bbox) const {
+  void getWindowRange(BBox &bbox) const {
     double window_xmin, window_ymin, window_xmax, window_ymax;
 
     getWindowRange(&window_xmin, &window_ymin, &window_xmax, &window_ymax);
 
-    bbox = CBBox2D(CPoint2D(window_xmin, window_ymin), CPoint2D(window_xmax, window_ymax));
+    bbox = BBox(Point(window_xmin, window_ymin), Point(window_xmax, window_ymax));
   }
 
   double getWindowWidth () const { return window_.dx(); }
   double getWindowHeight() const { return window_.dy(); }
 
-  CPoint2D getWindowCenter() const { return CPoint2D(window_.xmid(), window_.ymid()); }
+  Point getWindowCenter() const { return Point(window_.xmid(), window_.ymid()); }
 
   // get/set equal scale flag
   bool getEqualScale() const { return equal_scale_; }
@@ -137,7 +142,11 @@ class CDisplayRange2D {
   bool getFlipX() const { return flip_x_; }
   bool getFlipY() const { return flip_y_; }
 
-  void zoomIn(double factor=2.0) { zoomOut(1.0/factor); }
+  void zoomIn(double factor=2.0) {
+    assert(factor > 0.0);
+
+    zoomOut(1.0/factor);
+  }
 
   void zoomOut(double factor=2.0) {
     double window_hwidth  = 0.5*window_width1_ *factor;
@@ -170,8 +179,8 @@ class CDisplayRange2D {
     window_width1_  = window1_.dx();
     window_height1_ = window1_.dy();
 
-    factor_x_ = (window_width1_  != 0 ?  getPixelWidth ()/window_width1_  : 1);
-    factor_y_ = (window_height1_ != 0 ? -getPixelHeight()/window_height1_ : 1);
+    factor_x_ = (window_width1_  != 0 ?  getPixelWidth ()/window_width1_  : 1.0);
+    factor_y_ = (window_height1_ != 0 ? -getPixelHeight()/window_height1_ : 1.0);
 
     if (equal_scale_) {
       factor_x1_ = factor_x_;
@@ -237,7 +246,7 @@ class CDisplayRange2D {
 
     //------
 
-    CMatrix2D matrix1, matrix2, matrix3;
+    Matrix matrix1, matrix2, matrix3;
 
     if (equal_scale_) {
       matrix1.setTranslation(pixel_.xmin + pdx_, pixel_.ymin + pdy_);
@@ -250,11 +259,13 @@ class CDisplayRange2D {
       matrix3.setTranslation(-window1_.xmin, -window1_.ymax);
     }
 
-    matrix_  = matrix1*matrix2*matrix3;
+    matrix_ = matrix1*matrix2*matrix3;
+
+    // TODO: check invertable
     imatrix_ = matrix_.inverse();
   }
 
-  void windowToPixel(const CPoint2D &window, CPoint2D &pixel) const {
+  void windowToPixel(const Point &window, Point &pixel) const {
     windowToPixel(window.x, window.y, &pixel.x, &pixel.y);
   }
 
@@ -278,18 +289,32 @@ class CDisplayRange2D {
     *pixel_y = CMathRound::Round(pixel_y1);
   }
 
-  void pixelToWindow(const CPoint2D &pixel, CPoint2D &window) const {
+  void pixelToWindow(const Point &pixel, Point &window) const {
     pixelToWindow(pixel.x, pixel.y, &window.x, &window.y);
   }
 
   void pixelToWindow(double pixel_x, double pixel_y, double *window_x, double *window_y) const {
     if (equal_scale_) {
-      *window_x = (pixel_x - pixel_.xmin - pdx_)/factor_x1_ + window1_.xmin;
-      *window_y = (pixel_y - pixel_.ymax - pdy_)/factor_y1_ + window1_.ymin;
+      if (factor_x1_ != 0.0)
+        *window_x = (pixel_x - pixel_.xmin - pdx_)/factor_x1_ + window1_.xmin;
+      else
+        *window_x = window1_.xmin;
+
+      if (factor_y1_ != 0.0)
+        *window_y = (pixel_y - pixel_.ymax - pdy_)/factor_y1_ + window1_.ymin;
+      else
+       *window_y = window1_.ymin;
     }
     else {
-      *window_x = (pixel_x - pixel_.xmin)/factor_x_  + window1_.xmin;
-      *window_y = (pixel_y - pixel_.ymax)/factor_y_  + window1_.ymin;
+      if (factor_x_ != 0.0)
+        *window_x = (pixel_x - pixel_.xmin)/factor_x_  + window1_.xmin;
+      else
+        *window_x = window1_.xmin;
+
+      if (factor_y_ != 0.0)
+        *window_y = (pixel_y - pixel_.ymax)/factor_y_  + window1_.ymin;
+      else
+       *window_y = window1_.ymin;
     }
   }
 
@@ -337,8 +362,8 @@ class CDisplayRange2D {
     return (x >= pixel_.xmin && x <= pixel_.xmin && y >= pixel_.ymin && y <= pixel_.ymin);
   }
 
-  const CMatrix2D &getMatrix () const { return matrix_ ; }
-  const CMatrix2D &getIMatrix() const { return imatrix_; }
+  const Matrix &getMatrix () const { return matrix_ ; }
+  const Matrix &getIMatrix() const { return imatrix_; }
 
  private:
   RRange pixel_;
@@ -368,8 +393,8 @@ class CDisplayRange2D {
   bool flip_x_ { false };
   bool flip_y_ { false };
 
-  CMatrix2D matrix_;
-  CMatrix2D imatrix_;
+  Matrix matrix_;
+  Matrix imatrix_;
 };
 
 #endif

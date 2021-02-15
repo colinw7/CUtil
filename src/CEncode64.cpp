@@ -40,9 +40,9 @@ CEncode64::
 
 void
 CEncode64::
-setChars(const char base_64_chars[64])
+setChars(const char chars[64])
 {
-  memcpy(base_64_chars_, base_64_chars, 64);
+  memcpy(base_64_chars_, chars, 64);
 
   base_64_chars_[64] = '\0';
 }

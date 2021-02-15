@@ -311,6 +311,8 @@ class CTrie {
        os_(os) {
       }
 
+      const std::ostream &os() const { return os_; }
+
       void visit(const String &str, int n) {
         std::cerr << str << "(#" << n << ")" << std::endl;
       }
