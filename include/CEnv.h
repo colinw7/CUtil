@@ -3,6 +3,7 @@
 
 #include <CRefPtr.h>
 #include <vector>
+#include <string>
 #include <climits>
 #include <sys/types.h>
 
@@ -30,7 +31,7 @@ class CEnv {
  public:
   class const_iterator {
    public:
-    typedef NameValue value_type;
+    using value_type = NameValue;
 
    private:
     NameValuesP nameValues_;

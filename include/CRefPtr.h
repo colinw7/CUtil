@@ -374,6 +374,7 @@ class CRefPtr {
 };
 
 // std::less
+// TODO: remove or update : binary_function is deprecated
 namespace std {
 
 template<class T>
