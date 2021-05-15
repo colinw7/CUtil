@@ -6,10 +6,10 @@ CDEBUG = -g
 LDEBUG = -g
 
 INC_DIR = ../include
-OBJ_DIR = ../obj
+OBJ_DIR = ../minObj
 LIB_DIR = ../lib
 
-all: dirs $(LIB_DIR)/libCUtil.a
+all: dirs $(LIB_DIR)/libCUtilMin.a
 
 dirs:
 	@if [ ! -e ../obj ]; then mkdir ../obj; fi
@@ -30,10 +30,8 @@ OBJS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 CPPFLAGS = \
 -std=c++14 \
--DCBRUSH_IMAGE  \
 -I. \
 -I$(INC_DIR) \
--I../../CImageLib/include \
 -I../../CFile/include \
 -I../../CMath/include \
 -I../../CGlob/include \
@@ -41,12 +39,12 @@ CPPFLAGS = \
 
 clean:
 	$(RM) -f $(OBJ_DIR)/*.o
-	$(RM) -f $(LIB_DIR)/libCUtil.a
+	$(RM) -f $(LIB_DIR)/libCUtilMin.a
 
 $(OBJS): $(OBJ_DIR)/%.o: %.cpp
 	$(CC) -c $< -o $(OBJ_DIR)/$*.o $(CPPFLAGS)
 
 .SUFFIXES: .cpp
 
-$(LIB_DIR)/libCUtil.a: $(OBJS)
-	$(AR) crv $(LIB_DIR)/libCUtil.a $(OBJS)
+$(LIB_DIR)/libCUtilMin.a: $(OBJS)
+	$(AR) crv $(LIB_DIR)/libCUtilMin.a $(OBJS)
