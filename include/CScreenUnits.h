@@ -8,6 +8,9 @@
 
 #define CScreenUnitsMgrInst CScreenUnitsMgr::instance()
 
+/*!
+ * Screen units manager class to manage system widget conversion data
+ */
 class CScreenUnitsMgr {
  public:
   static CScreenUnitsMgr *instance() {
@@ -27,28 +30,30 @@ class CScreenUnitsMgr {
     *p = nullptr;
   }
 
-  // em size in pixels
+  //! get/set em size in pixels
   double emSize() const { return emSize_; }
   void setEmSize(double r) { emSize_ = r; }
 
-  // ex size in pixels
+  //! get/set ex size in pixels
   double exSize() const { return exSize_; }
   void setExSize(double r) { exSize_ = r; }
 
-  // pixels (dots) per inch
+  //! get/set pixels (dots) per inch
   double dpi() const { return dpi_; }
   void setDpi(double r) { dpi_ = r; }
 
-  // mm size in pixels
+  //! get/set mm size in pixels
   double mmSize() const { return dpi()/25.4; }
 
-  // screen size (percent) ?
+  //! get/set screen scale (percent)
   double screenScale() const { return screenScale_; }
   void setScreenScale(double s) { screenScale_ = s; }
 
+  //! get/set screen width
   double screenWidth() const { return screenWidth_; }
   void setScreenWidth(double r) { screenWidth_ = r; }
 
+  //! get/set screen height
   double screenHeight() const { return screenHeight_; }
   void setScreenHeight(double r) { screenHeight_ = r; }
 
@@ -74,6 +79,13 @@ class CScreenUnitsMgr {
 
 //------
 
+/*!
+ * Class for screen units value.
+ *
+ * Uses correctly configured CScreenUnitsMgr data for conversions
+ *
+ * Note: rvalue optional parameters are for reference value (percent and ratio)
+ */
 class CScreenUnits {
  public:
   enum class Units {
