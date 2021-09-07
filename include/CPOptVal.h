@@ -28,7 +28,7 @@ class CPOptValT {
     delete value_;
   }
 
-  const CPOptValT &operator=(const CPOptValT &rhs) {
+  CPOptValT &operator=(const CPOptValT &rhs) {
     if (rhs.value_)
       setValue(rhs.value);
     else
@@ -37,7 +37,7 @@ class CPOptValT {
     return *this;
   }
 
-  const CPOptValT &operator=(const T &value) {
+  CPOptValT &operator=(const T &value) {
     setValue(value);
 
     return *this;

@@ -1074,6 +1074,8 @@ class CRGBA {
     double qa = src.getAlpha();
     double qb = dst.getAlpha();
 
+    // a = 1 - (1 - qa)*(1 - qb)
+
     if      (mode == CRGBA_BLEND_NORMAL)
       return (1 - qa)*dst + src;
     else if (mode == CRGBA_BLEND_MULTIPLY)

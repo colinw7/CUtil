@@ -8,7 +8,7 @@ template<typename T>
 class COptValT {
  public:
   COptValT() :
-   value_(), valid_(false) {
+   value_() {
   }
 
   explicit COptValT(const T &value) :
@@ -209,15 +209,15 @@ class COptValT {
 
  private:
   T    value_;
-  bool valid_;
+  bool valid_ { false };
 };
 
-typedef COptValT<bool>        COptBool;
-typedef COptValT<int>         COptInt;
-typedef COptValT<long>        COptLong;
-typedef COptValT<uint>        COptUInt;
-typedef COptValT<ulong>       COptULong;
-typedef COptValT<double>      COptReal;
-typedef COptValT<std::string> COptString;
+using COptBool   = COptValT<bool>;
+using COptInt    = COptValT<int>;
+using COptLong   = COptValT<long>;
+using COptUInt   = COptValT<uint>;
+using COptULong  = COptValT<ulong>;
+using COptReal   = COptValT<double>;
+using COptString = COptValT<std::string>;
 
 #endif

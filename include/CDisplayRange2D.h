@@ -121,6 +121,11 @@ class CDisplayRange2D {
 
   Point getWindowCenter() const { return Point(window_.xmid(), window_.ymid()); }
 
+  void getTransformedWindowRange(double *window_xmin, double *window_ymin,
+                                 double *window_xmax, double *window_ymax) const {
+    window1_.get(window_xmin, window_ymin, window_xmax, window_ymax);
+  }
+
   // get/set equal scale flag
   bool getEqualScale() const { return equal_scale_; }
   void setEqualScale(bool flag) { equal_scale_ = flag; recalc(); }

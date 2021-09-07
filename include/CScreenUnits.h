@@ -103,6 +103,12 @@ class CScreenUnits {
   };
 
  public:
+  static CScreenUnits makePixel(double value) {
+    return CScreenUnits(value, Units::PX);
+  }
+
+  //---
+
   CScreenUnits() { }
 
   CScreenUnits(double value, Units units=Units::PX) :

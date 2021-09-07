@@ -642,7 +642,7 @@ class CMultiArrayT {
       delete [] dims1_;
   }
 
-  const CMultiArrayT &operator=(const CMultiArrayT &array) {
+  CMultiArrayT &operator=(const CMultiArrayT &array) {
     delete [] mask_;
 
     uint num_dims = getNumDims();

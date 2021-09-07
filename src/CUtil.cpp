@@ -1,6 +1,9 @@
 #include <CUtil.h>
 #include <CStrUtil.h>
 
+std::ostream *CUtil::os_ = nullptr;
+
+#if 0
 std::string
 CUtil::
 toString(CAngleType angle_type)
@@ -24,6 +27,7 @@ toAngleType(const std::string &str)
   else
     return CANGLE_TYPE_NONE;
 }
+#endif
 
 //---
 
@@ -63,4 +67,13 @@ decodeMask(unsigned short full_mask, unsigned short *shift, unsigned short *mask
   }
 
   *mask = full_mask;
+}
+
+//---
+
+void
+CUtil::
+printString(const std::string &str)
+{
+  (os_ ? *os_ : std::cerr) << str << "\n";
 }
