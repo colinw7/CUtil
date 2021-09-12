@@ -156,11 +156,13 @@ class CLineDash {
     return *this;
   }
 
-  double        getOffset    () const { return offset_; }
+  double getOffset() const { return offset_; }
+
   const double *getLengths   () const { return &lengths_[0]; }
-  uint          getNumLengths() const { return lengths_.size(); }
-  int           getInd       () const { return ind_; }
-  double        getPosition  () const { return position_; }
+  uint getNumLengths() const { return lengths_.size(); }
+
+  int getInd() const { return ind_; }
+  double getPosition() const { return position_; }
 
   double getLength(int i) const { return lengths_[i]; }
 
@@ -173,6 +175,7 @@ class CLineDash {
   void setInd   (uint ind)      { ind_    = ind; }
 
   bool isSolid() const { return lengths_.empty(); }
+  void setSolid() { lengths_.clear(); }
 
   bool isDraw() const { return isSolid() || ! (ind_ & 1); }
 
