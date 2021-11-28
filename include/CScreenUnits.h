@@ -107,6 +107,10 @@ class CScreenUnits {
     return CScreenUnits(value, Units::PX);
   }
 
+  static CScreenUnits makePercent(double value) {
+    return CScreenUnits(value, Units::PERCENT);
+  }
+
   //---
 
   CScreenUnits() { }
@@ -166,7 +170,7 @@ class CScreenUnits {
   }
 
   int ivalue() const {
-    assert(units_ == Units::PX);
+    assert(isPixel());
 
     if (value_ >= 0)
       return int(value_ + 0.5);
@@ -189,7 +193,7 @@ class CScreenUnits {
   }
 
   CScreenUnits px(const CScreenUnits &rvalue=CScreenUnits()) const {
-    if (units_ == Units::PX) return *this;
+    if (isPixel()) return *this;
 
     return CScreenUnits(toPixel(rvalue), Units::PX);
   }
@@ -225,8 +229,9 @@ class CScreenUnits {
   }
 
   CScreenUnits percent(const CScreenUnits &rvalue=CScreenUnits()) const {
-    if (units_ == Units::PERCENT) return *this;
-    if (units_ == Units::RATIO  ) return CScreenUnits(value_*100, Units::PERCENT);
+    if (isPercent()) return *this;
+
+    if (units_ == Units::RATIO) return CScreenUnits(value_*100, Units::PERCENT);
 
     assert(rvalue.units_ != Units::NONE);
 
@@ -236,8 +241,9 @@ class CScreenUnits {
   }
 
   CScreenUnits ratio(const CScreenUnits &rvalue=CScreenUnits()) const {
-    if (units_ == Units::RATIO  ) return *this;
-    if (units_ == Units::PERCENT) return CScreenUnits(value_/100, Units::RATIO);
+    if (units_ == Units::RATIO) return *this;
+
+    if (isPercent()) return CScreenUnits(value_/100, Units::RATIO);
 
     assert(rvalue.units_ != Units::NONE);
 
@@ -245,6 +251,12 @@ class CScreenUnits {
 
     return CScreenUnits(value, Units::RATIO);
   }
+
+  //---
+
+  bool isPixel() const { return (units() == Units::PX); }
+
+  bool isPercent() const { return (units() == Units::PERCENT); }
 
   //---
 
@@ -369,7 +381,7 @@ class CScreenUnits {
 
  private:
   double toPixel(const CScreenUnits &rvalue=CScreenUnits()) const {
-    if      (units_ == Units::PERCENT) {
+    if      (isPercent()) {
       if (rvalue.units_ != Units::NONE)
         return rvalue.toPixel()*value_/100.0;
       else

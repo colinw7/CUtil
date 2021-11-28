@@ -187,11 +187,11 @@ class CDisplayRange2D {
     factor_x_ = (window_width1_  != 0 ?  getPixelWidth ()/window_width1_  : 1.0);
     factor_y_ = (window_height1_ != 0 ? -getPixelHeight()/window_height1_ : 1.0);
 
-    if (equal_scale_) {
+    if (getEqualScale()) {
       factor_x1_ = factor_x_;
       factor_y1_ = factor_y_;
 
-      if (scale_min_) {
+      if (getScaleMin()) {
         if (fabs(factor_x1_) > fabs(factor_y1_)) {
           if (factor_x1_ < 0)
             factor_x1_ = -fabs(factor_y1_);
@@ -220,26 +220,32 @@ class CDisplayRange2D {
         }
       }
 
-      double px, py;
-
       pdx_ = 0;
       pdy_ = 0;
 
-      windowToPixel(window1_.xmax, window1_.ymin, &px, &py);
+      double px, py;
+
+      px = (window1_.xmax - window1_.xmin)*factor_x1_ + pixel_.xmin;
+      py = (window1_.ymax - window1_.ymin)*factor_y1_ + pixel_.ymax;
+
+      double extra_width  = pixel_.xmax - px;
+      double extra_height = py;
+
+      //windowToPixel(window1_.xmax, window1_.ymin, &px, &py);
 
       if      (halign_ == HAlign::LEFT)
         pdx_ = 0;
       else if (halign_ == HAlign::CENTER)
-        pdx_ = (pixel_.xmax - px)/2;
+        pdx_ = extra_width/2.0;
       else if (halign_ == HAlign::RIGHT)
-        pdx_ = pixel_.xmax - px;
+        pdx_ = extra_width;
 
       if      (valign_ == VAlign::TOP)
         pdy_ = 0;
       else if (valign_ == VAlign::CENTER)
-        pdy_ = (pixel_.ymax - py)/2;
+        pdy_ = -extra_height/2.0;
       else if (valign_ == VAlign::BOTTOM)
-        pdy_ = pixel_.ymax - py;
+        pdy_ = -extra_height;
     }
     else {
       pdx_ = 0;
@@ -253,7 +259,7 @@ class CDisplayRange2D {
 
     Matrix matrix1, matrix2, matrix3;
 
-    if (equal_scale_) {
+    if (getEqualScale()) {
       matrix1.setTranslation(pixel_.xmin + pdx_, pixel_.ymin + pdy_);
       matrix2.setScale      (factor_x1_, factor_y1_);
       matrix3.setTranslation(-window1_.xmin, -window1_.ymax);
@@ -275,7 +281,7 @@ class CDisplayRange2D {
   }
 
   void windowToPixel(double window_x, double window_y, double *pixel_x, double *pixel_y) const {
-    if (equal_scale_) {
+    if (getEqualScale()) {
       *pixel_x = (window_x - window1_.xmin)*factor_x1_ + pixel_.xmin + pdx_;
       *pixel_y = (window_y - window1_.ymin)*factor_y1_ + pixel_.ymax + pdy_;
     }
@@ -299,7 +305,7 @@ class CDisplayRange2D {
   }
 
   void pixelToWindow(double pixel_x, double pixel_y, double *window_x, double *window_y) const {
-    if (equal_scale_) {
+    if (getEqualScale()) {
       if (factor_x1_ != 0.0)
         *window_x = (pixel_x - pixel_.xmin - pdx_)/factor_x1_ + window1_.xmin;
       else
