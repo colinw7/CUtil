@@ -619,15 +619,19 @@ class RangeItrT {
   static RangeItrT range(T start, T end) {
     return RangeItrT(start, end);
   }
+  // RangeItrT<int>.range(3)
+  // > 3, 4, 5, .....
   static RangeItrT range(T start) {
     return RangeItrT(start);
   }
 
-  // RangeItrT<int>.rangeClosed(1, 3)
-  // > 1, 2, 3
+  // RangeItrT<int>.rangeClosed(1, 5, 2)
+  // > 1, 3, 5
   static RangeItrT rangeClosed(T start, T end, T step) {
     return RangeItrT(start, start < end ? end + step : end - step, step);
   }
+  // RangeItrT<int>.rangeClosed(1, 3)
+  // > 1, 2, 3
   static RangeItrT rangeClosed(T start, T end) {
     return RangeItrT(start, start < end ? end + 1 : end - 1);
   }
