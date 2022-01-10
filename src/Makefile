@@ -13,6 +13,7 @@ all: dirs $(LIB_DIR)/libCUtil.a
 
 dirs:
 	@if [ ! -e ../obj ]; then mkdir ../obj; fi
+	@if [ ! -e ../lib ]; then mkdir ../lib; fi
 	@if [ ! -e ../bin ]; then mkdir ../bin; fi
 
 SRC = \
