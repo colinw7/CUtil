@@ -223,15 +223,13 @@ class CDisplayRange2D {
       pdx_ = 0;
       pdy_ = 0;
 
-      double px, py;
+      double px1, py1, px2, py2;
 
-      px = (window1_.xmax - window1_.xmin)*factor_x1_ + pixel_.xmin;
-      py = (window1_.ymax - window1_.ymin)*factor_y1_ + pixel_.ymax;
+      windowToPixel(window1_.xmin, window1_.ymin, &px1, &py1);
+      windowToPixel(window1_.xmax, window1_.ymax, &px2, &py2);
 
-      double extra_width  = pixel_.xmax - px;
-      double extra_height = py;
-
-      //windowToPixel(window1_.xmax, window1_.ymin, &px, &py);
+      double extra_width  = std::fabs(pixel_.xmax - pixel_.xmin) - std::fabs(px2 - px1);
+      double extra_height = std::fabs(pixel_.ymax - pixel_.ymin) - std::fabs(py2 - py1);
 
       if      (halign_ == HAlign::LEFT)
         pdx_ = 0;
@@ -243,9 +241,9 @@ class CDisplayRange2D {
       if      (valign_ == VAlign::TOP)
         pdy_ = 0;
       else if (valign_ == VAlign::CENTER)
-        pdy_ = -extra_height/2.0;
+        pdy_ = extra_height/2.0;
       else if (valign_ == VAlign::BOTTOM)
-        pdy_ = -extra_height;
+        pdy_ = extra_height;
     }
     else {
       pdx_ = 0;
