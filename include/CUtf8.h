@@ -22,29 +22,29 @@ namespace CUtf8 {
     uchar c1 = str[pos];
 
     if      ((c1 & 0x80) == 0) { // top 1 bit is (0)
-      uc = (ulong) (c1 & 0x7F);
+      uc = static_cast<ulong>(c1 & 0x7F);
       seqlen = 1;
     }
     else if ((c1 & 0xE0) == 0xC0) { // top 3 bits are (110)
-      uc = (ulong) (c1 & 0x1F);
+      uc = static_cast<ulong>(c1 & 0x1F);
       seqlen = 2;
     }
     else if ((c1 & 0xF0) == 0xE0) { // top 4 bits are (1110)
-      uc = (ulong) (c1 & 0x0F);
+      uc = static_cast<ulong>(c1 & 0x0F);
       seqlen = 3;
     }
     else if ((c1 & 0xF8) == 0xF0) { // top 5 bits are (11110)
-      uc = (ulong) (c1 & 0x07);
+      uc = static_cast<ulong>(c1 & 0x07);
       seqlen = 4;
     }
     else {
       // malformed data, do something !!!
-      ++pos; return (ulong) c1;
+      ++pos; return static_cast<ulong>(c1);
     }
 
     if (seqlen + pos > int(len)) {
       // malformed data, do something !!!
-      ++pos; return (ulong) c1;
+      ++pos; return static_cast<ulong>(c1);
     }
 
     for (int i = 1; i < seqlen; ++i) {
@@ -52,7 +52,7 @@ namespace CUtf8 {
 
       if ((c2 & 0xC0) != 0x80) {
         // malformed data, do something !!!
-        ++pos; return (ulong) c2;
+        ++pos; return static_cast<ulong>(c2);
       }
     }
 
@@ -64,7 +64,7 @@ namespace CUtf8 {
 
         if (! IS_IN_RANGE(c1, 0xC2, 0xDF)) {
           // malformed data, do something !!!
-          //++pos; return (ulong) c1;
+          //++pos; return static_cast<ulong>(c1);
         }
 
         break;
@@ -78,7 +78,7 @@ namespace CUtf8 {
             ((c1 == 0xED) && ! IS_IN_RANGE(c2, 0x80, 0x9F)) ||
             (! IS_IN_RANGE(c1, 0xE1, 0xEC) && ! IS_IN_RANGE(c1, 0xEE, 0xEF))) {
           // malformed data, do something !!!
-          //++pos; return (ulong) c1;
+          //++pos; return static_cast<ulong>(c1);
         }
 
         break;
@@ -92,7 +92,7 @@ namespace CUtf8 {
             ((c1 == 0xF4) && ! IS_IN_RANGE(c2, 0x80, 0x8F)) ||
             ! IS_IN_RANGE(c1, 0xF1, 0xF3)) {
           // malformed data, do something !!!
-          //++pos; return (ulong) c1;
+          //++pos; return static_cast<ulong>(c1);
         }
 
         break;
@@ -100,7 +100,7 @@ namespace CUtf8 {
     }
 
     for (int i = 1; i < seqlen; ++i) {
-      uc = ((uc << 6) | (ulong)(str[pos + i] & 0x3F));
+      uc = ((uc << 6) | static_cast<ulong>(str[pos + i] & 0x3F));
     }
 
     pos += seqlen;

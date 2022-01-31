@@ -6,7 +6,7 @@
 template<typename T>
 class CFlags {
  public:
-  typedef T enum_type;
+  using enum_type = T;
 
  private:
   uint value_;
@@ -19,7 +19,7 @@ class CFlags {
   }
 
   CFlags(T value) :
-   value_((int) value) {
+   value_(static_cast<int>(value)) {
   }
 
   // copy/assign
@@ -34,7 +34,7 @@ class CFlags {
   }
 
   // enum value
-  T value() const { return (T) value_; }
+  T value() const { return static_cast<T>(value_); }
 
   // conversion
   operator int() const { return value_; }
