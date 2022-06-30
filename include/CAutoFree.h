@@ -62,6 +62,8 @@ class CAutoFree {
 
 //---
 
+#include <netdb.h>
+
 class CAutoFreeAddrInfo {
  private:
   typedef struct addrinfo T;

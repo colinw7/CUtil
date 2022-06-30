@@ -30,6 +30,38 @@ class CUtil {
   // print string
   static void printString(const std::string &str);
 
+#if 0
+  // print string separated with newline
+  template<class T, class... Args>
+  static void printSep(std::ostream &os, const std::string &sep, T arg, Args... args) {
+    os << arg;
+
+    if constexpr (sizeof...(Args) > 0) {
+      os << sep;
+
+      printSep(os, sep, args...);
+    }
+    else
+      os << "\n";
+  }
+#endif
+
+#if 0
+  // print space separated with newline
+  template<class T, class... Args>
+  static void print(std::ostream &os, T arg, Args... args) {
+    os << arg;
+
+    if constexpr (sizeof...(Args) > 0) {
+      os << " ";
+
+      print(os, args...);
+    }
+    else
+      os << "\n";
+  }
+#endif
+
  private:
   static std::ostream *os_;
 };

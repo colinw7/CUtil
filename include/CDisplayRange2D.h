@@ -94,10 +94,10 @@ class CDisplayRange2D {
 
     pixel_.get(&pixel_xmin1, &pixel_ymin1, &pixel_xmax1, &pixel_ymax1);
 
-    *pixel_xmin = pixel_xmin1;
-    *pixel_ymin = pixel_ymin1;
-    *pixel_xmax = pixel_xmax1;
-    *pixel_ymax = pixel_ymax1;
+    *pixel_xmin = int(pixel_xmin1);
+    *pixel_ymin = int(pixel_ymin1);
+    *pixel_xmax = int(pixel_xmax1);
+    *pixel_ymax = int(pixel_ymax1);
   }
 
   double getPixelWidth () const { return (pixel_.dx() >= 0 ? pixel_.dx() + 1 : pixel_.dx() - 1); }

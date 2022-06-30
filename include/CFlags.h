@@ -19,7 +19,7 @@ class CFlags {
   }
 
   CFlags(T value) :
-   value_(static_cast<int>(value)) {
+   value_(static_cast<uint>(value)) {
   }
 
   // copy/assign
@@ -37,7 +37,7 @@ class CFlags {
   T value() const { return static_cast<T>(value_); }
 
   // conversion
-  operator int() const { return value_; }
+  operator int() const { return int(value_); }
 
   //operator T() const { return value(); }
 

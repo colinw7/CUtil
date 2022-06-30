@@ -81,7 +81,7 @@ class CRGBUtil {
 
       h /= 60.0;
 
-      int i = (int) h;
+      int i = int(h);
 
       double f = h - i;
 
@@ -305,7 +305,7 @@ class CRGBUtil {
   }
 
   static uint clampI(int v) {
-    return (v >= 0 ? (v <= 255 ? v : 255) : 0);
+    return uint(v >= 0 ? (v <= 255 ? v : 255) : 0);
   }
 };
 

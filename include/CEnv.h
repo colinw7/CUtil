@@ -35,18 +35,18 @@ class CEnv {
 
    private:
     NameValuesP nameValues_;
-    uint        pos_;
+    uint        pos_ { 0 };
 
    public:
-    const_iterator() :
-     nameValues_(), pos_(UINT_MAX) {
+    // end iterator
+    const_iterator() {
       nameValues_ = CEnvInst.getSnapShot();
 
-      pos_ = nameValues_->names.size();
+      pos_ = static_cast<uint>(nameValues_->names.size());
     }
 
-    explicit const_iterator(int) :
-     nameValues_(), pos_(0) {
+    // begin iterator
+    explicit const_iterator(int) {
       nameValues_ = CEnvInst.getSnapShot();
     }
 

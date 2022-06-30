@@ -2,7 +2,6 @@
 #define CSafeCast_H
 
 #include <limits>
-#include <cstddef>
 #include <cassert>
 
 namespace CUtil {

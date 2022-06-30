@@ -109,11 +109,11 @@ class COrderedMap {
     auto p = keyIndMap_.find(key);
 
     if (p == keyIndMap_.end()) {
-      int ind = keyIndMap_.size();
+      auto ind = keyIndMap_.size();
 
-      p = keyIndMap_.insert(p, typename KeyIndMap::value_type(key, ind));
+      p = keyIndMap_.insert(p, typename KeyIndMap::value_type(key, int(ind)));
 
-      indKeyMap_[ind] = key;
+      indKeyMap_[int(ind)] = key;
     }
 
     return find(key);

@@ -12,7 +12,7 @@
 class CHSVA {
  private:
   static uint clampI(int v) {
-    return (v >= 0 ? (v <= 255 ? v : 255) : 0);
+    return (v >= 0 ? uint(v <= 255 ? v : 255) : 0);
   }
 
  public:
@@ -68,9 +68,9 @@ class CHSVA {
   double getAlpha     () const { return a_; }
 
   uint getHueI       () const { double h = h_; while (h < 0) h += 360; return int(h) % 360; }
-  uint getSaturationI() const { return clampI(255.0*s_); }
-  uint getValueI     () const { return clampI(255.0*v_); }
-  uint getAlphaI     () const { return clampI(255.0*a_); }
+  uint getSaturationI() const { return uint(clampI(int(255.0*s_))); }
+  uint getValueI     () const { return uint(clampI(int(255.0*v_))); }
+  uint getAlphaI     () const { return uint(clampI(int(255.0*a_))); }
 
   CHSV getHSV() const { return CHSV(h_, s_, v_); }
 

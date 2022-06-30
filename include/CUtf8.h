@@ -19,7 +19,7 @@ namespace CUtf8 {
 
     int seqlen = 1;
 
-    uchar c1 = str[pos];
+    auto c1 = uchar(str[size_t(pos)]);
 
     if      ((c1 & 0x80) == 0) { // top 1 bit is (0)
       uc = static_cast<ulong>(c1 & 0x7F);
@@ -48,7 +48,7 @@ namespace CUtf8 {
     }
 
     for (int i = 1; i < seqlen; ++i) {
-      uchar c2 = str[pos + i];
+      uchar c2 = uchar(str[size_t(pos + i)]);
 
       if ((c2 & 0xC0) != 0x80) {
         // malformed data, do something !!!
@@ -60,7 +60,7 @@ namespace CUtf8 {
 
     switch (seqlen) {
       case 2: {
-        c1 = str[pos + 0];
+        c1 = uchar(str[size_t(pos + 0)]);
 
         if (! IS_IN_RANGE(c1, 0xC2, 0xDF)) {
           // malformed data, do something !!!
@@ -71,8 +71,8 @@ namespace CUtf8 {
       }
 
       case 3: {
-        c1 = str[pos + 0];
-        c2 = str[pos + 1];
+        c1 = uchar(str[size_t(pos + 0)]);
+        c2 = uchar(str[size_t(pos + 1)]);
 
         if (((c1 == 0xE0) && ! IS_IN_RANGE(c2, 0xA0, 0xBF)) ||
             ((c1 == 0xED) && ! IS_IN_RANGE(c2, 0x80, 0x9F)) ||
@@ -85,8 +85,8 @@ namespace CUtf8 {
       }
 
       case 4: {
-        c1 = str[pos + 0];
-        c2 = str[pos + 1];
+        c1 = uchar(str[size_t(pos + 0)]);
+        c2 = uchar(str[size_t(pos + 1)]);
 
         if (((c1 == 0xF0) && ! IS_IN_RANGE(c2, 0x90, 0xBF)) ||
             ((c1 == 0xF4) && ! IS_IN_RANGE(c2, 0x80, 0x8F)) ||
@@ -100,7 +100,7 @@ namespace CUtf8 {
     }
 
     for (int i = 1; i < seqlen; ++i) {
-      uc = ((uc << 6) | static_cast<ulong>(str[pos + i] & 0x3F));
+      uc = ulong((uc << 6) | static_cast<ulong>(str[size_t(pos + i)] & 0x3F));
     }
 
     pos += seqlen;
@@ -116,7 +116,7 @@ namespace CUtf8 {
 
     int seqlen = 1;
 
-    uchar c1 = str[pos];
+    uchar c1 = uchar(str[size_t(pos)]);
 
     if      ((c1 & 0x80) == 0) { // top 1 bit is (0)
       seqlen = 1;
@@ -134,7 +134,7 @@ namespace CUtf8 {
     }
 
     if (seqlen + pos > int(len)) {
-      pos = len;
+      pos = int(len);
     }
 
     pos += seqlen;
@@ -143,33 +143,33 @@ namespace CUtf8 {
   }
 
   inline ulong readNextChar(const std::string &str, int &pos) {
-    uint len = str.size();
+    auto len = str.size();
 
-    return readNextChar(str, pos, len);
+    return readNextChar(str, pos, uint(len));
   }
 
   inline bool encode(ulong c, char s[4], int &len) {
     if      (c <= 0x7F) {
       len  = 1; // 7 bits
-      s[0] = c;
+      s[0] = char(c);
     }
     else if (c <= 0x7FF) {
       len = 2;  // 11 bits
-      s[0] = 0xC0 | ((c >> 6) & 0x1F); // top 5
-      s[1] = 0x80 | ( c       & 0x3F); // bottom 6
+      s[0] = char(0xC0 | ((c >> 6) & 0x1F)); // top 5
+      s[1] = char(0x80 | ( c       & 0x3F)); // bottom 6
     }
     else if (c <= 0xFFFF) {
       len = 3; // 16 bits
-      s[0] = 0xE0 | ((c >> 12) & 0x0F); // top 4
-      s[1] = 0x80 | ((c >>  6) & 0x3F); // mid 6
-      s[2] = 0x80 | ( c        & 0x3F); // bottom 6
+      s[0] = char(0xE0 | ((c >> 12) & 0x0F)); // top 4
+      s[1] = char(0x80 | ((c >>  6) & 0x3F)); // mid 6
+      s[2] = char(0x80 | ( c        & 0x3F)); // bottom 6
     }
     else if (c <= 0x1FFFFF) {
       len = 4; // 21 bits
-      s[0] = 0xF0 | ((c >> 18) & 0x07); // top 3
-      s[1] = 0x80 | ((c >> 12) & 0x3F); // top mid 6
-      s[2] = 0x80 | ((c >>  6) & 0x3F); // bottom mid 6
-      s[3] = 0x80 | ( c        & 0x3F); // bottom 6
+      s[0] = char(0xF0 | ((c >> 18) & 0x07)); // top 3
+      s[1] = char(0x80 | ((c >> 12) & 0x3F)); // top mid 6
+      s[2] = char(0x80 | ((c >>  6) & 0x3F)); // bottom mid 6
+      s[3] = char(0x80 | ( c        & 0x3F)); // bottom 6
     }
     else
       return false;
@@ -192,7 +192,7 @@ namespace CUtf8 {
 
   inline bool isSpace(ulong c) {
     if      (c <  0x80)
-      return isspace(c);
+      return isspace(int(c));
     else if (c == 0xa0) // no-break space
       return true;
     else if (c == 0x2028) // line separator
@@ -206,7 +206,7 @@ namespace CUtf8 {
   inline int length(const std::string &str) {
     int  i   = 0;
     int  pos = 0;
-    uint len = str.size();
+    uint len = uint(str.size());
 
     while (skipNextChar(str, pos, len))
       ++i;
@@ -220,7 +220,7 @@ namespace CUtf8 {
 
     int  i   = 0;
     int  pos = 0;
-    uint len = str.size();
+    uint len = uint(str.size());
 
     while (i < ind) {
       if (! skipNextChar(str, pos, len))
@@ -245,7 +245,7 @@ namespace CUtf8 {
 
     int  i   = 0;
     int  pos = 0;
-    uint len = str.size();
+    uint len = uint(str.size());
 
     // first first char
     while (i < ind) {
@@ -255,7 +255,7 @@ namespace CUtf8 {
       ++i;
     }
 
-    return str.substr(pos);
+    return str.substr(size_t(pos));
   }
 
   inline std::string substr(const std::string &str, int ind, int n) {
@@ -264,7 +264,7 @@ namespace CUtf8 {
 
     int  i   = 0;
     int  pos = 0;
-    uint len = str.size();
+    uint len = uint(str.size());
 
     // first first char
     while (i < ind) {
@@ -288,15 +288,15 @@ namespace CUtf8 {
 
     int i2 = pos;
 
-    return str.substr(i1, i2 - i1);
+    return str.substr(size_t(i1), size_t(i2 - i1));
   }
 
   inline bool isAscii(const std::string &str) {
     uint i   = 0;
-    uint len = str.size();
+    uint len = uint(str.size());
 
     while (i < len) {
-      uchar c = str[i];
+      uchar c = uchar(str[size_t(i)]);
 
       if (c >= 0x80)
         return false;

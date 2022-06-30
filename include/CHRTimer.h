@@ -25,15 +25,14 @@ class CHRTimerMgr {
     char *env = getenv(envname);
     if (! env) return false;
 
-    uint len = strlen(env);
-
+    auto len = strlen(env);
     if (len > 4) return false;
 
     char str[5];
 
     uint i = 0;
 
-    for ( ; env[i] != '\0'; ++i) str[i] = tolower(env[i]);
+    for ( ; env[i] != '\0'; ++i) str[i] = char(std::tolower(env[i]));
     for ( ; i < 5         ; ++i) str[i] = '\0';
 
     if (strcmp(str, "yes" ) == 0 || strcmp(str, "on") == 0 ||
@@ -300,7 +299,7 @@ class CIncrementalTimer {
     if (! count_) return;
 
     double elapsed  = elapsed_.getSecs();
-    double interval = elapsed/count_;
+    double interval = elapsed/double(count_);
 
     std::cout << id_ << ": total=" << elapsed << " calls=" << count_ <<
                  " interval=" << interval << std::endl;

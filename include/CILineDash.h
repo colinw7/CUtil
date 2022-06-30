@@ -7,13 +7,6 @@
 #include <sys/types.h>
 
 class CILineDash {
- private:
-  int  *lengths_;
-  uint  num_lengths_;
-  int   offset_;
-  uint  ind_;
-  int   position_;
-
  public:
   class Lengths {
     private:
@@ -36,7 +29,7 @@ class CILineDash {
      }
 
      uint size() const {
-       return lengths_.size();
+       return uint(lengths_.size());
      }
 
      int value(uint i) const {
@@ -45,32 +38,17 @@ class CILineDash {
   };
 
  public:
-  CILineDash() :
-   lengths_    (NULL),
-   num_lengths_(0),
-   offset_     (0),
-   ind_        (0),
-   position_   (0) {
+  CILineDash() {
     init();
   }
 
-  CILineDash(const CILineDash &dash) :
-   lengths_    (NULL),
-   num_lengths_(0),
-   offset_     (0),
-   ind_        (0),
-   position_   (0) {
+  CILineDash(const CILineDash &dash) {
     init();
 
     copy(dash);
   }
 
-  CILineDash(int *lengths, uint num_lengths, int offset) :
-   lengths_    (NULL),
-   num_lengths_(0),
-   offset_     (0),
-   ind_        (0),
-   position_   (0) {
+  CILineDash(int *lengths, uint num_lengths, int offset) {
     init();
 
     num_lengths_ = num_lengths;
@@ -80,13 +58,8 @@ class CILineDash {
     memcpy(lengths_, lengths, num_lengths*sizeof(int));
   }
 
-  CILineDash(const Lengths &lengths, int offset) :
-   lengths_    (NULL),
-   num_lengths_(0),
-   offset_     (0),
-   ind_        (0),
-   position_   (0) {
-    init();
+  CILineDash(const Lengths &lengths, int offset) {
+     init();
 
     num_lengths_ = lengths.size();
     lengths_     = new int [num_lengths_ + 1];
@@ -96,12 +69,7 @@ class CILineDash {
       lengths_[i] = lengths.value(i);
   }
 
-  explicit CILineDash(ushort pattern) :
-   lengths_    (NULL),
-   num_lengths_(0),
-   offset_     (0),
-   ind_        (0),
-   position_   (0) {
+  explicit CILineDash(ushort pattern) {
     init();
 
     int bits[16];
@@ -167,7 +135,7 @@ class CILineDash {
   }
 
   void init() {
-    lengths_     = NULL;
+    lengths_     = nullptr;
     num_lengths_ = 0;
     offset_      = 0;
     ind_         = 0;
@@ -199,11 +167,11 @@ class CILineDash {
     return *this;
   }
 
-  int  getOffset    () const { return offset_; }
-  int *getLengths   () const { return lengths_; }
-  int  getNumLengths() const { return num_lengths_; }
-  int  getInd       () const { return ind_; }
-  int  getPosition  () const { return position_; }
+  int   getOffset    () const { return offset_; }
+  int  *getLengths   () const { return lengths_; }
+  uint  getNumLengths() const { return num_lengths_; }
+  uint   getInd      () const { return ind_; }
+  int   getPosition  () const { return position_; }
 
   int getLength(int i) const { return lengths_[i]; }
 
@@ -249,7 +217,7 @@ class CILineDash {
   void setDashes(std::vector<int> &lengths, int offset=0) {
     delete [] lengths_;
 
-    num_lengths_ = lengths.size();
+    num_lengths_ = uint(lengths.size());
     lengths_     = new int [num_lengths_];
     offset_      = offset;
 
@@ -309,6 +277,13 @@ class CILineDash {
         ind_ = 0;
     }
   }
+
+ private:
+  int  *lengths_     { nullptr };
+  uint  num_lengths_ { 0 };
+  int   offset_      { 0 };
+  uint  ind_         { 0 };
+  int   position_    { 0 };
 };
 
 #endif

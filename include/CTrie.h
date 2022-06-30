@@ -29,7 +29,7 @@ class CTrie {
 
     const CharNodeMap &children() const { return nodes_; }
 
-    int numChildren() const { return nodes_.size(); }
+    int numChildren() const { return int(nodes_.size()); }
 
     int count() const { return count_; }
 
@@ -258,7 +258,7 @@ class CTrie {
     Node *node = root();
 
     for (const auto &c : str) {
-      node = addNode(node, c);
+      node = addNode(node, static_cast<unsigned char>(c));
     }
 
     node = addNode(node, '\0');
@@ -329,7 +329,7 @@ class CTrie {
  private:
   struct MatchData {
     MatchData(const String &match) :
-     str(match), len(match.size()) {
+     str(match), len(uint(match.size())) {
     }
 
     String str;

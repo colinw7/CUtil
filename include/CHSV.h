@@ -131,7 +131,7 @@ class CHSV {
   void setSaturation(double s) { s_ = s; }
   void setValue     (double v) { v_ = v; }
 
-  uint getHueI       () const { return iround(h_); }
+  uint getHueI       () const { return uint(iround(h_)); }
   uint getSaturationI() const { return clampI(ivalue(s_)); }
   uint getValueI     () const { return clampI(ivalue(v_)); }
 
@@ -139,7 +139,7 @@ class CHSV {
 
  private:
   static uint clampI(int v) {
-    return (v >= 0 ? (v <= 255 ? v : 255) : 0);
+    return (v >= 0 ? uint(v <= 255 ? v : 255) : 0);
   }
 
   static int iround(double r) {

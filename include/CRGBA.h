@@ -86,10 +86,10 @@ enum CRGBAComponent {
 
 class CRGBA {
  private:
-  typedef uint (*IdProc)(double r, double g, double b, double a);
+  using IdProc = uint (*)(double r, double g, double b, double a);
 
   static uint clampI(int v) {
-    return (v >= 0 ? (v <= 255 ? v : 255) : 0);
+    return uint(v >= 0 ? (v <= 255 ? v : 255) : 0);
   }
 
  public:
@@ -105,7 +105,7 @@ class CRGBA {
   }
 
   static uint defIdProc(double r, double g, double b, double a) {
-    return encodeARGB(ivalue(r), ivalue(g), ivalue(b), ivalue(a));
+    return encodeARGB(clampIValue(r), clampIValue(g), clampIValue(b), clampIValue(a));
   }
 
   static uint calcId(double r, double g, double b, double a) {
@@ -131,7 +131,15 @@ class CRGBA {
     return iround(r*255.0);
   }
 
+  static uint clampIValue(double r) {
+    return clampI(ivalue(r));
+  }
+
   static double rvalue(int i) {
+    return i/255.0;
+  }
+
+  static double rvalue(uint i) {
     return i/255.0;
   }
 
@@ -536,10 +544,10 @@ class CRGBA {
   }
 
   void getRGBAI(uint *r, uint *g, uint *b, uint *a) const {
-    *r = ivalue(r_);
-    *g = ivalue(g_);
-    *b = ivalue(b_);
-    *a = ivalue(a_);
+    *r = getRedI  ();
+    *g = getGreenI();
+    *b = getBlueI ();
+    *a = getAlphaI();
   }
 
   double getRed  () const { return r_; }
@@ -547,10 +555,10 @@ class CRGBA {
   double getBlue () const { return b_; }
   double getAlpha() const { return a_; }
 
-  uint getRedI  () const { return clampI(ivalue(r_)); }
-  uint getGreenI() const { return clampI(ivalue(g_)); }
-  uint getBlueI () const { return clampI(ivalue(b_)); }
-  uint getAlphaI() const { return clampI(ivalue(a_)); }
+  uint getRedI  () const { return clampIValue(r_); }
+  uint getGreenI() const { return clampIValue(g_); }
+  uint getBlueI () const { return clampIValue(b_); }
+  uint getAlphaI() const { return clampIValue(a_); }
 
   double getComponent(CRGBAComponent component) const {
     switch (component) {
@@ -617,7 +625,7 @@ class CRGBA {
     return (CRGBA_R_FACTOR*r_ + CRGBA_G_FACTOR*g_ + CRGBA_B_FACTOR*b_);
   }
 
-  uint getGrayI() const { return ivalue(getGray()); }
+  uint getGrayI() const { return clampIValue(getGray()); }
 
   double getClampGray() const {
     return clamped().getGray();

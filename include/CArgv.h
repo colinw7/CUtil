@@ -25,7 +25,9 @@ class State {
 
   bool isOpt() const { return (argv_[i_][0] == '-'); }
   bool isEOpt() const { return (isOpt() && argv_[i_][1] == '-'); }
-  bool isOptTerm() const { return (isOpt() && argv_[i_][2] == '\0'); }
+  bool isOptTerm() const { return (isEOpt() && argv_[i_][2] == '\0'); }
+
+  bool isHelp() const { return (isOpt() && (opt() == "h" || opt() == "help")); }
 
   void unhandled() {
     if (isOpt())
@@ -40,16 +42,26 @@ class State {
   int    i_    { 1 };
 };
 
-using ArgFn = std::function<void (const std::string &, State &)>;
+using ArgFn  = std::function<void (const std::string &, State &)>;
+using HelpFn = std::function<void ()>;
 
-void visit(int argc, char **argv, ArgFn &&visitOpt, ArgFn &&visitEOpt, ArgFn &&visitArg) {
+// visit main args (argc, argv) and call state functions
+//   visitOpt  : handle option
+//   visitEOpt : handle extended option
+//   visitArg  : handle arg
+//   visitHelp : handle help
+void visit(int argc, char **argv, ArgFn &&visitOpt, ArgFn &&visitEOpt, ArgFn &&visitArg,
+           HelpFn &&visitHelp) {
   bool allowArgs = true;
 
   State state(argc, argv);
 
   while (! state.atEnd()) {
     if (allowArgs && state.isOpt()) {
-      if (state.isEOpt()) {
+      if      (state.isHelp()) {
+        visitHelp();
+      }
+      else if (state.isEOpt()) {
         if (state.isOptTerm()) {
           allowArgs = false;
         }
@@ -75,9 +87,13 @@ void visit(int argc, char **argv, ArgFn &&visitOpt, ArgFn &&visitEOpt, ArgFn &&v
   }
 }
 
-void visit(int argc, char **argv, ArgFn &&visitOpt, ArgFn &&visitArg) {
+// visit main args (argc, argv) and call state functions
+//   visitOpt  : handle option and extended option
+//   visitArg  : handle arg
+//   visitHelp : handle help
+void visit(int argc, char **argv, ArgFn &&visitOpt, ArgFn &&visitArg, HelpFn &&visitHelp) {
   visit(argc, argv, std::forward<ArgFn>(visitOpt), std::forward<ArgFn>(visitOpt),
-        std::forward<ArgFn>(visitArg));
+        std::forward<ArgFn>(visitArg), std::forward<HelpFn>(visitHelp));
 }
 
 }

@@ -43,7 +43,7 @@ class CLineDash {
     }
 
     uint size() const {
-      return lengths_.size();
+      return uint(lengths_.size());
     }
 
     double value(uint i) const {
@@ -81,7 +81,7 @@ class CLineDash {
   explicit CLineDash(const Lengths &lengths, double offset=0.0) {
     init();
 
-    uint num_lengths = lengths.size();
+    uint num_lengths = getNumLengths();
 
     offset_ = offset;
 
@@ -120,10 +120,10 @@ class CLineDash {
     if (position_ != dash.position_) return false;
     if (offset_   != dash.offset_  ) return false;
 
-    if (lengths_.size() != dash.lengths_.size())
+    if (getNumLengths() != dash.getNumLengths())
       return false;
 
-    uint num_lengths = lengths_.size();
+    uint num_lengths = getNumLengths();
 
     for (uint i = 0; i < num_lengths; ++i) {
       if (lengths_[i] != dash.lengths_[i])
@@ -138,7 +138,7 @@ class CLineDash {
 
     offset_ *= factor;
 
-    uint num_lengths = lengths_.size();
+    uint num_lengths = getNumLengths();
 
     for (uint i = 0; i < num_lengths; ++i)
       lengths_[i] *= factor;
@@ -159,16 +159,19 @@ class CLineDash {
   double getOffset() const { return offset_; }
 
   const double *getLengths   () const { return &lengths_[0]; }
-  uint getNumLengths() const { return lengths_.size(); }
+  uint getNumLengths() const { return uint(lengths_.size()); }
 
-  int getInd() const { return ind_; }
+  uint getInd() const { return ind_; }
   double getPosition() const { return position_; }
 
-  double getLength(int i) const { return lengths_[i]; }
+  double getLength(int i) const {
+    assert(i >= 0 && i < int(lengths_.size()));
+    return lengths_[size_t(i)];
+  }
 
   void getLengths(std::vector<double> &lengths) const {
     for (uint i = 0; i < getNumLengths(); ++i)
-      lengths.push_back(getLength(i));
+      lengths.push_back(lengths_[size_t(i)]);
   }
 
   void setOffset(double offset) { offset_ = offset; }
@@ -179,20 +182,20 @@ class CLineDash {
 
   bool isDraw() const { return isSolid() || ! (ind_ & 1); }
 
-  double getDelta() const { return lengths_[ind_] - position_; }
+  double getDelta() const { return lengths_[size_t(ind_)] - position_; }
 
   void step(double delta) const {
     if (delta <= 0.0)
       return;
 
-    double delta1 = lengths_[ind_] - position_;
+    double delta1 = lengths_[size_t(ind_)] - position_;
 
     while (delta > delta1) {
       step();
 
       delta -= delta1;
 
-      delta1 = lengths_[ind_];
+      delta1 = lengths_[size_t(ind_)];
     }
 
     CLineDash *th = const_cast<CLineDash *>(this);
@@ -205,7 +208,7 @@ class CLineDash {
 
     ++th->ind_;
 
-    uint num_lengths = lengths_.size();
+    uint num_lengths = getNumLengths();
 
     if (ind_ >= num_lengths)
       th->ind_ = 0;
@@ -295,7 +298,7 @@ class CLineDash {
   }
 
   CILineDash getIDash() const {
-    uint num_lengths = lengths_.size();
+    uint num_lengths = getNumLengths();
 
     int *lengths = new int [num_lengths + 1];
 
@@ -314,12 +317,12 @@ class CLineDash {
 
     std::stringstream ss;
 
-    uint num_lengths = lengths_.size();
+    uint num_lengths = getNumLengths();
 
     for (uint i = 0; i < num_lengths; ++i) {
       if (i > 0) ss << ", ";
 
-      ss << lengths_[i];
+      ss << lengths_[size_t(i)];
     }
 
     return ss.str();
@@ -335,7 +338,7 @@ class CLineDash {
     std::vector<double> lengths;
 
     uint pos = 0;
-    uint len = str.size();
+    uint len = uint(str.size());
 
     while (pos < len && isspace(str[pos])) ++pos;
 
@@ -391,10 +394,10 @@ class CLineDash {
     ind_      = 0;
     position_ = offset_;
 
-    uint num_lengths = lengths_.size();
+    uint num_lengths = getNumLengths();
 
-    while (num_lengths > 0 && position_ >= lengths_[ind_]) {
-      position_ -= lengths_[ind_];
+    while (num_lengths > 0 && position_ >= lengths_[size_t(ind_)]) {
+      position_ -= lengths_[size_t(ind_)];
 
       ++ind_;
 
@@ -405,8 +408,8 @@ class CLineDash {
 
  private:
   std::vector<double> lengths_;
-  double              offset_ { 0.0 };
-  uint                ind_ { 0 };
+  double              offset_   { 0.0 };
+  uint                ind_      { 0 };
   double              position_ { 0.0 };
 };
 
