@@ -67,7 +67,7 @@ class CMultiArrayT {
     }
 
     explicit Dims(const std::vector<uint> &dims1) {
-      num_dims = dims1.size();
+      num_dims = uint(dims1.size());
 
       init();
 
@@ -208,7 +208,7 @@ class CMultiArrayT {
     }
 
     Slice(const std::vector<uint> &start1, const std::vector<uint> &len1) {
-      num = start1.size();
+      num = uint(start1.size());
 
       if (num < 3) {
         start = start_buffer;
@@ -758,7 +758,7 @@ class CMultiArrayT {
   void addSlice(const std::vector<uint> &starts, const std::vector<uint> &ends) {
     Slice slice(starts, ends);
 
-    uint num = starts.size();
+    uint num = uint(starts.size());
 
     for (uint i = 0; i < num; ++i)
       slice.len[i] -= starts[i] - 1;
