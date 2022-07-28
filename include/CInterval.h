@@ -2,7 +2,7 @@
 #define CInterval_H
 
 #include <iostream>
-#include <boost/optional.hpp>
+#include <optional>
 
 class CInterval {
  public:
@@ -26,8 +26,8 @@ class CInterval {
     double second { 0.0 }; // second
   };
 
-  using OptInt  = boost::optional<int>;
-  using OptReal = boost::optional<double>;
+  using OptInt  = std::optional<int>;
+  using OptReal = std::optional<double>;
 
  public:
   CInterval(double min=0.0, double max=1.0, int n=10);

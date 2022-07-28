@@ -50,25 +50,25 @@ inline int timeLengthToMonths(time_t t1, time_t t2) {
 inline int timeLengthToDays(double t1, double t2) {
   double t = t2 - t1;
 
-  return (t + day_seconds - 1)/day_seconds;
+  return int((t + day_seconds - 1)/day_seconds);
 }
 
 inline int timeLengthToHours(double t1, double t2) {
   double t = t2 - t1;
 
-  return (t + hour_seconds - 1)/hour_seconds;
+  return int((t + hour_seconds - 1)/hour_seconds);
 }
 
 inline int timeLengthToMinutes(double t1, double t2) {
   double t = t2 - t1;
 
-  return (t + minute_seconds - 1)/minute_seconds;
+  return int((t + minute_seconds - 1)/minute_seconds);
 }
 
 inline int timeLengthToSeconds(time_t t1, time_t t2) {
-  double t = t2 - t1;
+  double t = double(t2 - t1);
 
-  return t;
+  return int(t);
 }
 
 #if 0
@@ -178,13 +178,13 @@ inline double yearsToTime(int year) {
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return mktime(&tm);
+  return double(mktime(&tm));
 }
 
 inline double monthsToTime(const CInterval::TimeData &timeData, int month) {
   struct tm tm;
 
-  tm.tm_year  = timeData.year - 1900;
+  tm.tm_year  = int(timeData.year - 1900);
   tm.tm_mon   = month;
   tm.tm_mday  = 1;
   tm.tm_hour  = 0;
@@ -192,63 +192,63 @@ inline double monthsToTime(const CInterval::TimeData &timeData, int month) {
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return mktime(&tm);
+  return double(mktime(&tm));
 }
 
 inline double daysToTime(const CInterval::TimeData &timeData, int day) {
   struct tm tm;
 
-  tm.tm_year  = timeData.year - 1900;
-  tm.tm_mon   = timeData.month;
+  tm.tm_year  = int(timeData.year - 1900);
+  tm.tm_mon   = int(timeData.month);
   tm.tm_mday  = day + 1;
   tm.tm_hour  = 0;
   tm.tm_min   = 0;
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return mktime(&tm);
+  return double(mktime(&tm));
 }
 
 inline double hoursToTime(const CInterval::TimeData &timeData, int hour) {
   struct tm tm;
 
-  tm.tm_year  = timeData.year - 1900;
-  tm.tm_mon   = timeData.month;
-  tm.tm_mday  = timeData.day + 1;
+  tm.tm_year  = int(timeData.year - 1900);
+  tm.tm_mon   = int(timeData.month);
+  tm.tm_mday  = int(timeData.day + 1);
   tm.tm_hour  = hour;
   tm.tm_min   = 0;
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return mktime(&tm);
+  return double(mktime(&tm));
 }
 
 inline double minutesToTime(const CInterval::TimeData &timeData, int minute) {
   struct tm tm;
 
-  tm.tm_year  = timeData.year - 1900;
-  tm.tm_mon   = timeData.month;
-  tm.tm_mday  = timeData.day + 1;
-  tm.tm_hour  = timeData.hour;
+  tm.tm_year  = int(timeData.year - 1900);
+  tm.tm_mon   = int(timeData.month);
+  tm.tm_mday  = int(timeData.day + 1);
+  tm.tm_hour  = int(timeData.hour);
   tm.tm_min   = minute;
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return mktime(&tm);
+  return double(mktime(&tm));
 }
 
 inline double secondsToTime(const CInterval::TimeData &timeData, int second) {
   struct tm tm;
 
-  tm.tm_year  = timeData.year - 1900;
-  tm.tm_mon   = timeData.month;
-  tm.tm_mday  = timeData.day + 1;
-  tm.tm_hour  = timeData.hour;
-  tm.tm_min   = timeData.minute;
+  tm.tm_year  = int(timeData.year - 1900);
+  tm.tm_mon   = int(timeData.month);
+  tm.tm_mday  = int(timeData.day + 1);
+  tm.tm_hour  = int(timeData.hour);
+  tm.tm_min   = int(timeData.minute);
   tm.tm_sec   = second;
   tm.tm_isdst = -1; // auto DST
 
-  return mktime(&tm);
+  return double(mktime(&tm));
 }
 
 }
@@ -333,13 +333,13 @@ init()
     max = std::ceil (max);
   }
   else if (isDate()) {
-    int y = timeLengthToYears  (min, max);
-    int m = timeLengthToMonths (min, max);
-    int d = timeLengthToDays   (min, max);
+    int y = timeLengthToYears (time_t(min), time_t(max));
+    int m = timeLengthToMonths(time_t(min), time_t(max));
+    int d = timeLengthToDays  (min, max);
 
-    startTime_.year  = timeToYear   (min);
-    startTime_.month = timeToMonths (min);
-    startTime_.day   = timeToDays   (min);
+    startTime_.year  = timeToYear  (time_t(min));
+    startTime_.month = timeToMonths(time_t(min));
+    startTime_.day   = timeToDays  (time_t(min));
 
     min = 0;
 
@@ -364,11 +364,11 @@ init()
   else if (isTime()) {
     int h = timeLengthToHours  (min, max);
     int m = timeLengthToMinutes(min, max);
-    int s = timeLengthToSeconds(min, max);
+    int s = timeLengthToSeconds(time_t(min), time_t(max));
 
-    startTime_.hour   = timeToHours  (min);
-    startTime_.minute = timeToMinutes(min);
-    startTime_.second = timeToSeconds(min);
+    startTime_.hour   = timeToHours  (time_t(min));
+    startTime_.minute = timeToMinutes(time_t(min));
+    startTime_.second = timeToSeconds(time_t(min));
 
     min = 0;
 
@@ -698,13 +698,13 @@ interval(int i) const
 {
   if       (isDate()) {
     if      (timeType_ == TimeType::YEARS) {
-      return yearsToTime(startTime_.year + i*calcIncrement());
+      return yearsToTime(int(startTime_.year + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::MONTHS) {
-      return monthsToTime(startTime_, startTime_.month + i*calcIncrement());
+      return monthsToTime(startTime_, int(startTime_.month + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::DAYS) {
-      return daysToTime(startTime_, startTime_.day + i*calcIncrement());
+      return daysToTime(startTime_, int(startTime_.day + i*calcIncrement()));
     }
     else {
       return 0;
@@ -712,13 +712,13 @@ interval(int i) const
   }
   else if (isTime()) {
     if      (timeType_ == TimeType::HOURS) {
-      return hoursToTime(startTime_, startTime_.hour + i*calcIncrement());
+      return hoursToTime(startTime_, int(startTime_.hour + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::MINUTES) {
-      return minutesToTime(startTime_, startTime_.minute + i*calcIncrement());
+      return minutesToTime(startTime_, int(startTime_.minute + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::SECONDS) {
-      return secondsToTime(startTime_, startTime_.second + i*calcIncrement());
+      return secondsToTime(startTime_, int(startTime_.second + i*calcIncrement()));
     }
     else {
       return 0;
