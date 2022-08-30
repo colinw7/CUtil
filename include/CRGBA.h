@@ -555,6 +555,11 @@ class CRGBA {
   double getBlue () const { return b_; }
   double getAlpha() const { return a_; }
 
+  float getRedF  () const { return float(r_); }
+  float getGreenF() const { return float(g_); }
+  float getBlueF () const { return float(b_); }
+  float getAlphaF() const { return float(a_); }
+
   uint getRedI  () const { return clampIValue(r_); }
   uint getGreenI() const { return clampIValue(g_); }
   uint getBlueI () const { return clampIValue(b_); }
