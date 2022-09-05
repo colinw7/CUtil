@@ -262,8 +262,8 @@ struct CIntervalIncrementTest {
   double incFactor { 0.0 };
   bool   integral  { false };
 
-  CIntervalIncrementTest(double factor, int numTicks, bool isLog) :
-   factor(factor), numTicks(numTicks), isLog(isLog) {
+  CIntervalIncrementTest(double factor1, int numTicks1, bool isLog1) :
+   factor(factor1), numTicks(numTicks1), isLog(isLog1) {
     integral = isInteger(factor);
   }
 };

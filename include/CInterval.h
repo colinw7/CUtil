@@ -117,9 +117,9 @@ class CInterval {
     int    numMajor  { 0 };
     int    numMinor  { 0 };
 
-    GapData(double start=0.0, double end=0.0, double increment=0.0,
-            int numMajor=0, int numMinor=0) :
-     start(start), end(end), increment(increment), numMajor(numMajor), numMinor(numMinor) {
+    GapData(double start1=0.0, double end1=0.0, double increment1=0.0,
+            int numMajor1=0, int numMinor1=0) :
+     start(start1), end(end1), increment(increment1), numMajor(numMajor1), numMinor(numMinor1) {
     }
 
     bool isSet() const { return (start != 0.0 || end != 0.0); }
