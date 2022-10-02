@@ -22,11 +22,11 @@ class CIVectorT {
       bool             end;
 
       IteratorState() :
-        iv(0), len(0), pos(0), end(true) {
+       iv(0), len(0), pos(0), end(true) {
       }
 
       IteratorState(const CIVectorT *iv1) :
-        iv(iv1), len(iv1->size()), pos(0), end(pos >= len) {
+       iv(iv1), len(int(iv1->size())), pos(0), end(pos >= len) {
       }
 
       void inc() {

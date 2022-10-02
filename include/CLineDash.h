@@ -352,7 +352,7 @@ class CLineDash {
         num = num*10 + (str[pos++] - '0');
 
       if (pos < len && str[pos] == '.') {
-        double dec = 0;
+        double dec = 0.0;
 
         double f = 0.1;
 
@@ -364,7 +364,7 @@ class CLineDash {
           f /= 10.0;
         }
 
-        num += f;
+        num += dec;
       }
 
       while (pos < len && isspace(str[pos])) ++pos;

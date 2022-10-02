@@ -4,7 +4,7 @@
 template<class T>
 class CAutoFree {
  public:
-  CAutoFree(T *p=0) : p_(p) { }
+  CAutoFree(T *p=nullptr) : p_(p) { }
 
  ~CAutoFree() { free(p_); }
 
@@ -57,7 +57,7 @@ class CAutoFree {
   }
 
  private:
-  T *p_;
+  T *p_ { nullptr };
 };
 
 //---
@@ -69,7 +69,7 @@ class CAutoFreeAddrInfo {
   typedef struct addrinfo T;
 
  public:
-  CAutoFreeAddrInfo(T *p=0) : p_(p) { }
+  CAutoFreeAddrInfo(T *p=nullptr) : p_(p) { }
 
  ~CAutoFreeAddrInfo() {
     extern void freeaddrinfo(T *p);
@@ -127,7 +127,7 @@ class CAutoFreeAddrInfo {
   }
 
  private:
-  T *p_;
+  T *p_ { nullptr };
 };
 
 #endif

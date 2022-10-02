@@ -44,14 +44,15 @@ encode(const std::string &str)
 {
   std::string str1;
 
-  uint len = str.size();
+  auto len = str.size();
 
-  uint num = len/4;
+  uint num = uint(len/4);
 
   uint pos = 0;
 
   for (uint i = 0; i < num; ++i, pos += 4) {
-    uint chars = (str[pos + 0] << 24) | (str[pos + 1] << 16) | (str[pos + 2] << 8) | str[pos + 3];
+    uint chars = (uint(str[pos + 0]) << 24U) | (uint(str[pos + 1]) << 16U) |
+                 (uint(str[pos + 2]) <<  8U) |  uint(str[pos + 3]);
 
     std::string str2 = encodeInt(chars);
 
@@ -64,7 +65,7 @@ encode(const std::string &str)
     uint chars = 0;
 
     while (pos < len)
-      chars = (chars << 8) | str[pos++];
+      chars = uint(chars << 8) | uint(str[pos++]);
 
     std::string str2 = encodeInt(chars);
 
@@ -87,7 +88,7 @@ encodeInt(uint chars)
   for (uint i = 0; i < 5; i++) {
     uint temp = chars/85;
 
-    c[i] = chars - temp*85;
+    c[i] = int(chars) - int(temp*85);
 
     chars = temp;
   }
@@ -106,9 +107,9 @@ decode(const std::string &str)
 {
   std::string str1;
 
-  uint len = str.size();
+  auto len = str.size();
 
-  uint num = len/5;
+  uint num = uint(len/5);
 
   for (uint i = 0, pos = 0; i < num; ++i, pos += 5) {
     int i1, i2, i3, i4, i5;
@@ -119,7 +120,7 @@ decode(const std::string &str)
     decodeChar(str[i + 4], &i4);
     decodeChar(str[i + 5], &i5);
 
-    uint val = (((i1*85 + i2)*85 + i3)*85 + i4)*85 + i5;
+    uint val = (((uint(i1)*85 + uint(i2))*85 + uint(i3))*85 + uint(i4))*85 + uint(i5);
 
     str1 += char((val & 0xFF000000) >> 24);
     str1 += char((val & 0x00FF0000) >> 16);
@@ -138,7 +139,7 @@ decodeChar(char c, int *pos)
 
   if (p == 0) return false;
 
-  *pos = p - ascii85_chars;
+  *pos = int(p - ascii85_chars);
 
   return true;
 }

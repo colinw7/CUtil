@@ -59,7 +59,7 @@ encode(CFile *ifile, CFile *ofile)
     int len = 0;
 
     for (int i = 0; i < 3; i++) {
-      in[i] = (u_char) ifile->getC();
+      in[i] = static_cast<u_char>(ifile->getC());
 
       if (! ifile->eof())
         len++;
@@ -68,7 +68,7 @@ encode(CFile *ifile, CFile *ofile)
     }
 
     if (len) {
-      encodeBlock(in, out, len);
+      encodeBlock(in, out, uint(len));
 
       for (int i = 0; i < 4; i++)
         ofile->putC(out[i]);
@@ -96,9 +96,9 @@ std::string
 CEncode64::
 encode(const std::string &str)
 {
-  uint size = str.size();
+  auto size = str.size();
 
-  uint num = size/3;
+  uint num = uint(size/3);
 
   char buffer[3], buffer1[4];
 
@@ -111,18 +111,18 @@ encode(const std::string &str)
     buffer[1] = str[j + 1];
     buffer[2] = str[j + 2];
 
-    encodeBlock((uchar *) buffer, (uchar *) buffer1, 3);
+    encodeBlock(reinterpret_cast<uchar *>(buffer), reinterpret_cast<uchar *>(buffer1), 3);
 
     str1 += std::string(buffer1, 4);
   }
 
   if (j < size) {
-    num = size - j;
+    num = uint(size) - j;
 
     for (uint i = 0; i < num; ++i)
       buffer[i] = str[j + i];
 
-    encodeBlock((uchar *) buffer, (uchar *) buffer1, num);
+    encodeBlock(reinterpret_cast<uchar *>(buffer), reinterpret_cast<uchar *>(buffer1), num);
 
     str1 += std::string(buffer1, 4);
   }
@@ -161,7 +161,7 @@ encode(const uchar *in, size_t in_len, uchar *out, size_t out_size)
       buffer_len = in_len;
     }
 
-    out_len = addStr(out, out_len, out_size, buffer, buffer_len);
+    out_len = uint(addStr(out, out_len, out_size, buffer, buffer_len));
   }
 
   return true;
@@ -197,7 +197,7 @@ CEncode64::
 addStr(uchar *to, size_t to_len, size_t to_max, const uchar *from, size_t from_len)
 {
   if (to_len >= to_max - 1)
-    return (to_max - 1);
+    return int(to_max - 1);
 
   size_t size_left = to_max - to_len - 1;
 
@@ -206,12 +206,12 @@ addStr(uchar *to, size_t to_len, size_t to_max, const uchar *from, size_t from_l
 
     to[to_max] = '\0';
 
-    return (to_max - 1);
+    return int(to_max - 1);
   }
   else {
     memcpy(&to[to_len], from, from_len + 1);
 
-    return (to_len + from_len);
+    return int(to_len + from_len);
   }
 }
 
@@ -224,7 +224,7 @@ decode(const std::string &str)
 
   buffer2[3] = '\0';
 
-  uint size = str.size();
+  auto size = str.size();
 
   std::string str1;
 
@@ -239,9 +239,9 @@ decode(const std::string &str)
       buffer1[j++] = pos;
 
       if (j == 4) {
-        buffer2[0] = ((buffer1[0] & 0x3f) << 2) | ((buffer1[1] & 0x3f) >> 4);
-        buffer2[1] = ((buffer1[1] & 0x0f) << 4) | ((buffer1[2] & 0x3f) >> 2);
-        buffer2[2] = ((buffer1[2] & 0x03) << 6) | ((buffer1[3] & 0x3f) >> 0);
+        buffer2[0] = char(((uint(buffer1[0]) & 0x3f) << 2U) | ((uint(buffer1[1]) & 0x3f) >> 4U));
+        buffer2[1] = char(((uint(buffer1[1]) & 0x0f) << 4U) | ((uint(buffer1[2]) & 0x3f) >> 2U));
+        buffer2[2] = char(((uint(buffer1[2]) & 0x03) << 6U) | ((uint(buffer1[3]) & 0x3f) >> 0U));
 
         str1 += std::string(buffer2, 3);
 
@@ -253,13 +253,13 @@ decode(const std::string &str)
         // error
       }
       else if (j == 2) {
-        buffer2[0] = ((buffer1[0] & 0x3f) << 2) | ((buffer1[1] & 0x3f) >> 4);
+        buffer2[0] = char(((uint(buffer1[0]) & 0x3f) << 2U) | ((uint(buffer1[1]) & 0x3f) >> 4U));
 
         str1 += std::string(buffer2, 1);
       }
       else if (j == 3) {
-        buffer2[0] = ((buffer1[0] & 0x3f) << 2) | ((buffer1[1] & 0x3f) >> 4);
-        buffer2[1] = ((buffer1[1] & 0x0f) << 4) | ((buffer1[2] & 0x3f) >> 2);
+        buffer2[0] = char(((uint(buffer1[0]) & 0x3f) << 2U) | ((uint(buffer1[1]) & 0x3f) >> 4U));
+        buffer2[1] = char(((uint(buffer1[1]) & 0x0f) << 4U) | ((uint(buffer1[2]) & 0x3f) >> 2U));
 
         str1 += std::string(buffer2, 2);
       }
@@ -282,7 +282,7 @@ decodeChar(char c, int *pos)
 
   if (p == 0) return false;
 
-  *pos = p - base_64_chars_;
+  *pos = int(p - base_64_chars_);
 
   return true;
 }

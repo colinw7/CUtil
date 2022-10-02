@@ -24,7 +24,7 @@ class CAutoPtrStack {
   }
 
   void push(T *value) {
-    assert(value != NULL);
+    assert(value != nullptr);
 
     stack_.push_back(value);
   }
@@ -48,12 +48,12 @@ class CAutoPtrStack {
   }
 
   void resize(uint n) {
-    uint size = stack_.size();
+    uint size = uint(stack_.size());
 
     stack_.resize(n);
 
     for (uint i = size; i < n; ++i)
-      stack_[i] = NULL;
+      stack_[i] = nullptr;
   }
 
   void clear() {
