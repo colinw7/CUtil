@@ -14,8 +14,10 @@ class CPtr {
 
   // create
 
+  CPtr() { }
+
   explicit
-  CPtr(T *p = NULL) :
+  CPtr(T *p) :
    p_(p) {
   }
 
@@ -38,7 +40,7 @@ class CPtr {
   }
 
  ~CPtr() {
-    p_ = NULL;
+    p_ = nullptr;
   }
 
   // pointer like access
@@ -72,7 +74,7 @@ class CPtr {
   // enquire
 
   bool isValid() const {
-    return (p_ != NULL);
+    return (p_ != nullptr);
   }
 
   // get
@@ -96,11 +98,11 @@ class CPtr {
   // reset
 
   void reset() {
-    p_ = NULL;
+    p_ = nullptr;
   }
 
  private:
-  T *p_;
+  T *p_ { nullptr };
 };
 
 #endif

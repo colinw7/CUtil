@@ -1,9 +1,10 @@
 #ifndef CEnv_H
 #define CEnv_H
 
-#include <CRefPtr.h>
 #include <vector>
 #include <string>
+#include <memory>
+#include <iostream>
 #include <climits>
 #include <sys/types.h>
 
@@ -14,28 +15,20 @@ class CEnv {
   using NameList  = std::vector<std::string>;
   using ValueList = std::vector<std::string>;
 
-  typedef std::pair<std::string,std::string> NameValue;
+  using NameValue = std::pair<std::string, std::string>;
 
  private:
   struct NameValues {
     NameList  names;
     ValueList values;
-
-    NameValues() :
-     names(), values() {
-    }
   };
 
-  using NameValuesP = CRefPtr<NameValues>;
+  using NameValuesP = std::shared_ptr<NameValues>;
 
  public:
   class const_iterator {
    public:
     using value_type = NameValue;
-
-   private:
-    NameValuesP nameValues_;
-    uint        pos_ { 0 };
 
    public:
     // end iterator
@@ -71,6 +64,10 @@ class CEnv {
     value_type operator*() const {
       return value_type(nameValues_->names[pos_], nameValues_->values[pos_]);
     }
+
+   private:
+    NameValuesP nameValues_;
+    uint        pos_ { 0 };
   };
 
  public:
@@ -114,12 +111,12 @@ class CEnv {
   void getPathList(const std::string &name, ValueList &paths);
 
   NameValuesP getSnapShot() {
-    if (nameValues_.getRef() < 2) {
+    if (nameValues_.use_count() < 2) {
       NameValues *nameValues = new NameValues;
 
       getNameValues(*nameValues);
 
-      nameValues_ = nameValues;
+      nameValues_ = NameValuesP(nameValues);
     }
 
     return nameValues_;

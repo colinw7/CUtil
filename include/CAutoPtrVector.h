@@ -25,14 +25,14 @@ class CAutoPtrVector {
     clear();
   }
 
-  uint size() const { return vector_.size(); }
+  uint size() const { return uint(vector_.size()); }
 
   void push_back(T *value) {
     addValue(value);
   }
 
   T *operator[](int i) const {
-    return getValue(i);
+    return getValue(uint(i));
   }
 
   void addValue(T *value) {
@@ -55,7 +55,7 @@ class CAutoPtrVector {
   }
 
   T *getValue(uint i) const {
-    uint size = vector_.size();
+    uint size = uint(vector_.size());
 
     assert(i < size);
 
@@ -63,7 +63,7 @@ class CAutoPtrVector {
   }
 
   void resize(uint n) {
-    uint size = vector_.size();
+    uint size = uint(vector_.size());
 
     vector_.resize(n);
 

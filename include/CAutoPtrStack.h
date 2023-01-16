@@ -2,6 +2,7 @@
 #define CAutoPtrStack_H
 
 #include <vector>
+#include <cassert>
 
 template<typename T>
 class CAutoPtrStack {

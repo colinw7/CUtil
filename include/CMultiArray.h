@@ -1,8 +1,8 @@
 #ifndef CMULT_ARRAY_H
 #define CMULT_ARRAY_H
 
-#include <CRefPtr.h>
 #include <vector>
+#include <memory>
 #include <cstring>
 
 template<class T>
@@ -555,80 +555,82 @@ class CMultiArrayT {
   //-------
 
  private:
-  CRefPtr<Data>  data_;
-  uint          *dims_;
-  SliceList      slices_;
-  bool          *mask_;
-  uint           dims1_buffer_[3];
-  uint          *dims1_;
+  using DataP = std::shared_ptr<Data>;
+
+  DataP     data_;
+  uint*     dims_ { nullptr };
+  SliceList slices_;
+  bool*     mask_ { nullptr };
+  uint      dims1_buffer_[3];
+  uint*     dims1_ { nullptr };
 
   //--------
 
  public:
-  typedef typename Data::Iterator DataIterator;
+  using DataIterator = typename Data::Iterator;
 
   CMultiArrayT() {
-    data_ = new Data;
+    data_ = std::make_shared<Data>();
 
     init();
   }
 
   CMultiArrayT(uint d1, const T *data=nullptr) {
-    data_ = new Data(d1, data);
+    data_ = std::make_shared<Data>(d1, data);
 
     init();
   }
 
   CMultiArrayT(uint d1, uint d2, const T *data=nullptr) {
-    data_ = new Data(d1, d2, data);
+    data_ = std::make_shared<Data>(d1, d2, data);
 
     init();
   }
 
   CMultiArrayT(uint d1, uint d2, uint d3, const T *data=nullptr) {
-    data_ = new Data(d1, d2, d3, data);
+    data_ = std::make_shared<Data>(d1, d2, d3, data);
 
     init();
   }
 
   CMultiArrayT(const uint *dims, uint num_dims, const T *data=nullptr) {
-    data_ = new Data(dims, num_dims, data);
+    data_ = std::make_shared<Data>(dims, num_dims, data);
 
     init();
   }
 
   CMultiArrayT(const uint *dims, uint num_dims, const std::vector<T> &data) {
-    data_ = new Data(dims, num_dims, data);
+    data_ = std::make_shared<Data>(dims, num_dims, data);
 
     init();
   }
 
   CMultiArrayT(const uint *dims, uint num_dims, const T &data) {
-    data_ = new Data(dims, num_dims, data);
+    data_ = std::make_shared<Data>(dims, num_dims, data);
 
     init();
   }
 
   CMultiArrayT(const std::vector<uint> &dims, const T *data=nullptr) {
-    data_ = new Data(dims, data);
+    data_ = std::make_shared<Data>(dims, data);
 
     init();
   }
 
   CMultiArrayT(const std::vector<uint> &dims, const std::vector<T> &data) {
-    data_ = new Data(dims, data);
+    data_ = std::make_shared<Data>(dims, data);
 
     init();
   }
 
   CMultiArrayT(const std::vector<uint> &dims, const T &data) {
-    data_ = new Data(dims, data);
+    data_ = std::make_shared<Data>(dims, data);
 
     init();
   }
 
   CMultiArrayT(const CMultiArrayT &array) {
-    data_ = new Data(*array.data_);
+    data_ = std::make_shared<Data>(*array.data_);
 
     init();
   }
@@ -650,9 +652,7 @@ class CMultiArrayT {
     if (num_dims > 3)
       delete [] dims1_;
 
-    data_ = array.data_;
-
-    data_.uniquify();
+    data_ = DataP(array.data_->dup());
 
     init();
 
@@ -924,7 +924,7 @@ class CMultiArrayT {
   }
 
  private:
-  CMultiArrayT(const CRefPtr<Data> &data) {
+  CMultiArrayT(const std::shared_ptr<Data> &data) {
     data_ = data;
 
     init();

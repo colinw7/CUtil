@@ -4,13 +4,14 @@
 #include <CRGBA.h>
 #include <CBrushStyle.h>
 #include <CFillType.h>
-#include <CRefPtr.h>
 
 #ifdef CBRUSH_IMAGE
 #include <CImageLib.h>
 #endif
 
 #include <CGenGradient.h>
+
+#include <memory>
 
 enum class CBrushPattern {
   NONE,
@@ -31,7 +32,7 @@ enum class CBrushPattern {
 
 class CBrush {
  public:
-  using GradientPtr = CRefPtr<CGenGradient>;
+  using GradientPtr = std::shared_ptr<CGenGradient>;
 
  public:
   CBrush();
