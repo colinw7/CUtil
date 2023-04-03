@@ -110,7 +110,7 @@ class CRefPtr {
 
  public:
   CRefPtr() :
-   p_(0), count_(new Count(1)) {
+   p_(nullptr), count_(new Count(1)) {
   }
 
   explicit CRefPtr(T *p) :
@@ -160,7 +160,7 @@ class CRefPtr {
   T *get() const { return getPtr(); }
 
   T *getPtr() const {
-    assert(p_ != 0 && getRef() > 0);
+    assert(p_ != nullptr && getRef() > 0);
 
     return p_;
   }
@@ -290,7 +290,7 @@ class CRefPtr {
   }
 
   bool isValid() const {
-    return (p_ != 0);
+    return (p_ != nullptr);
   }
 
   void uniquify() {

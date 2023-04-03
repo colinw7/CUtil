@@ -62,7 +62,7 @@ class CColor {
     if (type_ == Type::NONE) {
       delete component_;
 
-      component_ = 0;
+      component_ = nullptr;
     }
 
     if      (type_ == Type::RGB) {

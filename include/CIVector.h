@@ -22,7 +22,7 @@ class CIVectorT {
       bool             end;
 
       IteratorState() :
-       iv(0), len(0), pos(0), end(true) {
+       iv(nullptr), len(0), pos(0), end(true) {
       }
 
       IteratorState(const CIVectorT *iv1) :

@@ -486,7 +486,7 @@ class RangeItrT {
     }
 
     Iterator(const Iterator &it) :
-     type_(it.type_), data_(it.data_ ? it.data_->dup() : 0), limit_(it.limit_),
+     type_(it.type_), data_(it.data_ ? it.data_->dup() : nullptr), limit_(it.limit_),
      isEnd_(type_ == Type::END) {
       if (type_ != Type::END)
         reset();

@@ -109,7 +109,7 @@ class CRGBA {
   }
 
   static uint calcId(double r, double g, double b, double a) {
-    IdProc id_proc = setIdProc(0);
+    IdProc id_proc = setIdProc(nullptr);
 
     return id_proc(r, g, b, a);
   }

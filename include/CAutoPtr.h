@@ -17,7 +17,7 @@ class CAutoPtr {
   // create
 
   explicit
-  CAutoPtr(T *p = 0) :
+  CAutoPtr(T *p = nullptr) :
    p_(p) {
   }
 
@@ -27,7 +27,7 @@ class CAutoPtr {
    p_(p.p_) {
     CAutoPtr &p1 = const_cast<CAutoPtr &>(p);
 
-    p1.set(0);
+    p1.set(nullptr);
   }
 
   CAutoPtr &operator=(const CAutoPtr &p) {
@@ -77,7 +77,7 @@ class CAutoPtr {
   // enquire
 
   bool isValid() const {
-    return (p_ != 0);
+    return (p_ != nullptr);
   }
 
   // get
@@ -107,7 +107,7 @@ class CAutoPtr {
   void reset() {
     delete p_;
 
-    p_ = 0;
+    p_ = nullptr;
   }
 
   // get and reset (extract) (no free)
@@ -115,7 +115,7 @@ class CAutoPtr {
   T *release() {
     T *p = p_;
 
-    p_ = 0;
+    p_ = nullptr;
 
     return p;
   }
@@ -138,7 +138,7 @@ class CAutoArrayPtr {
   typedef T element_type;
 
   explicit
-  CAutoArrayPtr(T *p = 0) :
+  CAutoArrayPtr(T *p = nullptr) :
    p_(p) {
   }
 
@@ -146,7 +146,7 @@ class CAutoArrayPtr {
 
   CAutoArrayPtr(const CAutoArrayPtr &p) :
    p_(p.p_) {
-    p.set(0);
+    p.set(nullptr);
   }
 
   CAutoArrayPtr &operator=(const CAutoArrayPtr &p) {
@@ -206,13 +206,13 @@ class CAutoArrayPtr {
   void reset() {
     delete [] p_;
 
-    p_ = 0;
+    p_ = nullptr;
   }
 
   T *release() {
     T *p = p_;
 
-    p_ = 0;
+    p_ = nullptr;
 
     return p;
   }

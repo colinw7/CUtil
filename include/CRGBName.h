@@ -7,11 +7,13 @@
 
 class CRGBName {
  public:
-  static bool lookup(const std::string &name, double *r, double *g, double *b, double *a=0);
-  static bool lookup(const std::string &name, float *r, float *g, float *b, float *a=0);
+  static bool lookup(const std::string &name, double *r, double *g, double *b, double *a=nullptr);
+  static bool lookup(const std::string &name, float *r, float *g, float *b, float *a=nullptr);
 
-  static bool lookupHtml(const std::string &name, double *r, double *g, double *b, double *a=0);
-  static bool lookupHtml(const std::string &name, float *r, float *g, float *b, float *a=0);
+  static bool lookupHtml(const std::string &name,
+                         double *r, double *g, double *b, double *a=nullptr);
+  static bool lookupHtml(const std::string &name,
+                         float *r, float *g, float *b, float *a=nullptr);
 
   //---
 

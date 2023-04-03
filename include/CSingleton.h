@@ -41,7 +41,7 @@ class CSingleton {
   static T *getInstancePtr() {
     T **p = getInstancePtrPtr();
 
-    if (*p == 0)
+    if (*p == nullptr)
       *p = new T;
 
     return *p;
@@ -56,7 +56,7 @@ class CSingleton {
 
     delete *p;
 
-    *p = 0;
+    *p = nullptr;
   }
 };
 
