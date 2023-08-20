@@ -75,6 +75,7 @@ class CInterval {
   //---
 
   double interval(int i) const;
+  double minorInterval(int i, int j) const;
 
   //---
 

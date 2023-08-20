@@ -729,6 +729,20 @@ interval(int i) const
   }
 }
 
+double
+CInterval::
+minorInterval(int i, int j) const
+{
+  double min, max;
+
+  intervalValues(i, min, max);
+
+  auto numMinor = calcNumMinor();
+  if (numMinor <= 1) return min;
+
+  return min + j*(max - min)/(numMinor - 1);
+}
+
 int
 CInterval::
 valueInterval(double r) const
