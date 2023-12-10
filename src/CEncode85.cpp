@@ -136,8 +136,7 @@ CEncode85::
 decodeChar(char c, int *pos)
 {
   const char *p = strchr(ascii85_chars, c);
-
-  if (p == 0) return false;
+  if (! p) return false;
 
   *pos = int(p - ascii85_chars);
 

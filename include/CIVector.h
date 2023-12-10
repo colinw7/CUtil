@@ -17,16 +17,17 @@ class CIVectorT {
 
    private:
     struct IteratorState {
-      const CIVectorT *iv;
-      int              len, pos;
-      bool             end;
+      const CIVectorT *iv  { nullptr };
+      int              len { 0 };
+      int              pos { 0 };
+      bool             end { false };
 
       IteratorState() :
-       iv(nullptr), len(0), pos(0), end(true) {
+       end(true) {
       }
 
       IteratorState(const CIVectorT *iv1) :
-       iv(iv1), len(int(iv1->size())), pos(0), end(pos >= len) {
+       iv(iv1), len(int(iv1->size())), end(pos >= len) {
       }
 
       void inc() {

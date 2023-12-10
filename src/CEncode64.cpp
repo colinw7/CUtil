@@ -215,6 +215,64 @@ addStr(uchar *to, size_t to_len, size_t to_max, const uchar *from, size_t from_l
   }
 }
 
+bool
+CEncode64::
+decode(CFile *ifile, CFile *ofile)
+{
+  int  buffer1[4];
+  char buffer2[4];
+
+  buffer2[3] = '\0';
+
+  uint j = 0;
+
+  while (! ifile->eof()) {
+    char c = static_cast<char>(ifile->getC());
+
+    int pos;
+
+    if      (decodeChar(c, &pos)) {
+      buffer1[j++] = pos;
+
+      if (j == 4) {
+        buffer2[0] = char(((uint(buffer1[0]) & 0x3f) << 2U) | ((uint(buffer1[1]) & 0x3f) >> 4U));
+        buffer2[1] = char(((uint(buffer1[1]) & 0x0f) << 4U) | ((uint(buffer1[2]) & 0x3f) >> 2U));
+        buffer2[2] = char(((uint(buffer1[2]) & 0x03) << 6U) | ((uint(buffer1[3]) & 0x3f) >> 0U));
+
+        ofile->putC(buffer2[0]);
+        ofile->putC(buffer2[1]);
+        ofile->putC(buffer2[2]);
+
+        j = 0;
+      }
+    }
+    else if (c == end_char) {
+      if      (j == 0 || j == 1) {
+        // error
+      }
+      else if (j == 2) {
+        buffer2[0] = char(((uint(buffer1[0]) & 0x3f) << 2U) | ((uint(buffer1[1]) & 0x3f) >> 4U));
+
+        ofile->putC(buffer2[0]);
+      }
+      else if (j == 3) {
+        buffer2[0] = char(((uint(buffer1[0]) & 0x3f) << 2U) | ((uint(buffer1[1]) & 0x3f) >> 4U));
+        buffer2[1] = char(((uint(buffer1[1]) & 0x0f) << 4U) | ((uint(buffer1[2]) & 0x3f) >> 2U));
+
+        ofile->putC(buffer2[0]);
+        ofile->putC(buffer2[1]);
+      }
+
+      break;
+    }
+    else {
+      continue;
+    }
+  }
+
+  return true;
+}
+
 std::string
 CEncode64::
 decode(const std::string &str)
@@ -228,7 +286,7 @@ decode(const std::string &str)
 
   std::string str1;
 
-  int j = 0;
+  uint j = 0;
 
   for (uint i = 0; i < size; ++i) {
     char c = str[i];
@@ -279,10 +337,16 @@ CEncode64::
 decodeChar(char c, int *pos)
 {
   char *p = strchr(base_64_chars_, c);
-
-  if (p == 0) return false;
+  if (! p) return false;
 
   *pos = int(p - base_64_chars_);
 
   return true;
+}
+
+bool
+CEncode64::
+isChar(char c) const
+{
+  return (strchr(base_64_chars_, c) != nullptr);
 }

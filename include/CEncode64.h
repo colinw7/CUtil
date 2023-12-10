@@ -14,6 +14,7 @@ class CEncode64 {
 
   void setChars(const char base_64_chars[64]);
 
+  char getEndChar() const { return end_char_; }
   void setEndChar(char c) { end_char_ = c; }
 
   bool encode(CFile *ifile, CFile *ofile);
@@ -22,9 +23,13 @@ class CEncode64 {
 
   bool encode(const unsigned char *in, size_t in_len, unsigned char *out, size_t out_size);
 
+  bool decode(CFile *ifile, CFile *ofile);
+
   std::string decode(const std::string &str);
 
   size_t calcOutSize(size_t in_len) const;
+
+  bool isChar(char c) const;
 
  private:
   CEncode64();
