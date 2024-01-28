@@ -5,19 +5,36 @@
 #include <climits>
 #include <cmath>
 
+#include <boost/numeric/conversion/cast.hpp>
+
 namespace {
+
+template<typename T>
+int intCast(const T &data) {
+  return boost::numeric_cast<int>(data);
+};
+
+template<typename T>
+uint uintCast(const T &data) {
+  return boost::numeric_cast<unsigned int>(data);
+};
+
+template<typename T>
+double doubleCast(const T &data) {
+  return boost::numeric_cast<double>(data);
+};
 
 inline bool RealEq(double r1, double r2) {
   return (std::abs(r1 - r2) < 1E-6);
 }
 
 inline bool isInteger(double r) {
-  return std::abs(r - int(r)) < 1E-3;
+  return std::abs(r - intCast(r)) < 1E-3;
 }
 
-static int day_seconds    = 24*60*60;
-static int hour_seconds   = 60*60;
-static int minute_seconds = 60;
+static uint day_seconds    = 24*60*60;
+static uint hour_seconds   = 60*60;
+static uint minute_seconds = 60;
 
 inline int timeLengthToYears(time_t t1, time_t t2) {
   struct tm *lt1 = localtime(&t1);
@@ -50,25 +67,25 @@ inline int timeLengthToMonths(time_t t1, time_t t2) {
 inline int timeLengthToDays(double t1, double t2) {
   double t = t2 - t1;
 
-  return int((t + day_seconds - 1)/day_seconds);
+  return intCast((t + day_seconds - 1)/day_seconds);
 }
 
 inline int timeLengthToHours(double t1, double t2) {
   double t = t2 - t1;
 
-  return int((t + hour_seconds - 1)/hour_seconds);
+  return intCast((t + hour_seconds - 1)/hour_seconds);
 }
 
 inline int timeLengthToMinutes(double t1, double t2) {
   double t = t2 - t1;
 
-  return int((t + minute_seconds - 1)/minute_seconds);
+  return intCast((t + minute_seconds - 1)/minute_seconds);
 }
 
 inline int timeLengthToSeconds(time_t t1, time_t t2) {
-  double t = double(t2 - t1);
+  double t = doubleCast(t2 - t1);
 
-  return int(t);
+  return intCast(t);
 }
 
 #if 0
@@ -131,43 +148,43 @@ inline double roundTimeToMinute(time_t t) {
 }
 #endif
 
-inline int timeToYear(time_t t) {
+inline uint timeToYear(time_t t) {
   struct tm *lt = localtime(&t);
 
   return 1900 + lt->tm_year;
 }
 
-inline int timeToMonths(time_t t) {
+inline uint timeToMonths(time_t t) {
   struct tm *lt = localtime(&t);
 
   return lt->tm_mon;
 }
 
-inline int timeToDays(time_t t) {
+inline uint timeToDays(time_t t) {
   struct tm *lt = localtime(&t);
 
   return lt->tm_mday - 1;
 }
 
-inline int timeToHours(time_t t) {
+inline uint timeToHours(time_t t) {
   struct tm *lt = localtime(&t);
 
   return lt->tm_hour;
 }
 
-inline int timeToMinutes(time_t t) {
+inline uint timeToMinutes(time_t t) {
   struct tm *lt = localtime(&t);
 
   return lt->tm_min;
 }
 
-inline int timeToSeconds(time_t t) {
+inline uint timeToSeconds(time_t t) {
   struct tm *lt = localtime(&t);
 
   return lt->tm_sec;
 }
 
-inline double yearsToTime(int year) {
+inline double yearsToTime(uint year) {
   struct tm tm;
 
   tm.tm_year  = year - 1900;
@@ -178,13 +195,13 @@ inline double yearsToTime(int year) {
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return double(mktime(&tm));
+  return doubleCast(mktime(&tm));
 }
 
-inline double monthsToTime(const CInterval::TimeData &timeData, int month) {
+inline double monthsToTime(const CInterval::TimeData &timeData, uint month) {
   struct tm tm;
 
-  tm.tm_year  = int(timeData.year - 1900);
+  tm.tm_year  = intCast(timeData.year - 1900);
   tm.tm_mon   = month;
   tm.tm_mday  = 1;
   tm.tm_hour  = 0;
@@ -192,63 +209,63 @@ inline double monthsToTime(const CInterval::TimeData &timeData, int month) {
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return double(mktime(&tm));
+  return doubleCast(mktime(&tm));
 }
 
-inline double daysToTime(const CInterval::TimeData &timeData, int day) {
+inline double daysToTime(const CInterval::TimeData &timeData, uint day) {
   struct tm tm;
 
-  tm.tm_year  = int(timeData.year - 1900);
-  tm.tm_mon   = int(timeData.month);
+  tm.tm_year  = intCast(timeData.year - 1900);
+  tm.tm_mon   = intCast(timeData.month);
   tm.tm_mday  = day + 1;
   tm.tm_hour  = 0;
   tm.tm_min   = 0;
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return double(mktime(&tm));
+  return doubleCast(mktime(&tm));
 }
 
-inline double hoursToTime(const CInterval::TimeData &timeData, int hour) {
+inline double hoursToTime(const CInterval::TimeData &timeData, uint hour) {
   struct tm tm;
 
-  tm.tm_year  = int(timeData.year - 1900);
-  tm.tm_mon   = int(timeData.month);
-  tm.tm_mday  = int(timeData.day + 1);
+  tm.tm_year  = intCast(timeData.year - 1900);
+  tm.tm_mon   = intCast(timeData.month);
+  tm.tm_mday  = intCast(timeData.day + 1);
   tm.tm_hour  = hour;
   tm.tm_min   = 0;
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return double(mktime(&tm));
+  return doubleCast(mktime(&tm));
 }
 
-inline double minutesToTime(const CInterval::TimeData &timeData, int minute) {
+inline double minutesToTime(const CInterval::TimeData &timeData, uint minute) {
   struct tm tm;
 
-  tm.tm_year  = int(timeData.year - 1900);
-  tm.tm_mon   = int(timeData.month);
-  tm.tm_mday  = int(timeData.day + 1);
-  tm.tm_hour  = int(timeData.hour);
+  tm.tm_year  = intCast(timeData.year - 1900);
+  tm.tm_mon   = intCast(timeData.month);
+  tm.tm_mday  = intCast(timeData.day + 1);
+  tm.tm_hour  = intCast(timeData.hour);
   tm.tm_min   = minute;
   tm.tm_sec   = 0;
   tm.tm_isdst = -1; // auto DST
 
-  return double(mktime(&tm));
+  return doubleCast(mktime(&tm));
 }
 
-inline double secondsToTime(const CInterval::TimeData &timeData, int second) {
+inline double secondsToTime(const CInterval::TimeData &timeData, uint second) {
   struct tm tm;
 
-  tm.tm_year  = int(timeData.year - 1900);
-  tm.tm_mon   = int(timeData.month);
-  tm.tm_mday  = int(timeData.day + 1);
-  tm.tm_hour  = int(timeData.hour);
-  tm.tm_min   = int(timeData.minute);
+  tm.tm_year  = intCast(timeData.year - 1900);
+  tm.tm_mon   = intCast(timeData.month);
+  tm.tm_mday  = intCast(timeData.day + 1);
+  tm.tm_hour  = intCast(timeData.hour);
+  tm.tm_min   = intCast(timeData.minute);
   tm.tm_sec   = second;
   tm.tm_isdst = -1; // auto DST
 
-  return double(mktime(&tm));
+  return doubleCast(mktime(&tm));
 }
 
 }
@@ -257,12 +274,12 @@ inline double secondsToTime(const CInterval::TimeData &timeData, int second) {
 
 struct CIntervalIncrementTest {
   double factor    { 1.0 };
-  int    numTicks  { 5 };
+  uint   numTicks  { 5 };
   bool   isLog     { false };
   double incFactor { 0.0 };
   bool   integral  { false };
 
-  CIntervalIncrementTest(double factor1, int numTicks1, bool isLog1) :
+  CIntervalIncrementTest(double factor1, uint numTicks1, bool isLog1) :
    factor(factor1), numTicks(numTicks1), isLog(isLog1) {
     integral = isInteger(factor);
   }
@@ -287,10 +304,10 @@ incrementTests[] = {
   {  50.0  , 5  , false }
 };
 
-static int numIncrementTests = sizeof(incrementTests)/sizeof(incrementTests[0]);
+static uint numIncrementTests = sizeof(incrementTests)/sizeof(incrementTests[0]);
 
 CInterval::
-CInterval(double start, double end, int numMajor) :
+CInterval(double start, double end, uint numMajor) :
  data_(start, end)
 {
   data_.numMajor = numMajor;
@@ -412,7 +429,7 @@ init()
 
   if (data_.numMajor > 0) {
     goodTicks_.opt = data_.numMajor;
-    goodTicks_.min = std::max(goodTicks_.opt/10, 1);
+    goodTicks_.min = std::max(goodTicks_.opt/10, 1U);
     goodTicks_.max = goodTicks_.opt*10;
   }
   else {
@@ -434,7 +451,7 @@ init()
     //---
 
     // Calculate other test increments
-    for (int i = 0; i < numIncrementTests; i++) {
+    for (uint i = 0; i < numIncrementTests; i++) {
       // disable non-integral increments for integral
       if (integral && ! isInteger(incrementTests[i].factor)) {
         incrementTests[i].incFactor = 0.0;
@@ -453,11 +470,11 @@ init()
     //---
 
     // Test each increment in turn (Set default start/end to force update)
-    int tickIncrement = this->tickIncrement();
+    uint tickIncrement = this->tickIncrement();
 
     GapData axisGapData;
 
-    for (int i = 0; i < numIncrementTests; i++) {
+    for (uint i = 0; i < numIncrementTests; i++) {
       // skip disable tests
       if (incrementTests[i].incFactor <= 0.0)
         continue;
@@ -467,7 +484,7 @@ init()
         if (! isInteger(incrementTests[i].incFactor))
           continue;
 
-        int incFactor1 = int(incrementTests[i].incFactor);
+        uint incFactor1 = uintCast(incrementTests[i].incFactor);
 
         if (incFactor1 % tickIncrement != 0)
           continue;
@@ -588,7 +605,7 @@ initIncrement(double imin, double imax, bool integral) const
 
 bool
 CInterval::
-testAxisGaps(double start, double end, double testIncrement, int testNumGapTicks,
+testAxisGaps(double start, double end, double testIncrement, uint testNumGapTicks,
              GapData &axisGapData)
 {
 //std::cerr << "testAxisGaps> Start: " << start << " End: " << end << " Incr: " << testIncrement <<
@@ -604,7 +621,7 @@ testAxisGaps(double start, double end, double testIncrement, int testNumGapTicks
   while (newEnd < end)
     newEnd += testIncrement;
 
-  int testNumGaps = CMathRound::RoundUp((newEnd - newStart)/testIncrement);
+  uint testNumGaps = uintCast(CMathRound::RoundUp((newEnd - newStart)/testIncrement));
 
 //std::cerr << "  Adjusted) Start: " << newStart << " End: " << newEnd << " Num: " <<
 //             testNumGaps << "\n";
@@ -698,13 +715,13 @@ interval(int i) const
 {
   if       (isDate()) {
     if      (timeType_ == TimeType::YEARS) {
-      return yearsToTime(int(startTime_.year + i*calcIncrement()));
+      return yearsToTime(intCast(startTime_.year + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::MONTHS) {
-      return monthsToTime(startTime_, int(startTime_.month + i*calcIncrement()));
+      return monthsToTime(startTime_, intCast(startTime_.month + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::DAYS) {
-      return daysToTime(startTime_, int(startTime_.day + i*calcIncrement()));
+      return daysToTime(startTime_, intCast(startTime_.day + i*calcIncrement()));
     }
     else {
       return 0;
@@ -712,13 +729,13 @@ interval(int i) const
   }
   else if (isTime()) {
     if      (timeType_ == TimeType::HOURS) {
-      return hoursToTime(startTime_, int(startTime_.hour + i*calcIncrement()));
+      return hoursToTime(startTime_, intCast(startTime_.hour + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::MINUTES) {
-      return minutesToTime(startTime_, int(startTime_.minute + i*calcIncrement()));
+      return minutesToTime(startTime_, intCast(startTime_.minute + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::SECONDS) {
-      return secondsToTime(startTime_, int(startTime_.second + i*calcIncrement()));
+      return secondsToTime(startTime_, intCast(startTime_.second + i*calcIncrement()));
     }
     else {
       return 0;
@@ -754,7 +771,7 @@ valueInterval(double r) const
 
   double ii = 1.0/increment;
 
-  int interval = int((r - start)*ii);
+  int interval = intCast((r - start)*ii);
 
   return interval;
 }

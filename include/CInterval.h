@@ -27,10 +27,11 @@ class CInterval {
   };
 
   using OptInt  = std::optional<int>;
+  using OptUInt = std::optional<uint>;
   using OptReal = std::optional<double>;
 
  public:
-  CInterval(double min=0.0, double max=1.0, int n=10);
+  CInterval(double min=0.0, double max=1.0, uint n=10);
 
   //! get/set ideal interval start
   double start() const { return data_.start; }
@@ -41,8 +42,8 @@ class CInterval {
   void setEnd(double r) { data_.end = r; invalidate(); }
 
   //! get/set ideal number of major ticks
-  int numMajor() const { return data_.numMajor; }
-  void setNumMajor(int i) { data_.numMajor = i; invalidate(); }
+  uint numMajor() const { return data_.numMajor; }
+  void setNumMajor(uint i) { data_.numMajor = i; invalidate(); }
 
   //! get/set values are integral
   bool isIntegral() const { return integral_; }
@@ -65,8 +66,8 @@ class CInterval {
   void setMajorIncrement(double r) { majorIncrement_ = r; invalidate(); }
 
   //! get/set required increment multiplier
-  int tickIncrement() const { return tickIncrement_.value_or(0); }
-  void setTickIncrement(int r) { tickIncrement_ = r; invalidate(); }
+  uint tickIncrement() const { return tickIncrement_.value_or(0); }
+  void setTickIncrement(uint r) { tickIncrement_ = r; invalidate(); }
 
   //! get/set required origin
   double origin() const { return origin_.value_or(0.0); }
@@ -83,8 +84,8 @@ class CInterval {
   double calcStart    () const { constInit(); return calcData_.start    ; }
   double calcEnd      () const { constInit(); return calcData_.end      ; }
   double calcIncrement() const { constInit(); return calcData_.increment; }
-  int    calcNumMajor () const { constInit(); return calcData_.numMajor ; }
-  int    calcNumMinor () const { constInit(); return calcData_.numMinor ; }
+  uint   calcNumMajor () const { constInit(); return calcData_.numMajor ; }
+  uint   calcNumMinor () const { constInit(); return calcData_.numMinor ; }
 
   // get interval for value
   int valueInterval(double r) const;
@@ -103,7 +104,7 @@ class CInterval {
 
   double initIncrement(double imin, double imax, bool integral) const;
 
-  bool testAxisGaps(double start, double end, double testIncrement, int testNumGapTicks,
+  bool testAxisGaps(double start, double end, double testIncrement, uint testNumGapTicks,
                     GapData &axisGapData);
 
   void invalidate() { calcValid_ = false; originValid_ = false; }
@@ -115,11 +116,11 @@ class CInterval {
     double start     { 0.0 };
     double end       { 0.0 };
     double increment { 0.0 };
-    int    numMajor  { 0 };
-    int    numMinor  { 0 };
+    uint   numMajor  { 0 };
+    uint   numMinor  { 0 };
 
     GapData(double start1=0.0, double end1=0.0, double increment1=0.0,
-            int numMajor1=0, int numMinor1=0) :
+            uint numMajor1=0, uint numMinor1=0) :
      start(start1), end(end1), increment(increment1), numMajor(numMajor1), numMinor(numMinor1) {
     }
 
@@ -132,34 +133,34 @@ class CInterval {
   };
 
   struct GoodTicks {
-    int min {  4 };
-    int max { 12 };
-    int opt { 10 };
+    uint min {  4 };
+    uint max { 12 };
+    uint opt { 10 };
 
-    bool isGood(int n) const {
+    bool isGood(uint n) const {
       return (n >= min && n <= max);
     }
 
-    bool isMoreOpt(int n1, int n2) const {
-      return (std::abs(n1 - opt) < std::abs(n2 - opt));
+    bool isMoreOpt(uint n1, uint n2) const {
+      return (std::abs(int(n1) - int(opt)) < std::abs(int(n2) - int(opt)));
     }
   };
 
-  GapData   data_;                              // axis preferred data
-  bool      integral_       { false };          // is integral
-  bool      date_           { false };          // is date
-  bool      time_           { false };          // is time
-  bool      log_            { false };          // is log
-  OptReal   majorIncrement_;                    // required major increment (must be > 0.0)
-  OptInt    tickIncrement_;                     // required tick increment (must be > 0)
-  GoodTicks goodTicks_;                         // ideal tick data
-  GapData   calcData_;                          // calculated tick data
-  bool      calcValid_      { false };          // are calculated values valid
-  OptReal   origin_;                            // required origin
-  bool      originValid_    { false };          // is calculated origin valid
-  double    originStart_      { 0.0};           // calculated start for explicit origin
-  TimeType  timeType_       { TimeType::NONE }; // time type
-  TimeData  startTime_;                         // start year
+  GapData   data_;                              //!< axis preferred data
+  bool      integral_       { false };          //!< is integral
+  bool      date_           { false };          //!< is date
+  bool      time_           { false };          //!< is time
+  bool      log_            { false };          //!< is log
+  OptReal   majorIncrement_;                    //!< required major increment (must be > 0.0)
+  OptUInt   tickIncrement_;                     //!< required tick increment (must be > 0)
+  GoodTicks goodTicks_;                         //!< ideal tick data
+  GapData   calcData_;                          //!< calculated tick data
+  bool      calcValid_      { false };          //!< are calculated values valid
+  OptReal   origin_;                            //!< required origin
+  bool      originValid_    { false };          //!< is calculated origin valid
+  double    originStart_      { 0.0};           //!< calculated start for explicit origin
+  TimeType  timeType_       { TimeType::NONE }; //!< time type
+  TimeData  startTime_;                         //!< start year
 };
 
 #endif
