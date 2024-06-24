@@ -42,6 +42,25 @@ ACCESSOR_DCL_SET(n,T,v)
 
 //-----------------
 
+#define SACCESSOR_IMPL_GET(n,T,S,v) \
+const T &get##n() const { return S.v; }
+
+#define SACCESSOR_IMPL_SET(n,T,S,v) \
+void set##n(const T &v) { S.v = v; }
+
+#define SACCESSOR_IMPL_MODIFY(n,T,S,v) \
+T &modify##n() { return S.v; }
+
+#define SACCESSOR_IMPL(n,T,S,v) \
+SACCESSOR_IMPL_GET(n,T,S,v) \
+SACCESSOR_IMPL_SET(n,T,S,v) \
+SACCESSOR_IMPL_MODIFY(n,T,S,v)
+
+#define SACCESSOR(n,T,S,v) \
+SACCESSOR_IMPL(n,T,S,v)
+
+//-----------------
+
 #define PACCESSOR_GET(n,T,v) \
 T *get##n() const { return v##_; }
 
