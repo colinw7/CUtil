@@ -285,32 +285,31 @@ struct CIntervalIncrementTest {
   }
 };
 
-static CIntervalIncrementTest
-incrementTests[] = {
+static std::vector<CIntervalIncrementTest>
+incrementTests = {
   // factor, num, isLog
-  {   1.0  , 5  , true  },
-  {   1.2  , 3  , false },
-  {   2.0  , 4  , false },
-  {   2.5  , 5  , false },
-  {   4.0  , 4  , false },
-  {   5.0  , 5  , false },
-  {   6.0  , 3  , false },
-  {   8.0  , 4  , false },
-  {  10.0  , 5  , true  },
-  {  12.0  , 3  , false },
-  {  20.0  , 4  , false },
-  {  25.0  , 5  , false },
-  {  40.0  , 4  , false },
-  {  50.0  , 5  , false }
+  CIntervalIncrementTest(   1.0  , 5  , true  ),
+  CIntervalIncrementTest(   1.2  , 3  , false ),
+  CIntervalIncrementTest(   2.0  , 4  , false ),
+  CIntervalIncrementTest(   2.5  , 5  , false ),
+  CIntervalIncrementTest(   4.0  , 4  , false ),
+  CIntervalIncrementTest(   5.0  , 5  , false ),
+  CIntervalIncrementTest(   6.0  , 3  , false ),
+  CIntervalIncrementTest(   8.0  , 4  , false ),
+  CIntervalIncrementTest(  10.0  , 5  , true  ),
+  CIntervalIncrementTest(  12.0  , 3  , false ),
+  CIntervalIncrementTest(  20.0  , 4  , false ),
+  CIntervalIncrementTest(  25.0  , 5  , false ),
+  CIntervalIncrementTest(  40.0  , 4  , false ),
+  CIntervalIncrementTest(  50.0  , 5  , false )
 };
-
-static uint numIncrementTests = sizeof(incrementTests)/sizeof(incrementTests[0]);
 
 CInterval::
 CInterval(double start, double end, uint numMajor) :
  data_(start, end)
 {
-  data_.numMajor = numMajor;
+  if (numMajor > 0)
+    data_.numMajor = numMajor;
 }
 
 void
@@ -358,22 +357,51 @@ init()
     startTime_.month = timeToMonths(time_t(min));
     startTime_.day   = timeToDays  (time_t(min));
 
-    min = 0;
-
     if      (y >= 5) {
       //std::cout << "years\n";
       timeType_ = TimeType::YEARS;
+      min       = 0;
       max       = y;
     }
     else if (m >= 3) {
       //std::cout << "months\n";
       timeType_ = TimeType::MONTHS;
+      min       = 0;
       max       = m;
     }
     else if (d >= 4) {
       //std::cout << "days\n";
       timeType_ = TimeType::DAYS;
+      min       = 0;
       max       = d;
+    }
+    else {
+      int h1 = timeLengthToHours  (min, max);
+      int m1 = timeLengthToMinutes(min, max);
+      int s1 = timeLengthToSeconds(time_t(min), time_t(max));
+
+      startTime_.hour   = timeToHours  (time_t(min));
+      startTime_.minute = timeToMinutes(time_t(min));
+      startTime_.second = timeToSeconds(time_t(min));
+
+      if      (h1 >= 6) {
+        //std::cout << "hours\n";
+        timeType_ = TimeType::HOURS;
+        min       = 0;
+        max       = h1;
+      }
+      else if (m1 >= 5) {
+        //std::cout << "minutes\n";
+        timeType_ = TimeType::MINUTES;
+        min       = 0;
+        max       = m1;
+      }
+      else {
+        //std::cout << "seconds\n";
+        timeType_ = TimeType::SECONDS;
+        min       = 0;
+        max       = s1;
+      }
     }
 
     integral = true;
@@ -387,21 +415,22 @@ init()
     startTime_.minute = timeToMinutes(time_t(min));
     startTime_.second = timeToSeconds(time_t(min));
 
-    min = 0;
-
-    if      (h >= 12) {
+    if      (h >= 6) {
       //std::cout << "hours\n";
       timeType_ = TimeType::HOURS;
+      min       = 0;
       max       = h;
     }
-    else if (m >= 10) {
+    else if (m >= 5) {
       //std::cout << "minutes\n";
       timeType_ = TimeType::MINUTES;
+      min       = 0;
       max       = m;
     }
     else {
       //std::cout << "seconds\n";
       timeType_ = TimeType::SECONDS;
+      min       = 0;
       max       = s;
     }
 
@@ -451,6 +480,8 @@ init()
     //---
 
     // Calculate other test increments
+    uint numIncrementTests = uint(incrementTests.size());
+
     for (uint i = 0; i < numIncrementTests; i++) {
       // disable non-integral increments for integral
       if (integral && ! isInteger(incrementTests[i].factor)) {
@@ -515,7 +546,7 @@ init()
   calcData_.numMajor =
     CMathRound::RoundNearest((calcData_.end - calcData_.start)/calcData_.increment);
 
-  if      (isDate()) {
+  if      (isDate() || isTime()) {
     if      (timeType_ == TimeType::YEARS) {
       calcData_.numMinor = 12;
     }
@@ -525,9 +556,7 @@ init()
     else if (timeType_ == TimeType::DAYS) {
       calcData_.numMinor = 4;
     }
-  }
-  else if (isTime()) {
-    if      (timeType_ == TimeType::HOURS) {
+    else if (timeType_ == TimeType::HOURS) {
       calcData_.numMinor = 6;
     }
     else if (timeType_ == TimeType::MINUTES) {
@@ -713,7 +742,7 @@ double
 CInterval::
 interval(int i) const
 {
-  if       (isDate()) {
+  if       (isDate() || isTime()) {
     if      (timeType_ == TimeType::YEARS) {
       return yearsToTime(intCast(startTime_.year + i*calcIncrement()));
     }
@@ -723,12 +752,7 @@ interval(int i) const
     else if (timeType_ == TimeType::DAYS) {
       return daysToTime(startTime_, intCast(startTime_.day + i*calcIncrement()));
     }
-    else {
-      return 0;
-    }
-  }
-  else if (isTime()) {
-    if      (timeType_ == TimeType::HOURS) {
+    else if (timeType_ == TimeType::HOURS) {
       return hoursToTime(startTime_, intCast(startTime_.hour + i*calcIncrement()));
     }
     else if (timeType_ == TimeType::MINUTES) {

@@ -119,8 +119,9 @@ class CInterval {
     uint   numMajor  { 0 };
     uint   numMinor  { 0 };
 
-    GapData(double start1=0.0, double end1=0.0, double increment1=0.0,
-            uint numMajor1=0, uint numMinor1=0) :
+    GapData() { }
+
+    GapData(double start1, double end1, double increment1=0.0, uint numMajor1=0, uint numMinor1=0) :
      start(start1), end(end1), increment(increment1), numMajor(numMajor1), numMinor(numMinor1) {
     }
 
