@@ -3,7 +3,7 @@
 
 #include <iterator>
 #include <cstddef>
-#include <CGeneric.h>
+//#include <CGeneric.h>
 
 // input iterator supports:
 //  . Default construct
@@ -22,13 +22,15 @@
 //      assert(*i1 == *i2);
 //
 template<class STATE, class T, class DIST=ptrdiff_t>
-class CInputIterator : public std::iterator<std::input_iterator_tag,T,DIST> {
+class CInputIterator {
  public:
-  enum { IS_PTR = CGenericTypeT<T>::IsPtrT };
+  enum { IS_PTR = std::is_pointer<T>::value };
 
-  typedef typename CTypeTraits<T>::BareT BareT;
+  typedef typename std::remove_reference<T>::type     NonRefT;
+  typedef typename std::remove_pointer<NonRefT>::type NonPtrT;
+  typedef typename std::remove_cv<NonPtrT>::type      BareT;
 
-  typedef typename CGenericIfElse<IS_PTR,const BareT *,const BareT &>::Result ContentsT;
+  typedef typename std::conditional<IS_PTR,const BareT *,const BareT &>::type ContentsT;
 
   CInputIterator() :
    state_() {
@@ -44,7 +46,7 @@ class CInputIterator : public std::iterator<std::input_iterator_tag,T,DIST> {
 
  ~CInputIterator() { }
 
-  const CInputIterator &operator=(const CInputIterator &i) {
+  CInputIterator &operator=(const CInputIterator &i) {
     state_ = i.state_;
     return *this;
   }
@@ -85,7 +87,7 @@ class COutputIterator : public std::iterator<std::output_iterator_tag,T,DIST> {
   COutputIterator();
   COutputIterator(const COutputIterator &i);
 
-  const COutputIterator &operator=(const COutputIterator &i);
+  COutputIterator &operator=(const COutputIterator &i);
 
   const COutputIterator &operator++();
 
@@ -118,7 +120,7 @@ class CForwardIterator : public forward_iterator<T,DIST> {
   CForwardIterator();
   CForwardIterator(const CForwardIterator &i);
 
-  const CForwardIterator &operator=(const CForwardIterator &i);
+  CForwardIterator &operator=(const CForwardIterator &i);
 
   const CForwardIterator &operator++();
 
@@ -152,7 +154,7 @@ class CBidirectionalIterator : public bidirectional_iterator<T,DIST> {
   CBidirectionalIterator();
   CBidirectionalIterator(const CBidirectionalIterator &i);
 
-  const CBidirectionalIterator &operator=(const CBidirectionalIterator &i);
+  CBidirectionalIterator &operator=(const CBidirectionalIterator &i);
 
   const CBidirectionalIterator &operator++();
 
@@ -193,7 +195,7 @@ class CRandomAccessIterator : public random_access_iterator<T,DIST> {
   CRandomAccessIterator();
   CRandomAccessIterator(const CRandomAccessIterator &i);
 
-  const CRandomAccessIterator &operator=(const CRandomAccessIterator &i);
+  CRandomAccessIterator &operator=(const CRandomAccessIterator &i);
 
   const CRandomAccessIterator &operator++();
 

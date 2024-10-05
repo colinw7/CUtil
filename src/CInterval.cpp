@@ -1,27 +1,31 @@
 #include <CInterval.h>
 #include <CMathRound.h>
 #include <iostream>
+#include <vector>
 #include <cstdlib>
 #include <climits>
 #include <cmath>
 
-#include <boost/numeric/conversion/cast.hpp>
+//#include <boost/numeric/conversion/cast.hpp>
 
 namespace {
 
 template<typename T>
 int intCast(const T &data) {
-  return boost::numeric_cast<int>(data);
+  //return boost::numeric_cast<int>(data);
+  return static_cast<int>(data);
 };
 
 template<typename T>
 uint uintCast(const T &data) {
-  return boost::numeric_cast<unsigned int>(data);
+  //return boost::numeric_cast<unsigned int>(data);
+  return static_cast<uint>(data);
 };
 
 template<typename T>
 double doubleCast(const T &data) {
-  return boost::numeric_cast<double>(data);
+  //return boost::numeric_cast<double>(data);
+  return static_cast<double>(data);
 };
 
 inline bool RealEq(double r1, double r2) {

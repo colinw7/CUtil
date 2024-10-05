@@ -378,7 +378,7 @@ class CRefPtr {
 namespace std {
 
 template<class T>
-struct less< CRefPtr<T> > : public binary_function<CRefPtr<T>, CRefPtr<T>, bool> {
+struct less< CRefPtr<T> > {
   bool operator()(const CRefPtr<T> &lhs, const CRefPtr<T> &rhs) const {
     return less<T *>()(lhs.getPtr(), rhs.getPtr());
   }
