@@ -223,12 +223,12 @@ class CRefPtr {
   }
 
   void reset() {
-    if (p_ == NULL)
+    if (p_ == nullptr)
       return;
 
     removeRef();
 
-    p_     = NULL;
+    p_     = nullptr;
     count_ = new Count(0);
 
     addRef();
@@ -316,7 +316,7 @@ class CRefPtr {
   template<typename S>
   bool
   canCast() const {
-    return (dynamic_cast<S *>(p_) != NULL);
+    return (dynamic_cast<S *>(p_) != nullptr);
   }
 
   template<typename S>
