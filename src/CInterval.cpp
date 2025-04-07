@@ -309,11 +309,9 @@ incrementTests = {
 };
 
 CInterval::
-CInterval(double start, double end, uint numMajor) :
+CInterval(double start, double end) :
  data_(start, end)
 {
-  if (numMajor > 0)
-    data_.numMajor = numMajor;
 }
 
 void
@@ -444,12 +442,10 @@ init()
   //---
 
   // use fixed increment
-  double majorIncrement = this->majorIncrement();
-
-  if (majorIncrement > 0.0 && (! isDate() && ! isTime())) {
+  if (hasMajorIncrement() && (! isDate() && ! isTime())) {
     calcData_.start     = min;
     calcData_.end       = max;
-    calcData_.increment = majorIncrement;
+    calcData_.increment = majorIncrement();
 
     calcData_.numMajor =
       CMathRound::RoundNearest((calcData_.end - calcData_.start)/calcData_.increment);
@@ -661,20 +657,24 @@ testAxisGaps(double start, double end, double testIncrement, uint testNumGapTick
 
   //---
 
-  // If nothing set yet just update values and return
-  if (! axisGapData.isSet()) {
-    axisGapData = GapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
+  auto updateGapData = [&](double start1, double end1, double increment1,
+                           int numGaps1, int numGapTicks1) {
+    axisGapData = GapData(start1, end1, increment1, numGaps1, numGapTicks1);
     return true;
-  }
+  };
+
+  //---
+
+  // If nothing set yet just update values and return
+  if (! axisGapData.isSet())
+    return updateGapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
 
   //---
 
   // If the current number of gaps is not within the acceptable range and the
   // new number of gaps is within the acceptable range then update current
-  if (! goodTicks_.isGood(axisGapData.numMajor) && goodTicks_.isGood(testNumGaps)) {
-    axisGapData = GapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
-    return true;
-  }
+  if (! goodTicks_.isGood(axisGapData.numMajor) && goodTicks_.isGood(testNumGaps))
+    return updateGapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
 
   //---
 
@@ -693,10 +693,8 @@ testAxisGaps(double start, double end, double testIncrement, uint testNumGapTick
 
     if ((RealEq(delta1, delta2) &&
          goodTicks_.isMoreOpt(testNumGaps, axisGapData.numMajor)) ||
-        delta1 < delta2) {
-      axisGapData = GapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
-      return true;
-    }
+        delta1 < delta2)
+      return updateGapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
   }
 
   //---
@@ -715,16 +713,12 @@ testAxisGaps(double start, double end, double testIncrement, uint testNumGapTick
     double f2 = std::abs(axisGapData.end - axisGapData.start)/std::abs(end - start);
 
     if      (RealEq(f1, f2)) {
-      if (goodTicks_.isMoreOpt(testNumGaps, axisGapData.numMajor)) {
-        axisGapData = GapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
-        return true;
-      }
+      if (goodTicks_.isMoreOpt(testNumGaps, axisGapData.numMajor))
+        return updateGapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
     }
     else if (testNumGaps == axisGapData.numMajor) {
-      if (f1 < f2) {
-        axisGapData = GapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
-        return true;
-      }
+      if (f1 < f2)
+        return updateGapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
     }
     else {
       double opt = goodTicks_.opt;
@@ -732,10 +726,8 @@ testAxisGaps(double start, double end, double testIncrement, uint testNumGapTick
       double f3 = std::abs(opt - testNumGaps         )/opt;
       double f4 = std::abs(opt - axisGapData.numMajor)/opt;
 
-      if (f1 + f3 < f2 + f4) {
-        axisGapData = GapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
-        return true;
-      }
+      if (f1 + f3 < f2 + f4)
+        return updateGapData(newStart, newEnd, testIncrement, testNumGaps, testNumGapTicks);
     }
   }
 

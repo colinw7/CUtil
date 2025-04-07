@@ -31,7 +31,7 @@ class CInterval {
   using OptReal = std::optional<double>;
 
  public:
-  CInterval(double min=0.0, double max=1.0, uint n=10);
+  CInterval(double min=0.0, double max=1.0);
 
   //! get/set ideal interval start
   double start() const { return data_.start; }
@@ -44,6 +44,7 @@ class CInterval {
   //! get/set ideal number of major ticks
   uint numMajor() const { return data_.numMajor; }
   void setNumMajor(uint i) { data_.numMajor = i; invalidate(); }
+  void resetNumMajor() { data_.numMajor = 0; invalidate(); }
 
   //! get/set values are integral
   bool isIntegral() const { return integral_; }
@@ -62,12 +63,15 @@ class CInterval {
   void setLog(bool b) { log_ = b; invalidate(); }
 
   //! get/set required major increment
+  bool hasMajorIncrement() const { return !!majorIncrement_; }
   double majorIncrement() const { return majorIncrement_.value_or(0.0); }
   void setMajorIncrement(double r) { majorIncrement_ = r; invalidate(); }
+  void resetMajorIncrement() { majorIncrement_.reset(); invalidate(); }
 
   //! get/set required increment multiplier
   uint tickIncrement() const { return tickIncrement_.value_or(0); }
   void setTickIncrement(uint r) { tickIncrement_ = r; invalidate(); }
+  void resetTickIncrement() { tickIncrement_.reset(); invalidate(); }
 
   //! get/set required origin
   double origin() const { return origin_.value_or(0.0); }
