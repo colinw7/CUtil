@@ -266,6 +266,8 @@ class CTrie {
     node->incCount();
   }
 
+  //---
+
  private:
   template<class VISITOR>
   void visit(VISITOR &v, Node *node, const String &str) {
@@ -276,6 +278,8 @@ class CTrie {
         visit(v, n.second, str + char(n.first));
     }
   }
+
+  //---
 
  public:
   Node *root() const {
@@ -294,6 +298,8 @@ class CTrie {
     return node->numWords();
   }
 
+  //---
+
  public:
   template<class VISITOR>
   void visit(VISITOR &v) {
@@ -303,6 +309,8 @@ class CTrie {
 
     visit(v, node, str);
   }
+
+  //---
 
   void dump(std::ostream &os=std::cerr) {
     class Dumper {
@@ -326,6 +334,8 @@ class CTrie {
     visit(dumper);
   }
 
+  //---
+
  private:
   struct MatchData {
     MatchData(const String &match) :
@@ -338,14 +348,14 @@ class CTrie {
   };
 
  public:
-  void complete(const String &match, Strings &strs) {
+  void complete(const String &match, Strings &strs) const {
     MatchData matchData(match);
 
     Node *node = root();
 
     String str;
 
-    complete(node, str, strs, matchData);
+    completeNode(node, str, strs, matchData);
   }
 
   void patterns(int depth, Patterns &patterns) const {
@@ -355,19 +365,19 @@ class CTrie {
   }
 
  private:
-  void complete(Node *node, const String &str, Strings &strs, MatchData &matchData) {
+  void completeNode(Node *node, const String &str, Strings &strs, MatchData &matchData) const {
     for (const auto &n : node->children()) {
       if (matchData.pos == matchData.len) {
         if (! n.first)
           strs.push_back(matchData.str + str);
         else
-          complete(n.second, str + char(n.first), strs, matchData);
+          completeNode(n.second, str + char(n.first), strs, matchData);
       }
       else {
         if (n.first && n.first == matchData.str[matchData.pos]) {
           ++matchData.pos;
 
-          complete(n.second, str, strs, matchData);
+          completeNode(n.second, str, strs, matchData);
 
           --matchData.pos;
         }
@@ -375,8 +385,41 @@ class CTrie {
     }
   }
 
+  //---
+
+ private:
   Node *addNode(Node *parent, unsigned char c) {
     return parent->addChar(c);
+  }
+
+  //---
+
+ public:
+  bool startWord(const String &str) const {
+    Node *node = root();
+
+    auto len = str.size();
+    if (len == 0) return false;
+
+    return nodeStartWord(node, str, 0, len);
+  }
+
+ private:
+  bool nodeStartWord(Node *node, const String &str, uint pos, size_t len) const {
+    auto c = str[pos];
+
+    const auto &nodes = node->children();
+
+    auto pn = nodes.find(c);
+    if (pn == nodes.end())
+      return false;
+
+    ++pos;
+
+    if (pos == len)
+      return true;
+
+    return nodeStartWord((*pn).second, str, pos, len);
   }
 
  private:
