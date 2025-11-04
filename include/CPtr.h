@@ -43,7 +43,7 @@ class CPtr {
     p_ = nullptr;
   }
 
-  // pointer like access
+  // -- pointer like access --
 
   T *operator->() const {
     return p_;
@@ -61,7 +61,7 @@ class CPtr {
     return &p_;
   }
 
-  // booleans
+  // -- booleans --
 
   bool operator==(T const *p) const {
     return p_ == p;
@@ -72,31 +72,26 @@ class CPtr {
   }
 
   // enquire
-
   bool isValid() const {
     return (p_ != nullptr);
   }
 
   // get
-
   T *get() const {
     return p_;
   }
 
   // set
-
   void set(const CPtr &p) {
     p.p_ = p;
   }
 
   // set
-
   void set(const T *p) {
     p_ = p;
   }
 
   // reset
-
   void reset() {
     p_ = nullptr;
   }

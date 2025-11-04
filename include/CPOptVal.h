@@ -6,20 +6,14 @@
 
 template<typename T>
 class CPOptValT {
- private:
-  T *value_;
-
  public:
-  CPOptValT() :
-   value_(NULL) {
-  }
+  CPOptValT() { }
 
   explicit CPOptValT(const T &value) {
     setValue(value);
   }
 
-  CPOptValT(const CPOptValT &rhs) :
-   value_(NULL) {
+  CPOptValT(const CPOptValT &rhs) {
     if (rhs.value_)
       setValue(*rhs.value_);
   }
@@ -32,7 +26,7 @@ class CPOptValT {
     if (rhs.value_)
       setValue(rhs.value);
     else
-      value_ = NULL;
+      value_ = nullptr;
 
     return *this;
   }
@@ -81,7 +75,7 @@ class CPOptValT {
     if (value_) {
       delete value_;
 
-      value_ = NULL;
+      value_ = nullptr;
     }
   }
 
@@ -198,6 +192,9 @@ class CPOptValT {
   friend std::ostream &operator<<(std::ostream &os, const CPOptValT &val) {
     return os << val.getValue();
   }
+
+ private:
+  T *value_ { nullptr };
 };
 
 typedef CPOptValT<bool>        CPOptBool;

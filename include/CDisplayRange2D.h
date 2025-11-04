@@ -250,8 +250,8 @@ class CDisplayRange2D {
       pdy_ = 0;
     }
 
-    flip_x_ = ((pixel_ .xmax - pixel_ .xmin)*(window_.xmax - window_.xmin) < 0);
-    flip_y_ = ((pixel_ .ymax - pixel_ .ymin)*(window_.ymax - window_.ymin) < 0);
+    flip_x_ = ((pixel_.xmax - pixel_.xmin)*(window_.xmax - window_.xmin) < 0);
+    flip_y_ = ((pixel_.ymax - pixel_.ymin)*(window_.ymax - window_.ymin) < 0);
 
     //------
 
@@ -335,6 +335,8 @@ class CDisplayRange2D {
     pixelWidthToWindowWidth(pixel, window);
   }
 
+  //---
+
   void pixelWidthToWindowWidth(double pixel, double *window) const {
     if (pixel < 0) {
       pixelWidthToWindowWidth(-pixel, window);
@@ -366,6 +368,40 @@ class CDisplayRange2D {
 
     *window = fabs(window_y2 - window_y1);
   }
+
+  void windowWidthToPixelWidth(double window, double *pixel) const {
+    if (window < 0) {
+      windowWidthToPixelWidth(-window, pixel);
+      *pixel = -(*pixel);
+      return;
+    }
+
+    double pixel_x1, pixel_y1;
+    double pixel_x2, pixel_y2;
+
+    windowToPixel(0     , 0     , &pixel_x1, &pixel_y1);
+    windowToPixel(window, window, &pixel_x2, &pixel_y2);
+
+    *pixel = fabs(pixel_x2 - pixel_x1);
+  }
+
+  void windowHeightToPixelHeight(double window, double *pixel) const {
+    if (window < 0) {
+      windowHeightToPixelHeight(-window, pixel);
+      *pixel = -(*pixel);
+      return;
+    }
+
+    double pixel_x1, pixel_y1;
+    double pixel_x2, pixel_y2;
+
+    windowToPixel(0     , 0     , &pixel_x1, &pixel_y1);
+    windowToPixel(window, window, &pixel_x2, &pixel_y2);
+
+    *pixel = fabs(pixel_y2 - pixel_y1);
+  }
+
+  //---
 
   bool checkPixel(double x, double y) {
     return (x >= pixel_.xmin && x <= pixel_.xmin && y >= pixel_.ymin && y <= pixel_.ymin);
