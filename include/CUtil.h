@@ -5,7 +5,9 @@
 
 #include <algorithm>
 #include <string>
+#include <optional>
 #include <iostream>
+#include <sstream>
 
 class CUtil {
  public:
@@ -61,6 +63,54 @@ class CUtil {
       os << "\n";
   }
 #endif
+
+  template<typename T>
+  static std::optional<T> &updateMin(std::optional<T> &opt, const T &value) {
+    if (opt) opt = std::min(opt.value(), value);
+    else     opt = value;
+    return opt;
+  }
+
+  template<typename T>
+  static std::optional<T> &updateMax(std::optional<T> &opt, const T &value) {
+    if (opt) opt = std::max(opt.value(), value);
+    else     opt = value;
+    return opt;
+  }
+
+  template<typename T>
+  static std::optional<T> &updateMin(std::optional<T> &opt, const std::optional<T> &value) {
+    if (value) {
+      if (opt) opt = std::min(opt.value(), value.value());
+      else     opt = value.value();
+    }
+    return opt;
+  }
+
+  template<typename T>
+  static std::optional<T> &updateMax(std::optional<T> &opt, const std::optional<T> &value) {
+    if (value) {
+      if (opt) opt = std::max(opt.value(), value.value());
+      else     opt = value.value();
+    }
+    return opt;
+  }
+
+  template<typename T>
+  static void print(std::ostream &os, const std::optional<T> &value,
+                    const std::string &unsetStr="<unset>") {
+    if (value)
+      os << value.value();
+    else
+      os << unsetStr;
+  }
+
+  template<typename T>
+  static std::string toString(const T &t) {
+    std::ostringstream ss;
+    ss << t;
+    return ss.str();
+  }
 
  private:
   static std::ostream *os_;
