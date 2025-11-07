@@ -316,12 +316,12 @@ class CDisplayRange2D {
     }
     else {
       if (factor_x_ != 0.0)
-        *window_x = (pixel_x - pixel_.xmin)/factor_x_  + window1_.xmin;
+        *window_x = (pixel_x - pixel_.xmin       )/factor_x_  + window1_.xmin;
       else
         *window_x = window1_.xmin;
 
       if (factor_y_ != 0.0)
-        *window_y = (pixel_y - pixel_.ymax)/factor_y_  + window1_.ymin;
+        *window_y = (pixel_y - pixel_.ymax       )/factor_y_  + window1_.ymin;
       else
        *window_y = window1_.ymin;
     }
