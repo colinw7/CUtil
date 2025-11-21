@@ -463,6 +463,6 @@ namespace CGenericStaticAssert {
 
 #define CGENERIC_ASSERT(C) \
   typedef ::CGenericStaticAssert::Test< \
-    sizeof(::CGenericStaticAssert::STATIC_ASSERT_FAILURE<(bool)(C)>)> \
+    sizeof(::CGenericStaticAssert::STATIC_ASSERT_FAILURE<bool(C)>)> \
       CGENERIC_JOIN(_static_assert_typedef_, __LINE__);
 #endif

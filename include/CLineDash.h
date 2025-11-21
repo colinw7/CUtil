@@ -81,7 +81,7 @@ class CLineDash {
   explicit CLineDash(const Lengths &lengths, double offset=0.0) {
     init();
 
-    uint num_lengths = getNumLengths();
+    uint num_lengths = lengths.size();
 
     offset_ = offset;
 
