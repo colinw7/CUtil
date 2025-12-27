@@ -145,11 +145,14 @@ class CRGBA {
 
   //-------
 
-  static CRGBA white() { return CRGBA(1, 1, 1, 1); }
-  static CRGBA black() { return CRGBA(0, 0, 0, 1); }
-  static CRGBA red  () { return CRGBA(1, 0, 0, 1); }
-  static CRGBA green() { return CRGBA(0, 1, 0, 1); }
-  static CRGBA blue () { return CRGBA(0, 0, 1, 1); }
+  static CRGBA white  () { return CRGBA(1, 1, 1, 1); }
+  static CRGBA black  () { return CRGBA(0, 0, 0, 1); }
+  static CRGBA red    () { return CRGBA(1, 0, 0, 1); }
+  static CRGBA green  () { return CRGBA(0, 1, 0, 1); }
+  static CRGBA blue   () { return CRGBA(0, 0, 1, 1); }
+  static CRGBA yellow () { return CRGBA(1, 1, 0, 1); }
+  static CRGBA cyan   () { return CRGBA(0, 1, 1, 1); }
+  static CRGBA magenta() { return CRGBA(1, 0, 1, 1); }
 
   static CRGBA transparent() { return CRGBA(0, 0, 0, 0); }
 
