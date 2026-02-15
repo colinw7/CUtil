@@ -792,6 +792,8 @@ class CRGBA {
   }
 
   const CRGBA &blend(const CRGBA &rgb, double factor) {
+    factor = std::min(std::max(factor, 0.0), 1.0);
+
     double factor1 = 1.0 - factor;
 
     r_ = r_*factor + rgb.r_*factor1;

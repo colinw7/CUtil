@@ -9,8 +9,8 @@
 #define CTHROW_IF(t,m) if (t) CThrowMgrInst->doThrow((m),__FILE__,__LINE__)
 #define CITHROW_IF(t,i) if (t) CThrowMgrInst->doThrow(i)
 
-#include <signal.h>
-#include <stdlib.h>
+#include <csignal>
+#include <cstdlib>
 
 #include <iostream>
 
@@ -20,6 +20,8 @@ enum CThrowType {
   CTHROW_EXIT,
   CTHROW_PRINT
 };
+
+//---
 
 struct CThrow {
   std::string message;
@@ -31,10 +33,9 @@ struct CThrow {
   }
 };
 
-class CThrowMgr {
- private:
-  CThrowType type_;
+//---
 
+class CThrowMgr {
  public:
   static CThrowMgr *getInstance() {
     static CThrowMgr *instance;
@@ -45,7 +46,7 @@ class CThrowMgr {
     return instance;
   }
 
-  void setType(CThrowType type) { type_ = type; }
+  CThrowType setType(CThrowType type) { std::swap(type_, type); return type; }
 
   CThrowType getType() { return type_; }
 
@@ -100,6 +101,25 @@ class CThrowMgr {
 
  ~CThrowMgr() {
   }
+
+ private:
+  CThrowType type_ { CTHROW_THROW };
+};
+
+//---
+
+class CThrowScope {
+ public:
+  CThrowScope(CThrowType type) {
+    type_ = CThrowMgrInst->setType(type);
+  }
+
+ ~CThrowScope() {
+    (void) CThrowMgrInst->setType(type_);
+  }
+
+ private:
+  CThrowType type_ { CTHROW_THROW };
 };
 
 #endif
