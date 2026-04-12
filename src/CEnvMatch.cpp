@@ -52,9 +52,9 @@ matchPattern(const std::string &pattern, std::vector<std::string> &names)
 
   CEnvInst.getNameValues(env_names, env_values);
 
-  int num_env_names = env_names.size();
+  auto num_env_names = env_names.size();
 
-  for (int i = 0; i < num_env_names; i++) {
+  for (uint i = 0; i < num_env_names; i++) {
     if (glob.compare(env_names[i]))
       names.push_back(env_names[i]);
   }

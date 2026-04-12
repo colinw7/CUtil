@@ -19,7 +19,7 @@ CEnv &
 CEnv::
 getInstance()
 {
-  static CEnv *instance = 0;
+  static CEnv *instance = nullptr;
 
   if (! instance)
     instance = new CEnv();
@@ -38,16 +38,16 @@ bool
 CEnv::
 exists(const string &name) const
 {
-  char *env = getenv((char *) name.c_str());
+  char *env = getenv(const_cast<char *>(name.c_str()));
 
-  return (env != 0);
+  return (env != nullptr);
 }
 
 string
 CEnv::
 get(const string &name) const
 {
-  char *env = getenv((char *) name.c_str());
+  char *env = getenv(const_cast<char *>(name.c_str()));
 
   if (! env) {
     std::cerr << "env: '" << name + "' does not exist" << std::endl;
@@ -61,7 +61,7 @@ bool
 CEnv::
 get(const string &name, string &value) const
 {
-  char *env = getenv((char *) name.c_str());
+  char *env = getenv(const_cast<char *>(name.c_str()));
   if (! env) return false;
 
   value = env;
@@ -80,7 +80,7 @@ get(const string &name, int &value) const
   if (! get(name, str))
     return false;
 
-  value = CStrUtil::toInteger(str);
+  value = int(CStrUtil::toInteger(str));
 
   return true;
 }
@@ -110,7 +110,7 @@ set(const string &name, const string &value)
 #else
   string env = name + "=" + value;
 
-  char *envp = strdup((char *) env.c_str());
+  char *envp = strdup(const_cast<char *>(env.c_str()));
 
   allocated_.push_back(envp);
 
@@ -134,12 +134,12 @@ bool
 CEnv::
 unset(const string &name)
 {
-  int name_len = name.size();
+  auto name_len = name.size();
 
-  int i = 0;
+  uint i = 0;
 
-  while (environ[i] != 0) {
-    int environ_len = strlen(environ[i]);
+  while (environ[i] != nullptr) {
+    auto environ_len = strlen(environ[i]);
 
     if (environ_len > name_len &&
         strncmp(environ[i], name.c_str(), name_len) == 0 &&
@@ -149,17 +149,17 @@ unset(const string &name)
     i++;
   }
 
-  if (environ[i] == 0) {
+  if (environ[i] == nullptr) {
     std::cerr << "env: '" << name + "' does not exist" << std::endl;
     return false;
   }
 
-  int i1 = i;
+  uint i1 = i;
 
-  while (environ[i1] != 0)
+  while (environ[i1] != nullptr)
     i1++;
 
-  for (int j = i; j < i1; j++)
+  for (uint j = i; j < i1; j++)
     environ[j] = environ[j + 1];
 
   return true;
@@ -169,7 +169,7 @@ bool
 CEnv::
 unsetAll()
 {
-  environ[0] = 0;
+  environ[0] = nullptr;
 
   return true;
 }
@@ -206,10 +206,10 @@ getValues(const string &name) const
 
   ValueList values;
 
-  int num_words = words.size();
+  auto num_words = words.size();
 
-  for (int i = 0; i < num_words; i++)
-    values.push_back(words[i].getWord());
+  for (uint i = 0; i < num_words; i++)
+    values.push_back(words[int(i)].getWord());
 
   return values;
 }
@@ -234,7 +234,7 @@ getSortedNameValues(NameList &names, ValueList &values) const
 {
   std::vector<NameValue> name_values;
 
-  for (int i = 0; environ[i] != 0; i++) {
+  for (int i = 0; environ[i] != nullptr; i++) {
     string env_name = string(environ[i]);
 
     string::size_type pos = env_name.find('=');
@@ -274,7 +274,7 @@ loadNameValues(NameList &names, ValueList &values) const
   names .clear();
   values.clear();
 
-  for (int i = 0; environ[i] != 0; i++) {
+  for (int i = 0; environ[i] != nullptr; i++) {
     string env_name = string(environ[i]);
 
     string::size_type pos = env_name.find('=');
