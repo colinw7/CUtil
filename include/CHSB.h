@@ -5,7 +5,9 @@
 
 class CHSB {
  public:
-  CHSB(double h=0, double s=0, double b=0) :
+  CHSB() { }
+
+  CHSB(double h, double s, double b) :
    h_(h), s_(s), b_(b) {
   }
 
@@ -37,7 +39,9 @@ class CHSB {
   //CRGB toRGB() const;
 
  private:
-  double h_, s_, b_;
+  double h_ { 0.0 };
+  double s_ { 0.0 };
+  double b_ { 0.0 };
 };
 
 //------

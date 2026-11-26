@@ -307,6 +307,71 @@ class CRGBUtil {
   static uint clampI(int v) {
     return uint(v >= 0 ? (v <= 255 ? v : 255) : 0);
   }
+
+  //---
+
+  struct LAB {
+    double l, a, b;
+  };
+
+  // Convert sRGB to CIELAB (D65 illuminant)
+  static LAB rgbToLab(const CRGBA &color) {
+    // 1. Normalize and linearize sRGB
+    auto pivotRgb = [](double c) {
+      c /= 255.0;
+      return (c > 0.04045) ? std::pow((c + 0.055) / 1.055, 2.4) : (c / 12.92);
+    };
+
+    double r = pivotRgb(color.r()) * 100.0;
+    double g = pivotRgb(color.g()) * 100.0;
+    double b = pivotRgb(color.b()) * 100.0;
+
+    // 2. Convert RGB to XYZ
+    double x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375;
+    double y = r * 0.2126729 + g * 0.7151522 + b * 0.0721750;
+    double z = r * 0.0193339 + g * 0.1191920 + b * 0.9503041;
+
+    // 3. Normalize for D65 white point and convert XYZ to LAB
+    auto pivotXyz = [](double t) {
+      return (t > 0.008856) ? std::cbrt(t) : (7.787 * t) + (16.0 / 116.0);
+    };
+
+    double fx = pivotXyz(x / 95.047);
+    double fy = pivotXyz(y / 100.000);
+    double fz = pivotXyz(z / 108.883);
+
+    return { (116.0 * fy) - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz) };
+  }
+
+  // Calculate CIE76 Delta E
+  static double colorDiff(const CRGBA &c1, const CRGBA &c2) {
+    auto lab1 = rgbToLab(c1);
+    auto lab2 = rgbToLab(c2);
+
+    auto dl = lab1.l - lab2.l;
+    auto da = lab1.a - lab2.a;
+    auto db = lab1.b - lab2.b;
+
+    return std::sqrt(dl*dl + da*da + db*db);
+  }
+
+  static void setColorCmpDelta(double d) {
+    *colorCmpDeltaP() = d;
+  }
+
+  struct ColorCmp {
+    bool operator()(const CRGBA &lhs, const CRGBA &rhs) const {
+      auto d = colorDiff(lhs, rhs);
+
+      return (d < *colorCmpDeltaP());
+    }
+  };
+
+ private:
+  static double *colorCmpDeltaP() {
+    static double delta = 1.0;
+    return &delta;
+  }
 };
 
 #endif

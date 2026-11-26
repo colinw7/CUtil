@@ -156,6 +156,9 @@ class CRGBA {
 
   static CRGBA transparent() { return CRGBA(0, 0, 0, 0); }
 
+  static CRGBA gray(double r) { return CRGBA(r, r, r, 1); }
+  static CRGBA grey(double r) { return gray(r); }
+
   //-------
 
   CRGBA() :
@@ -441,13 +444,27 @@ class CRGBA {
   }
 
   std::string stringEncode() const {
-    uint r, g, b, a;
+    return stringEncodeRGBA();
+  }
 
+  std::string stringEncodeRGBA() const {
+    uint r, g, b, a;
     getRGBAI(&r, &g, &b, &a);
 
     char str[256];
 
     ::sprintf(str, "#%02x%02x%02x%02x", r, g, b, a);
+
+    return str;
+  }
+
+  std::string stringEncodeARGB() const {
+    uint r, g, b, a;
+    getRGBAI(&r, &g, &b, &a);
+
+    char str[256];
+
+    ::sprintf(str, "#%02x%02x%02x%02x", a, r, g, b);
 
     return str;
   }
@@ -567,6 +584,11 @@ class CRGBA {
   double getGreen() const { return g_; }
   double getBlue () const { return b_; }
   double getAlpha() const { return a_; }
+
+  double r() const { return r_; }
+  double g() const { return g_; }
+  double b() const { return b_; }
+  double a() const { return a_; }
 
   float getRedF  () const { return float(r_); }
   float getGreenF() const { return float(g_); }
@@ -1218,7 +1240,6 @@ class CRGBA {
 
   uint encodeARGB() const {
     uint r, g, b, a;
-
     getRGBAI(&r, &g, &b, &a);
 
     return encodeARGB(r, g, b, a);
@@ -1226,7 +1247,6 @@ class CRGBA {
 
   uint encodeRGB() const {
     uint r, g, b, a;
-
     getRGBAI(&r, &g, &b, &a);
 
     return encodeRGB(r, g, b);
